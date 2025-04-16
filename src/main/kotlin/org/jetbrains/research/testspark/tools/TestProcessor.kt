@@ -107,7 +107,7 @@ class TestProcessor(
                 projectBuildPath,
             ) + "${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath"
         val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
-        val classPaths = "@$fileName"
+        val classPaths = "\"@$fileName\""
 
         val testExecutionResult =
             CommandLineRunner.run(

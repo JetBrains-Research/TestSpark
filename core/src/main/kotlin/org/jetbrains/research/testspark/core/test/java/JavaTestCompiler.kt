@@ -44,7 +44,7 @@ class JavaTestCompiler(
     ): ExecutionResult {
         val classPathsList = getClassPaths(projectBuildPath)
         val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
-        val classPaths = "@$fileName"
+        val classPaths = "\"@$fileName\""
 
         // compile file
         // See: https://github.com/JetBrains-Research/TestSpark/issues/402
