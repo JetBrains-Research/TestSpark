@@ -79,7 +79,9 @@ class TestProcessor(
         junitVersion: JUnitVersion,
     ): String {
         // find the proper javac
-        val javaRunner = findJavaCompilerInDirectory(homeDirectory)
+        val javaRunnerFile = findJavaCompilerInDirectory(homeDirectory)
+        val javaRunnerAbsolutePath = javaRunnerFile.absolutePath
+        val javaRunner = if (DataFilesUtil.isWindows()) "\"$javaRunnerAbsolutePath\"" else "'$javaRunnerAbsolutePath'"
         // JaCoCo libs
         val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
         val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
@@ -112,7 +114,7 @@ class TestProcessor(
         val testExecutionResult =
             CommandLineRunner.run(
                 arrayListOf(
-                    "\"${javaRunner.absolutePath}\"",
+                    javaRunner,
                     javaAgentFlag,
                     "-cp",
                     classPaths,
@@ -126,7 +128,7 @@ class TestProcessor(
         // Prepare the command for generating the Jacoco report
         val command =
             mutableListOf(
-                "\"${javaRunner.absolutePath}\"",
+                javaRunner,
                 "-jar",
                 // jacocoCLIDir,
                 jacocoCLILibraryPath,
