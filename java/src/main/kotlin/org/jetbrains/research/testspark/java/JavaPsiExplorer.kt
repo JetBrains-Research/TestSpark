@@ -72,9 +72,7 @@ class JavaPsiExplorer(
         depth: Int = 0,
     ): String? {
         val clsFqName = javaCls.qualifiedName
-        if (clsFqName.isEmpty()) return null
-
-        val isStdLib = clsFqName.startsWith("java.") || clsFqName.startsWith("javax.")
+        if (clsFqName.isEmpty() || isStdLib(clsFqName)) return null
 
         if (depth <= 0) {
             return clsFqName
@@ -88,11 +86,9 @@ class JavaPsiExplorer(
                 clsFqName,
                 type = GraphNodeType.CLASS,
                 isUnitUnderTest = isUnderTest,
-                isStandardLibrary = isStdLib,
                 properties = mapOf("type" to javaCls.classType.representation),
             ),
         )
-        if (isStdLib) return clsFqName
 
         javaCls.allMethods.forEach {
             exploreMethod(it as JavaPsiMethodWrapper, depth = depth)?.let { methodFqName ->
@@ -142,7 +138,7 @@ class JavaPsiExplorer(
         depth: Int = 0,
     ): String? {
         val methodFqName = javaMethod.fqName
-        if (methodFqName.startsWith("java.") || methodFqName.startsWith("javax.")) return null
+        if (isStdLib(methodFqName)) return null
         if (methodVisited.contains(methodFqName)) return methodFqName
         methodVisited.put(methodFqName, depth)
         val properties = mutableMapOf<String, Any>()
@@ -267,5 +263,9 @@ class JavaPsiExplorer(
                 }
             }
         return result
+    }
+
+    private fun isStdLib(qualifiedName: String): Boolean {
+        return qualifiedName.startsWith("java.") || qualifiedName.startsWith("javax.")
     }
 }
