@@ -42,7 +42,7 @@ class JavaTestCompiler(
         projectBuildPath: String,
         workingDir: String,
     ): ExecutionResult {
-        val classPathsList = "\"${getClassPaths(projectBuildPath)}\""
+        val classPathsList = "\"${getClassPaths(projectBuildPath).replace("\\", "/")}\""
         val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
         val classPaths = "\"@$fileName\""
 
