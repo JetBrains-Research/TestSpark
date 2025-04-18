@@ -173,7 +173,7 @@ class JavaPsiExplorer(
         }
 
         // TODO: rework: Need access to psi instance
-        val psiClass = PsiTreeUtil.getChildOfType<PsiClass>(javaMethod.containingFile, PsiClass::class.java)
+        val psiClass = PsiTreeUtil.getChildOfType(javaMethod.containingFile, PsiClass::class.java)
         val psiMethod = psiClass?.methods?.firstOrNull { it.name == javaMethod.name } ?: return methodFqName
         // return type
         val psiReturnType = psiMethod.returnType
@@ -263,7 +263,7 @@ class JavaPsiExplorer(
     ): List<String> {
         val result = mutableListOf<String>()
         PsiTreeUtil
-            .findChildrenOfType<PsiMethodCallExpression>(psiStatement, PsiMethodCallExpression::class.java)
+            .findChildrenOfType(psiStatement, PsiMethodCallExpression::class.java)
             .forEach { itMethodCall ->
                 itMethodCall.resolveMethod()?.let {
                     val psiMethod = JavaPsiMethodWrapper(it)
