@@ -24,6 +24,7 @@ enum class GraphEdgeType {
     HAS_TYPE_PROPERTY,
     THROWS,
     FROM,
+    HAS_CONSTRUCTOR
 }
 
 data class GraphNode(
@@ -66,6 +67,7 @@ abstract class Graph {
             GraphEdgeType.HAS_TYPE_PROPERTY -> 1.0 * modifier
             GraphEdgeType.THROWS -> 0.7
             GraphEdgeType.FROM -> 1.0
+            GraphEdgeType.HAS_CONSTRUCTOR -> 1.0
         }
     }
 
@@ -326,6 +328,21 @@ class KuzuGraph(
                         conn.prepare(
                             """
                             |MATCH (n1:Method), (n2:Class)
+                            |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
+                            |MERGE (n1)-[:${edge.type}]->(n2)
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+
+                GraphEdgeType.HAS_CONSTRUCTOR -> {
+                    val statement =
+                        conn.prepare(
+                            """
+                            |MATCH (n1:Class), (n2:Method)
                             |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                             |MERGE (n1)-[:${edge.type}]->(n2)
                             """.trimMargin(),
