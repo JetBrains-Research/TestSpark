@@ -154,9 +154,13 @@ abstract class Graph {
         val results = mutableListOf<Pair<String, Double>>()
 
         val pageRank = calculatePageRank(source)
+        saveScores(pageRank)
 
         for (target in targets) {
             val score = pageRank[target] ?: 0.0
+            if (score == 0.0) {
+                log.warn { "Score for $target is $score" }
+            }
             results.add(Pair(target, score))
         }
         return results
