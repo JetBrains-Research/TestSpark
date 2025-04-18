@@ -46,7 +46,7 @@ class JavaPsiExplorer(
                             GraphEdge(
                                 from = classFqName,
                                 to = methodFqName,
-                                type = GraphEdgeType.HAS_METHOD,
+                                type = if(javaPsiMethod.isConstructor) GraphEdgeType.HAS_CONSTRUCTOR else  GraphEdgeType.HAS_METHOD,
                             ),
                         )
                         graph.addEdge(
@@ -100,7 +100,7 @@ class JavaPsiExplorer(
                     GraphEdge(
                         from = clsFqName,
                         to = methodFqName,
-                        type = GraphEdgeType.HAS_METHOD,
+                        type = if(it.isConstructor || it.isDefaultConstructor) GraphEdgeType.HAS_CONSTRUCTOR else  GraphEdgeType.HAS_METHOD,
                     ),
                 )
             }
