@@ -37,7 +37,11 @@ class JavaPsiExplorer(
         if (javaPsiMethod != null) {
             exploreMethod(javaPsiMethod, isUnderTest = true, depth = depth)?.let { methodFqName ->
                 if (javaPsiMethod.containingClass is JavaPsiClassWrapper) {
-                    exploreClass(javaPsiMethod.containingClass, isUnderTest = false, depth = depth)?.let { classFqName ->
+                    exploreClass(
+                        javaPsiMethod.containingClass,
+                        isUnderTest = false,
+                        depth = depth
+                    )?.let { classFqName ->
                         graph.addEdge(
                             GraphEdge(
                                 from = classFqName,
@@ -237,11 +241,14 @@ class JavaPsiExplorer(
                 if (it !is PsiTypeParameter) {
                     exploreClass(JavaPsiClassWrapper(it), depth = depth)?.let { classFqName ->
                         result.add(classFqName)
-                        psiType.parameters.forEach { param ->
-                            result.addAll(exploreType(param, depth - 1))
-                        }
                     }
                 }
+            }
+            psiType.parameters.forEach { param ->
+                result.addAll(exploreType(param, depth - 1))
+            }
+            psiType.superTypes.forEach { superType ->
+                result.addAll(exploreType(superType, depth))
             }
         }
         return result
