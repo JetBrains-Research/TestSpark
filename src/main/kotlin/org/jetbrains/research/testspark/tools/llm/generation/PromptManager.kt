@@ -329,7 +329,7 @@ class PromptManager(
         val classMethodsScores = mutableMapOf<ClassRepresentation, MutableMap<MethodRepresentation, Double>>()
         interestingClasses.forEach { itClass ->
             classScores[itClass] = scores.firstOrNull { s -> s.first == itClass.qualifiedName }?.second ?: 0.0
-            classMethodsScores[itClass] = mutableMapOf<MethodRepresentation, Double>()
+            classMethodsScores[itClass] = mutableMapOf()
             itClass.allMethods.forEach { itMethod ->
                 {
                     classMethodsScores[itClass]!![itMethod] =
