@@ -24,7 +24,7 @@ enum class GraphEdgeType {
     HAS_TYPE_PROPERTY,
     THROWS,
     FROM,
-    HAS_CONSTRUCTOR
+    HAS_CONSTRUCTOR,
 }
 
 data class GraphNode(
@@ -142,7 +142,7 @@ abstract class Graph {
             iteration++
         } while (!hasConverged && iteration < maxIterations)
         log.info { "PageRank iteration: $iteration" }
-        // Step 4: Convert result to fqName -> score map
+        // Step 4: Convert the result to fqName -> score map
         return scores.mapKeys { (node, _) -> node.fqName }
     }
 
@@ -373,11 +373,11 @@ class KuzuGraph(
             nodes.add(
                 GraphNode(
                     type = GraphNodeType.valueOf(result.getValue(0).getValue<String>().uppercase()),
-                    name = result.getValue(1).getValue<String>(),
-                    fqName = result.getValue(2).getValue<String>(),
-                    isUnitUnderTest = result.getValue(3).getValue<Boolean>(),
-                    isStandardLibrary = result.getValue(4).getValue<Boolean>(),
-                    score = result.getValue(5).getValue<Double>(),
+                    name = result.getValue(1).getValue(),
+                    fqName = result.getValue(2).getValue(),
+                    isUnitUnderTest = result.getValue(3).getValue(),
+                    isStandardLibrary = result.getValue(4).getValue(),
+                    score = result.getValue(5).getValue(),
                 ),
             )
         }
@@ -392,8 +392,8 @@ class KuzuGraph(
             edges.add(
                 GraphEdge(
                     type = GraphEdgeType.valueOf(result.getValue(0).getValue<String>().uppercase()),
-                    from = result.getValue(1).getValue<String>(),
-                    to = result.getValue(2).getValue<String>(),
+                    from = result.getValue(1).getValue(),
+                    to = result.getValue(2).getValue(),
                 ),
             )
         }
@@ -475,11 +475,11 @@ class KuzuGraph(
     fun kuzuNodeValueToGraphNode(value: Value): GraphNode =
         GraphNode(
             type = GraphNodeType.valueOf(ValueNodeUtil.getLabelName(value).uppercase()),
-            name = ValueNodeUtil.getPropertyValueAt(value, 0).getValue<String>(),
-            fqName = ValueNodeUtil.getPropertyValueAt(value, 1).getValue<String>(),
-            isUnitUnderTest = ValueNodeUtil.getPropertyValueAt(value, 2).getValue<Boolean>(),
-            isStandardLibrary = ValueNodeUtil.getPropertyValueAt(value, 3).getValue<Boolean>(),
-            score = ValueNodeUtil.getPropertyValueAt(value, 4).getValue<Double>(),
+            name = ValueNodeUtil.getPropertyValueAt(value, 0).getValue(),
+            fqName = ValueNodeUtil.getPropertyValueAt(value, 1).getValue(),
+            isUnitUnderTest = ValueNodeUtil.getPropertyValueAt(value, 2).getValue(),
+            isStandardLibrary = ValueNodeUtil.getPropertyValueAt(value, 3).getValue(),
+            score = ValueNodeUtil.getPropertyValueAt(value, 4).getValue(),
         )
 
     fun close() {
