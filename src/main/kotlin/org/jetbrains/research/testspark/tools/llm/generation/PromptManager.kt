@@ -130,7 +130,6 @@ class PromptManager(
                                             }
                                     },
                                 )
-                            graph.saveScores(scores.toMap())
                             val interestingClassesRanked = rankInterestingClasses(interestingClasses, scores)
                             promptGenerator.generatePromptForClass(interestingClassesRanked, testSamplesCode)
                         }
@@ -155,7 +154,6 @@ class PromptManager(
                                             }
                                     },
                                 )
-                            graph.saveScores(scores.toMap())
 
                             val interestingClassesFromMethodRanked = rankInterestingClasses(interestingClassesFromMethod, scores)
                             promptGenerator.generatePromptForMethod(
