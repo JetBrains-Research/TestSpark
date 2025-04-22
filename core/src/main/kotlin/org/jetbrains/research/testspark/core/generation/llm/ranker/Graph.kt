@@ -199,6 +199,7 @@ class KuzuGraph(
         conn.query("CREATE REL TABLE HAS_TYPE_PROPERTY(FROM Class TO Class)")
         conn.query("CREATE REL TABLE THROWS(FROM Method TO Class)")
         conn.query("CREATE REL TABLE FROM(FROM Method TO Class)")
+        conn.query("CREATE REL TABLE HAS_CONSTRUCTOR(FROM Class TO Method)")
     }
 
     override fun addNode(node: GraphNode) {
