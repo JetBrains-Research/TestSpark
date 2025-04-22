@@ -6,7 +6,7 @@ import com.kuzudb.KuzuList
 import com.kuzudb.Value
 import com.kuzudb.ValueNodeUtil
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlin.math.abs
+import kotlin.math.sqrt
 
 enum class GraphNodeType(
     val label: String,
@@ -74,8 +74,8 @@ abstract class Graph {
     fun calculatePageRank(
         source: String,
         dampingFactor: Double = 0.85,
-        maxIterations: Int = 100,
-        tolerance: Double = 1e-6, // Convergence tolerance
+        maxIterations: Int = 500,
+        tolerance: Double = 1e-4,
     ): Map<String, Double> {
         val nodes = getAllNodes()
         val edges = getAllEdges()
@@ -130,12 +130,25 @@ abstract class Graph {
             // Update scores with new values
             val normalizedNewScores = newScores.mapValues { (_, value) -> value * normalizationFactor }
 
-            for ((node, newScore) in normalizedNewScores) {
-                // Check for convergence (difference between old and new scores)
-                if (abs(newScore - scores[node]!!) > tolerance) {
-                    hasConverged = false
-                    break
-                }
+            // Calculate L2 norm (Euclidean distance) between old and new score vectors
+            // This is a more robust convergence check than comparing individual nodes
+            // as it considers the overall difference between score vectors
+            val l2Norm =
+                sqrt(
+                    normalizedNewScores
+                        .map { (node, newScore) ->
+                            val oldScore = scores[node]!!
+                            (newScore - oldScore) * (newScore - oldScore) // Square of difference
+                        }.sum(),
+                )
+
+            // Check for convergence using L2 norm
+            // The algorithm has converged when the Euclidean distance between
+            // consecutive score vectors is less than or equal to the tolerance
+            hasConverged = l2Norm <= tolerance
+
+            if (iteration % 50 == 0) {
+                log.info { "PageRank iteration: $iteration, L2 norm: $l2Norm" }
             }
 
             scores.putAll(normalizedNewScores)
