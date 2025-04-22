@@ -40,7 +40,7 @@ class JavaPsiExplorer(
                     exploreClass(
                         javaPsiMethod.containingClass,
                         isUnderTest = false,
-                        depth = depth
+                        depth = depth,
                     )?.let { classFqName ->
                         graph.addEdge(
                             GraphEdge(
@@ -159,17 +159,7 @@ class JavaPsiExplorer(
 
         // explore the class if we come from calls
         if (javaMethod.containingClass is JavaPsiClassWrapper) {
-            exploreClass(javaMethod.containingClass, depth = depth)?.let { classFqName ->
-                if (javaMethod.isConstructor || javaMethod.isDefaultConstructor) {
-                    graph.addEdge(
-                        GraphEdge(
-                            from = methodFqName,
-                            to = classFqName,
-                            type = GraphEdgeType.HAS_RETURN_TYPE,
-                        ),
-                    )
-                }
-            }
+            exploreClass(javaMethod.containingClass, depth = depth)
         }
 
         // TODO: rework: Need access to psi instance
@@ -275,7 +265,5 @@ class JavaPsiExplorer(
         return result
     }
 
-    private fun isStdLib(qualifiedName: String): Boolean {
-        return qualifiedName.startsWith("java.") || qualifiedName.startsWith("javax.")
-    }
+    private fun isStdLib(qualifiedName: String): Boolean = qualifiedName.startsWith("java.") || qualifiedName.startsWith("javax.")
 }
