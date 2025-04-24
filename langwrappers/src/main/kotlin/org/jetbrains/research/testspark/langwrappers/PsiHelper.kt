@@ -312,4 +312,6 @@ abstract class PsiHelper(
         interestingClasses: Set<PsiClassWrapper>,
         psiMethod: PsiMethodWrapper? = null,
     ): Graph
+
+    abstract fun getPsiClassFromFqName(fqName: String): PsiClassWrapper?
 }

@@ -1,13 +1,13 @@
 package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
@@ -100,4 +100,9 @@ class JavaPsiHelper(
         interestingClasses: Set<PsiClassWrapper>,
         psiMethod: PsiMethodWrapper?,
     ): Graph = JavaPsiExplorer(graph, psiFile.project).explore(classesToTest, interestingClasses, psiMethod)
+
+    override fun getPsiClassFromFqName(fqName: String): JavaPsiClassWrapper? {
+        val javaPsi = JavaPsiFacade.getInstance(psiFile.project)
+        return javaPsi.findClass(fqName, psiFile.resolveScope)?.let { return JavaPsiClassWrapper(it) }
+    }
 }

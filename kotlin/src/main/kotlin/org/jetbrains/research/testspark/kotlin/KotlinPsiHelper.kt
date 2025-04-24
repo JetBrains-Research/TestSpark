@@ -96,4 +96,6 @@ class KotlinPsiHelper(
         interestingClasses: Set<PsiClassWrapper>,
         psiMethod: PsiMethodWrapper?,
     ): Graph = KotlinPsiExplorer(graph, psiFile.project).explore(classesToTest, interestingClasses, psiMethod)
+
+    override fun getPsiClassFromFqName(fqName: String): KotlinPsiClassWrapper? = TODO("Not yet implemented")
 }
