@@ -51,13 +51,13 @@ class JavaPsiExplorer(
                                 type = if (javaPsiMethod.isConstructor) GraphEdgeType.HAS_CONSTRUCTOR else GraphEdgeType.HAS_METHOD,
                             ),
                         )
-                        graph.addEdge(
-                            GraphEdge(
-                                from = methodFqName,
-                                to = classFqName,
-                                type = GraphEdgeType.FROM,
-                            ),
-                        )
+//                        graph.addEdge(
+//                            GraphEdge(
+//                                from = methodFqName,
+//                                to = classFqName,
+//                                type = GraphEdgeType.FROM,
+//                            ),
+//                        )
                     }
                 }
             }
