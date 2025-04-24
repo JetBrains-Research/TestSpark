@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
+import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphNode
 import org.jetbrains.research.testspark.core.generation.llm.ranker.KuzuGraph
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -154,11 +155,12 @@ class PromptManager(
                                             }
                                     },
                                 )
+                            val interestingNodes = graph.getInterestingNodes().mapNotNull { graphNodeToClass(it) }
 
                             val interestingClassesFromMethodRanked = rankInterestingClasses(interestingClassesFromMethod, scores)
                             promptGenerator.generatePromptForMethod(
                                 method,
-                                interestingClassesFromMethodRanked,
+                                interestingNodes,
                                 testSamplesCode,
                                 psiHelper.getPackageName(),
                             )
@@ -319,6 +321,29 @@ class PromptManager(
         interestingPsiClasses.remove(cut)
 
         return polymorphismRelations.toMutableMap()
+    }
+
+    private fun graphNodeToClass(node: GraphNode): ClassRepresentation? {
+        val psiClass = psiHelper.getPsiClassFromFqName(node.fqName)
+        return if (psiClass != null) {
+            val methodFqNames = node.children.map { it.fqName }
+            val classRepr = createClassRepresentation(psiClass)
+            val methodsRepresentation =
+                classRepr.allMethods
+                    .filter { methodFqNames.contains(it.qualifiedName) }
+                    .sortedByDescending { itMethod ->
+                        node.children.firstOrNull { it.fqName == itMethod.qualifiedName }?.score
+                    }
+            return ClassRepresentation(
+                classRepr.qualifiedName,
+                classRepr.fullText,
+                classRepr.constructorSignatures,
+                methodsRepresentation.toList(),
+                classRepr.classType,
+            )
+        } else {
+            null
+        }
     }
 
     private fun rankInterestingClasses(
