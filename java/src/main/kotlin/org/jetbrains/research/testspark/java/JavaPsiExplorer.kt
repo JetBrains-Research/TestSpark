@@ -83,18 +83,22 @@ class JavaPsiExplorer(
         if (depth <= 0) {
             return clsFqName
         }
-        classVisited[javaCls.qualifiedName]?.let { if (it >= depth) return clsFqName }
-        classVisited.put(clsFqName, depth)
 
-        graph.addNode(
-            GraphNode(
-                javaCls.name,
-                clsFqName,
-                type = GraphNodeType.CLASS,
-                isUnitUnderTest = isUnderTest,
-                properties = mapOf("type" to javaCls.classType.representation),
-            ),
-        )
+        val oldDepth = classVisited.put(clsFqName, depth)
+
+        if (oldDepth == null) {
+            graph.addNode(
+                GraphNode(
+                    javaCls.name,
+                    clsFqName,
+                    type = GraphNodeType.CLASS,
+                    isUnitUnderTest = isUnderTest,
+                    properties = mapOf("type" to javaCls.classType.representation),
+                ),
+            )
+        } else if (oldDepth >= depth) {
+            return clsFqName
+        }
 
         javaCls.allMethods.forEach {
             exploreMethod(it as JavaPsiMethodWrapper, depth = depth)?.let { methodFqName ->
@@ -145,19 +149,24 @@ class JavaPsiExplorer(
     ): String? {
         val methodFqName = javaMethod.fqName
         if (isStdLib(methodFqName)) return null
-        if (methodVisited.contains(methodFqName)) return methodFqName
-        methodVisited.put(methodFqName, depth)
-        val properties = mutableMapOf<String, Any>()
-        properties["isConstructor"] = javaMethod.isConstructor
-        graph.addNode(
-            GraphNode(
-                javaMethod.name,
-                methodFqName,
-                type = GraphNodeType.METHOD,
-                isUnitUnderTest = isUnderTest,
-                properties = properties,
-            ),
-        )
+
+        val oldDepth = methodVisited.put(methodFqName, depth)
+
+        if (oldDepth == null) {
+            val properties = mutableMapOf<String, Any>()
+            properties["isConstructor"] = javaMethod.isConstructor
+            graph.addNode(
+                GraphNode(
+                    javaMethod.name,
+                    methodFqName,
+                    type = GraphNodeType.METHOD,
+                    isUnitUnderTest = isUnderTest,
+                    properties = properties,
+                ),
+            )
+        } else if (oldDepth >= depth) {
+            return methodFqName
+        }
 
         // explore the class if we come from calls
         if (javaMethod.containingClass is JavaPsiClassWrapper) {
