@@ -77,7 +77,7 @@ abstract class Graph {
         source: String,
         dampingFactor: Double = 0.85,
         maxIterations: Int = 500,
-        tolerance: Double = 1e-4,
+        tolerance: Double = 1e-5,
     ): Map<String, Double> {
         val nodes = getAllNodes()
         val edges = getAllEdges()
@@ -89,9 +89,9 @@ abstract class Graph {
 
         nodes.forEach { node ->
             if (node.fqName == source) {
-                scores[node] = 0.5
+                scores[node] = 1.0
             } else {
-                scores[node] = 0.5 / (totalNodes - 1)
+                scores[node] = 0.0 // 0.5 / (totalNodes - 1)
             }
         }
 
@@ -149,14 +149,13 @@ abstract class Graph {
             // consecutive score vectors is less than or equal to the tolerance
             hasConverged = l2Norm <= tolerance
 
-            if (iteration % 50 == 0) {
+            if (hasConverged || iteration % 50 == 0) {
                 log.info { "PageRank iteration: $iteration, L2 norm: $l2Norm" }
             }
 
             scores.putAll(normalizedNewScores)
             iteration++
         } while (!hasConverged && iteration < maxIterations)
-        log.info { "PageRank iteration: $iteration" }
         // Step 4: Convert the result to fqName -> score map
         return scores.mapKeys { (node, _) -> node.fqName }
     }
