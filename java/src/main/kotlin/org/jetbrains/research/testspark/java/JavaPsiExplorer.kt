@@ -168,9 +168,13 @@ class JavaPsiExplorer(
             return methodFqName
         }
 
+        val usedClasses = mutableListOf<String>()
+
         // explore the class if we come from calls
         if (javaMethod.containingClass is JavaPsiClassWrapper) {
-            exploreClass(javaMethod.containingClass, depth = depth)
+            exploreClass(javaMethod.containingClass, depth = depth)?.let {
+                usedClasses.add(it)
+            }
         }
 
         // TODO: rework: Need access to psi instance
@@ -180,6 +184,7 @@ class JavaPsiExplorer(
         val psiReturnType = psiMethod.returnType
         if (psiReturnType != null) {
             exploreType(psiReturnType, depth = depth - 1).forEach { classFqName ->
+                usedClasses.add(classFqName)
                 graph.addEdge(
                     GraphEdge(
                         from = methodFqName,
@@ -193,6 +198,7 @@ class JavaPsiExplorer(
         psiMethod.parameterList.parameters.forEach { parameter ->
             val psiType = parameter.type
             exploreType(psiType, depth - 1).forEach { paramFqName ->
+                usedClasses.add(paramFqName)
                 graph.addEdge(
                     GraphEdge(
                         from = methodFqName,
@@ -205,6 +211,7 @@ class JavaPsiExplorer(
         // exceptions
         psiMethod.throwsList.referencedTypes.forEach { throwType ->
             exploreType(throwType, depth - 1).forEach { throwFqName ->
+                usedClasses.add(throwFqName)
                 graph.addEdge(
                     GraphEdge(
                         from = methodFqName,
