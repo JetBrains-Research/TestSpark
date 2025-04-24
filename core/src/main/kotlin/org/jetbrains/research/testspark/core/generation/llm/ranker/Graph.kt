@@ -454,22 +454,30 @@ class KuzuGraph(
         val nodes = mutableListOf<GraphNode>()
         val statement =
             conn.prepare(
-                """MATCH (n)
-                   | WITH COUNT(n.fqName) as totalNodes
-                   | MATCH p=(c:Class)-[r:HAS_METHOD]->(m:Method)
-                   | WHERE (${'$'}hasList AND (c.fqName IN ${'$'}originIds OR m.fqName IN ${'$'}originIds)) 
-                   |    AND c.score > (1/totalNodes) AND m.score > (1/totalNodes)
-                   | RETURN c, collect(m)
-                """.trimMargin(),
+                """
+                MATCH (m:Method), (c:Class), (t)
+                WITH avg(m.score) AS mAvgScore, avg(c.score) AS cAvgScore, count(t) as totalNodes
+                MATCH p=(a {isUnitUnderTest: true})-[r:HAS_METHOD|:HAS_RETURN_TYPE|:HAS_TYPE_PARAMETER|:HAS_TYPE_PROPERTY|:INHERITANCE|:FROM|:HAS_CONSTRUCTOR|:THROWS*1..6]-(c:Method)
+                WITH list_creation(a,c) as sd, nodes(r) as r, mAvgScore, cAvgScore, totalNodes
+                UNWIND list_concat(r,sd) as rn
+                WITH rn, CASE
+                        WHEN label(rn) = "Class" THEN 0
+                        ELSE mAvgScore
+                    END AS avgScore, label(rn) as la,totalNodes
+                WHERE rn.score >= avgScore
+                WITH collect(DISTINCT rn.fqName) as nodesId
+                MATCH (c:Class)-[r:HAS_METHOD]->(m:Method)
+                WHERE (c.fqName IN nodesId OR m.fqName IN nodesId)
+                RETURN DISTINCT c, collect(m)
+                """.trimIndent(),
             )
 
-        val originIdsValues = KuzuList(((origin ?: emptyList()).map { Value(it) }).toTypedArray()).value
         val queryResult =
             conn.execute(
                 statement,
                 mapOf(
-                    "originIds" to originIdsValues,
-                    "hasList" to Value(origin != null),
+//                    "originIds" to originIdsValues,
+//                    "hasList" to Value(origin != null),
                 ),
             )
         if (!queryResult.isSuccess) {
