@@ -3,9 +3,11 @@ package org.jetbrains.research.testspark.java
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.PsiReferenceExpression
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.PsiType
 import com.intellij.psi.PsiTypeParameter
+import com.intellij.psi.PsiVariable
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.research.testspark.core.data.ClassType
@@ -205,12 +207,16 @@ class JavaPsiExplorer(
         }
         // body
         psiMethod.body?.statements?.forEach { statement ->
-            exploreStatement(statement, depth = depth - 1).forEach { methodCalledFqName ->
+            exploreStatement(statement, depth = depth - 1).forEach { relations ->
+                val fqName = relations.first
+                val edge = relations.second
+                if (fqName == methodFqName) return@forEach
+                if (usedClasses.contains(fqName)) return@forEach
                 graph.addEdge(
                     GraphEdge(
                         from = methodFqName,
-                        to = methodCalledFqName,
-                        type = GraphEdgeType.CALLS,
+                        to = fqName,
+                        type = edge,
                     ),
                 )
             }
@@ -250,18 +256,28 @@ class JavaPsiExplorer(
     private fun exploreStatement(
         psiStatement: PsiStatement,
         depth: Int = 0,
-    ): List<String> {
-        val result = mutableListOf<String>()
+    ): List<Pair<String, GraphEdgeType>> {
+        val result = mutableListOf<Pair<String, GraphEdgeType>>()
         PsiTreeUtil
             .findChildrenOfType(psiStatement, PsiMethodCallExpression::class.java)
             .forEach { itMethodCall ->
                 itMethodCall.resolveMethod()?.let {
                     val psiMethod = JavaPsiMethodWrapper(it)
                     exploreMethod(psiMethod, depth = depth)?.let { methodFqName ->
-                        result.add(methodFqName)
+                        result.add(Pair(methodFqName, GraphEdgeType.CALLS))
                     }
                 }
             }
+        PsiTreeUtil.findChildrenOfType(psiStatement, PsiReferenceExpression::class.java).forEach { itReference ->
+            itReference.references.forEach {
+                val ty = it.resolve()
+                if (ty is PsiVariable) {
+                    exploreType(ty.type, depth = depth).forEach { classFqName ->
+                        result.add(Pair(classFqName, GraphEdgeType.USES))
+                    }
+                }
+            }
+        }
         return result
     }
 
