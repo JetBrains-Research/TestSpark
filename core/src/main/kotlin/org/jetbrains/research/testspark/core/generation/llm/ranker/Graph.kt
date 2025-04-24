@@ -25,6 +25,7 @@ enum class GraphEdgeType {
     THROWS,
     FROM,
     HAS_CONSTRUCTOR,
+    USES,
 }
 
 data class GraphNode(
@@ -68,6 +69,7 @@ abstract class Graph {
             GraphEdgeType.THROWS -> 0.7
             GraphEdgeType.FROM -> 1.0
             GraphEdgeType.HAS_CONSTRUCTOR -> 1.0
+            GraphEdgeType.USES -> 0.5
         }
     }
 
@@ -213,6 +215,7 @@ class KuzuGraph(
         conn.query("CREATE REL TABLE THROWS(FROM Method TO Class)")
         conn.query("CREATE REL TABLE FROM(FROM Method TO Class)")
         conn.query("CREATE REL TABLE HAS_CONSTRUCTOR(FROM Class TO Method)")
+        conn.query("CREATE REL TABLE USES(FROM Method TO Class)")
     }
 
     override fun addNode(node: GraphNode) {
@@ -361,6 +364,21 @@ class KuzuGraph(
                         conn.prepare(
                             """
                             |MATCH (n1:Class), (n2:Method)
+                            |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
+                            |MERGE (n1)-[:${edge.type}]->(n2)
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+
+                GraphEdgeType.USES -> {
+                    val statement =
+                        conn.prepare(
+                            """
+                            |MATCH (n1:Method), (n2:Class)
                             |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                             |MERGE (n1)-[:${edge.type}]->(n2)
                             """.trimMargin(),
