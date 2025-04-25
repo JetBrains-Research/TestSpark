@@ -2,12 +2,23 @@ package org.jetbrains.research.testspark.testmanager.template
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSample
+import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
+import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
 
 /**
  * Interface for retrieving information from test class code.
  */
 interface TestAnalyzer {
+    companion object {
+        fun create(language: SupportedLanguage): TestAnalyzer =
+            when (language) {
+                SupportedLanguage.Kotlin -> KotlinTestAnalyzer
+                SupportedLanguage.Java -> JavaTestAnalyzer
+            }
+    }
+
     /**
      * Extracts the code of the first test method found in the given class code.
      *

@@ -6,7 +6,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSample
-import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
+import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 
 /**
  * A selector for samples for the LLM.
@@ -51,7 +51,7 @@ class LLMSampleSelector {
         project: Project,
         language: SupportedLanguage,
     ) {
-        val testAnalyzer = TestAnalyzerFactory.create(language)
+        val testAnalyzer = TestAnalyzer.create(language)
 
         // add default sample
         testSamples.add(TestSample(DEFAULT_TEST_NAME, DEFAULT_TEST_CODE))

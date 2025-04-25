@@ -15,16 +15,16 @@ import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModif
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.factories.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
-import org.jetbrains.research.testspark.tools.llm.generation.TestBodyPrinterFactory
-import org.jetbrains.research.testspark.tools.llm.generation.TestSuiteParserFactory
 import org.jetbrains.research.testspark.tools.llm.generation.gemini.GeminiPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
@@ -284,16 +284,16 @@ object LLMHelper {
         }
 
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.create(language)
+        val testBodyPrinter = TestBodyPrinter.create(language)
         val testSuiteParser =
-            TestSuiteParserFactory.createJUnitTestSuiteParser(
+            JUnitTestSuiteParser.create(
                 jUnitVersion,
                 language,
                 testBodyPrinter,
             )
 
         val testsAssembler =
-            TestsAssemblerFactory.create(
+            JUnitTestsAssembler(
                 indicator,
                 testGenerationOutput,
                 testSuiteParser,

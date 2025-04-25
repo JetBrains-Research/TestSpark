@@ -2,11 +2,22 @@ package org.jetbrains.research.testspark.testmanager.template
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.testmanager.java.JavaTestGenerator
+import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestGenerator
 
 /**
  * Interface for generating and formatting test class code.
  */
 interface TestGenerator {
+    companion object {
+        fun create(language: SupportedLanguage): TestGenerator =
+            when (language) {
+                SupportedLanguage.Kotlin -> KotlinTestGenerator
+                SupportedLanguage.Java -> JavaTestGenerator
+            }
+    }
+
     /**
      * Generates the code for a test class.
      *

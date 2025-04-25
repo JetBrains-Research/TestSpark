@@ -5,7 +5,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.TestSuiteParser
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
@@ -19,7 +19,7 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 class JUnitTestsAssembler(
     val indicator: CustomProgressIndicator,
     private val generationData: TestGenerationData,
-    private val testSuiteParser: TestSuiteParser,
+    private val junitTestSuiteParser: JUnitTestSuiteParser,
     val junitVersion: JUnitVersion,
 ) : TestsAssembler() {
     private val log: Logger = Logger.getInstance(this.javaClass)
@@ -49,7 +49,7 @@ class JUnitTestsAssembler(
     }
 
     override fun assembleTestSuite(): TestSuiteGeneratedByLLM? {
-        val testSuite = testSuiteParser.parseTestSuite(super.getContent())
+        val testSuite = junitTestSuiteParser.parseTestSuite(super.getContent())
 
         // save RunWith
         if (testSuite?.annotation?.isNotBlank() == true) {

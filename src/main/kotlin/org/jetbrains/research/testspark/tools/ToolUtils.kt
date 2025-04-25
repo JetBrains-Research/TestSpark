@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
-import org.jetbrains.research.testspark.testmanager.TestGeneratorFactory
+import org.jetbrains.research.testspark.testmanager.template.TestGenerator
 import java.io.File
 
 object ToolUtils {
@@ -53,7 +53,7 @@ object ToolUtils {
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
             testCase.testCode =
-                TestGeneratorFactory.create(language).generateCode(
+                TestGenerator.create(language).generateCode(
                     project,
                     getClassWithTestCaseName(testCase.testName),
                     code,
