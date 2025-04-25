@@ -77,7 +77,9 @@ class TestSparkStarter : ApplicationStarter {
         val runCoverage = args[10].toBoolean()
 
         val testsExecutionResultManager = TestsExecutionResultManager()
+
         val indicatorController = IndicatorController()
+
         println("Test generation requested for $projectPath")
 
         // remove the `.idea` folder in the $projectPath if exists

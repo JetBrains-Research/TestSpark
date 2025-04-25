@@ -107,6 +107,7 @@ class LLMProcessManager(
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
+        ProjectUnderTestFileCreator.log("buildPath from ProjectContextService: '$buildPath'")
         if (project
                 .service<PluginSettingsService>()
                 .state.buildPath
@@ -115,6 +116,7 @@ class LLMProcessManager(
             // User did not set own path
             buildPath = ToolUtils.getBuildPath(project)
         }
+        ProjectUnderTestFileCreator.log("Final buildPath: '$buildPath'")
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
             llmErrorManager.errorProcess(LLMMessagesBundle.get("emptyBuildPath"), project, errorMonitor)

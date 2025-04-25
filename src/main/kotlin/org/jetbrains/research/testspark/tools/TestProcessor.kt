@@ -4,7 +4,6 @@ import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.JUnitVersion
@@ -142,7 +141,8 @@ class TestProcessor(
 
         // for classpath containing cut
         command.add("--classfiles")
-        command.add(CompilerModuleExtension.getInstance(projectContext.cutModule!!)?.compilerOutputPath!!.path)
+        command.add(projectContext.compilationOutputDirectory!!)
+        // command.add(CompilerModuleExtension.getInstance(projectContext.cutModule!!)?.compilerOutputPath!!.path)
 
         // for each source folder
         sourceRoots.forEach { root ->

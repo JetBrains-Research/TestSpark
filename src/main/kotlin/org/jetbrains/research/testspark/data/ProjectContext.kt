@@ -11,4 +11,5 @@ data class ProjectContext(
     var classFQN: String? = null,
     // The module to cut.
     var cutModule: Module? = null,
+    var compilationOutputDirectory: String? = null,
 )

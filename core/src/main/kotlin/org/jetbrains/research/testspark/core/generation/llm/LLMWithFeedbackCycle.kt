@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.data.TestSparkModule
@@ -86,6 +87,8 @@ class LLMWithFeedbackCycle(
 
         // collect imports from all responses
         val imports: MutableSet<String> = mutableSetOf()
+
+        val llmResponseFilepath = ProjectUnderTestFileCreator.getOrCreateFileInOutputDirectory("llm-response.txt")
 
         while (!generatedTestsArePassing) {
             requestsCount++

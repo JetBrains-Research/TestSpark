@@ -7,6 +7,7 @@ import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
@@ -83,10 +84,24 @@ class PromptManager(
                         psiHelper.getInterestingPsiClassesWithQualifiedNames(classesToTest, maxInputParamsDepth)
 
                     val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
+
+                    ProjectUnderTestFileCreator.log(
+                        "interestingClasses: [\n${
+                            interestingClasses.joinToString("\n") { "\t${it.qualifiedName}" }
+                        }\n]",
+                    )
+
                     val polymorphismRelations =
                         getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses)
                             .map(this::createClassRepresentation)
                             .toMap()
+
+                    for (entry in polymorphismRelations.entries) {
+                        val baseClass = entry.key
+                        val subclasses = entry.value
+                        val subclassesStr = subclasses.joinToString("\n") { "$\t${it.qualifiedName}" }
+                        ProjectUnderTestFileCreator.log("${baseClass.qualifiedName}: [\n${subclassesStr}\n]")
+                    }
 
                     val context =
                         PromptGenerationContext(
