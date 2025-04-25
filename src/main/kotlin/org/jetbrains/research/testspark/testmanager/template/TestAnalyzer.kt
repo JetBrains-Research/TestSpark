@@ -1,12 +1,11 @@
 package org.jetbrains.research.testspark.testmanager.template
 
-import org.jetbrains.research.testspark.core.test.SupportedLanguage
-import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
-import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
-
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSample
+import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
+import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
 
 /**
  * Interface for retrieving information from test class code.
