@@ -79,7 +79,9 @@ class TestProcessor(
         junitVersion: JUnitVersion,
     ): String {
         // find the proper javac
-        val javaRunner = findJavaCompilerInDirectory(homeDirectory)
+        val javaRunnerFile = findJavaCompilerInDirectory(homeDirectory)
+        val javaRunnerAbsolutePath = javaRunnerFile.absolutePath
+        val javaRunner = if (DataFilesUtil.isWindows()) "\"$javaRunnerAbsolutePath\"" else "'$javaRunnerAbsolutePath'"
         // JaCoCo libs
         val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
         val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
@@ -100,15 +102,26 @@ class TestProcessor(
             } else {
                 "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false"
             }
+
+        // save classpaths to a temp file
+        val classPathsList =
+            "\"" +
+                testCompiler
+                    .getClassPaths(
+                        projectBuildPath,
+                    ).replace("\\", "/") +
+                "${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath" +
+                "\""
+        val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
+        val classPaths = "\"@$fileName\""
+
         val testExecutionResult =
             CommandLineRunner.run(
                 arrayListOf(
-                    javaRunner.absolutePath,
+                    javaRunner,
                     javaAgentFlag,
                     "-cp",
-                    "\"${testCompiler.getClassPaths(
-                        projectBuildPath,
-                    )}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
+                    classPaths,
                     "org.jetbrains.research.SingleJUnitTestRunner${junitVersion.version}",
                     name,
                 ),
@@ -119,7 +132,7 @@ class TestProcessor(
         // Prepare the command for generating the Jacoco report
         val command =
             mutableListOf(
-                javaRunner.absolutePath,
+                javaRunner,
                 "-jar",
                 // jacocoCLIDir,
                 jacocoCLILibraryPath,
