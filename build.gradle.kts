@@ -36,6 +36,7 @@ plugins {
     // Gradle Qodana Plugin
 //    id("org.jetbrains.qodana") version "0.1.13"
 }
+
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
@@ -437,6 +438,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
 tasks.register<UpdateEvoSuite>("updateEvosuite") {
     evoSuiteVersion = properties("evosuiteVersion")
 }
+
 /**
  * Copies the JUnitRunner.jar file to the lib directory of the project.
  * This task depends on the "JUnitRunner" module being built beforehand.
