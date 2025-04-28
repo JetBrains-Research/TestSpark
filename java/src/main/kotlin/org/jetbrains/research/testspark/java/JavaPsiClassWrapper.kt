@@ -69,7 +69,7 @@ class JavaPsiClassWrapper(
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)
         val query = ClassInheritorsSearch.search(psiClass, scope, false)
-        return query.findAll().map { JavaPsiClassWrapper(it) }
+        return query.findAll().filter { it !is PsiAnonymousClass }.map { JavaPsiClassWrapper(it) }
     }
 
     override fun getInterestingPsiClassesWithQualifiedNames(psiMethod: PsiMethodWrapper): MutableSet<PsiClassWrapper> {
