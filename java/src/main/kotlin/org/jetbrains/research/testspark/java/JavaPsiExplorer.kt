@@ -35,40 +35,13 @@ class JavaPsiExplorer(
         depth: Int = MAX_DEPTH,
     ): Graph {
         val javaPsiMethod = psiMethod as? JavaPsiMethodWrapper
-        var isUnderTest = true
         if (javaPsiMethod != null) {
-            exploreMethod(javaPsiMethod, isUnderTest = true, depth = depth)?.let { methodFqName ->
-                if (javaPsiMethod.containingClass is JavaPsiClassWrapper) {
-                    exploreClass(
-                        javaPsiMethod.containingClass,
-                        isUnderTest = false,
-                        depth = depth,
-                    )?.let { classFqName ->
-                        graph.addEdge(
-                            GraphEdge(
-                                from = classFqName,
-                                to = methodFqName,
-                                type = if (javaPsiMethod.isConstructor) GraphEdgeType.HAS_CONSTRUCTOR else GraphEdgeType.HAS_METHOD,
-                            ),
-                        )
-//                        graph.addEdge(
-//                            GraphEdge(
-//                                from = methodFqName,
-//                                to = classFqName,
-//                                type = GraphEdgeType.FROM,
-//                            ),
-//                        )
-                    }
-                }
+            exploreMethod(javaPsiMethod, isUnderTest = true, depth = depth)
+        } else {
+            classesToTest.firstOrNull()?.let {
+                exploreClass(it as JavaPsiClassWrapper, isUnderTest = true, depth)
             }
-            isUnderTest = false
         }
-        classesToTest.forEach {
-            exploreClass(it as JavaPsiClassWrapper, isUnderTest = isUnderTest, depth)
-            // only the first classesToTest is the Class under test.
-            isUnderTest = false
-        }
-        interestingClasses.forEach { exploreClass(it as JavaPsiClassWrapper, isUnderTest = false, depth) }
         return graph
     }
 
