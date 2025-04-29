@@ -133,8 +133,10 @@ class TestSparkStarter : ApplicationStarter {
                         settingsState.currentLLMPlatformName = LLMDefaultsBundle.get("grazieName")
                         settingsState.grazieToken = token
                         settingsState.grazieModel = model
-                        settingsState.classPrompts =
-                            JsonEncoding.encode(mutableListOf(File(promptTemplateFile).readText()))
+                        if (promptTemplateFile != "") {
+                            settingsState.classPrompts =
+                                JsonEncoding.encode(mutableListOf(File(promptTemplateFile).readText()))
+                        }
                         settingsState.junitVersion =
                             when (jUnitVersion.filter { it.isDigit() }) {
                                 "4" -> JUnitVersion.JUnit4
