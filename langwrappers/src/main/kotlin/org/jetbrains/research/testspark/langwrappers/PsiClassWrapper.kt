@@ -26,6 +26,7 @@ interface PsiClassWrapper {
     val qualifiedName: String
     val text: String?
     val methods: List<PsiMethodWrapper>
+    val constructors: List<PsiMethodWrapper>
     val allMethods: List<PsiMethodWrapper>
     val constructorSignatures: List<String>
     val superClass: PsiClassWrapper?

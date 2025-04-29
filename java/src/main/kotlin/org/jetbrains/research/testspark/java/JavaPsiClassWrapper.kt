@@ -27,6 +27,7 @@ class JavaPsiClassWrapper(
     override val text: String get() = psiClass.text
 
     override val methods: List<PsiMethodWrapper> get() = psiClass.methods.map { JavaPsiMethodWrapper(it) }
+    override val constructors: List<PsiMethodWrapper> get() = psiClass.constructors.map { JavaPsiMethodWrapper(it) }
 
     override val allMethods: List<PsiMethodWrapper> get() = psiClass.allMethods.map { JavaPsiMethodWrapper(it) }
 
