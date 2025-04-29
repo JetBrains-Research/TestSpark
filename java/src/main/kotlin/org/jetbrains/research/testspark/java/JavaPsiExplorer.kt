@@ -73,7 +73,7 @@ class JavaPsiExplorer(
             return clsFqName
         }
 
-        javaCls.allMethods.forEach {
+        javaCls.methods.forEach {
             exploreMethod(it as JavaPsiMethodWrapper, depth = depth)?.let { methodFqName ->
                 graph.addEdge(
                     GraphEdge(
