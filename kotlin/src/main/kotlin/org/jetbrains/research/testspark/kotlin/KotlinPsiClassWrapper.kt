@@ -38,9 +38,7 @@ class KotlinPsiClassWrapper(
 
     override val text: String? get() = psiClass.text
 
-    override val constructors: List<PsiMethodWrapper> get() =
-        (psiClass.primaryConstructor?.let { listOf(KotlinPsiMethodWrapper(it)) } ?: emptyList()) +
-            psiClass.secondaryConstructors.map { KotlinPsiMethodWrapper(it) }
+    override val constructors: List<PsiMethodWrapper> get() = psiClass.allConstructors.map { KotlinPsiMethodWrapper(it) }
 
     override val methods: List<PsiMethodWrapper>
         get() =
