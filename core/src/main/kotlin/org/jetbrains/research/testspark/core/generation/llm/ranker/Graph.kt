@@ -186,7 +186,7 @@ abstract class Graph {
 
     abstract fun saveScores(scores: Map<String, Double>)
 
-    abstract fun getInterestingNodes(origin: List<String>? = null): List<GraphNode>
+    abstract fun getInterestingNodes(maxDepth: Int = 3): List<GraphNode>
 }
 
 class KuzuGraph(
@@ -450,14 +450,15 @@ class KuzuGraph(
         conn.query("COMMIT;")
     }
 
-    override fun getInterestingNodes(origin: List<String>?): List<GraphNode> {
+    override fun getInterestingNodes(maxDepth: Int): List<GraphNode> {
+        val maxDepthForGraph = maxDepth.coerceIn(1..10) * 2
         val nodes = mutableListOf<GraphNode>()
         val statement =
             conn.prepare(
                 """
                 MATCH (m:Method), (c:Class), (t)
                 WITH avg(m.score) AS mAvgScore, avg(c.score) AS cAvgScore, count(t) as totalNodes
-                MATCH p=(a {isUnitUnderTest: true})-[r:HAS_METHOD|:HAS_RETURN_TYPE|:HAS_TYPE_PARAMETER|:HAS_TYPE_PROPERTY|:INHERITANCE|:FROM|:HAS_CONSTRUCTOR|:THROWS*1..6]-(c:Method)
+                MATCH p=(a {isUnitUnderTest: true})-[r:HAS_METHOD|:HAS_RETURN_TYPE|:HAS_TYPE_PARAMETER|:HAS_TYPE_PROPERTY|:INHERITANCE|:FROM|:HAS_CONSTRUCTOR|:THROWS*1..$maxDepthForGraph]-(c:Method)
                 WITH list_creation(a,c) as sd, nodes(r) as r, mAvgScore, cAvgScore, totalNodes
                 UNWIND list_concat(r,sd) as rn
                 WITH rn, CASE
@@ -466,7 +467,7 @@ class KuzuGraph(
                     END AS avgScore, label(rn) as la,totalNodes
                 WHERE rn.score >= avgScore
                 WITH collect(DISTINCT rn.fqName) as nodesId
-                MATCH (c:Class)-[r:HAS_METHOD]->(m:Method)
+                MATCH (c:Class)-[r:HAS_METHOD|:HAS_CONSTRUCTOR]->(m:Method)
                 WHERE (c.fqName IN nodesId OR m.fqName IN nodesId)
                 RETURN DISTINCT c, collect(m)
                 """.trimIndent(),
