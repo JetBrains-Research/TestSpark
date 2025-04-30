@@ -99,7 +99,8 @@ class JavaPsiHelper(
         classesToTest: List<PsiClassWrapper>,
         interestingClasses: Set<PsiClassWrapper>,
         psiMethod: PsiMethodWrapper?,
-    ): Graph = JavaPsiExplorer(graph, psiFile.project).explore(classesToTest, interestingClasses, psiMethod)
+        depth: Int,
+    ): Graph = JavaPsiExplorer(graph, psiFile.project).explore(classesToTest, interestingClasses, psiMethod, depth = depth)
 
     override fun getPsiClassFromFqName(fqName: String): JavaPsiClassWrapper? {
         val javaPsi = JavaPsiFacade.getInstance(psiFile.project)
