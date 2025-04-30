@@ -41,6 +41,7 @@ class PromptManager(
     private val caret: Int,
 ) {
     private val graph: Graph = KuzuGraph()
+    private var isGraphCreated = false
 
     /**
      * The `classesToTest` is empty when we work with the function outside the class
@@ -120,47 +121,37 @@ class PromptManager(
 
                     when (codeType.type!!) {
                         CodeType.CLASS -> {
-                            psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, null)
-                            val scores =
-                                graph.score(
-                                    cut!!.qualifiedName,
-                                    interestingClasses.flatMap {
-                                        listOf(it.qualifiedName) +
-                                            it.allMethods.map { m ->
-                                                m.qualifiedName
-                                            }
-                                    },
-                                )
-                            val interestingClassesRanked = rankInterestingClasses(interestingClasses, scores)
+                            if (!isGraphCreated) {
+                                psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, null)
+                                graph.score(cut!!.qualifiedName)
+                                isGraphCreated = true
+                            }
+                            val interestingClassesRanked =
+                                graph
+                                    .getInterestingNodes(
+                                        maxInputParamsDepth,
+                                    ).mapNotNull { graphNodeToClass(it) }
                             promptGenerator.generatePromptForClass(interestingClassesRanked, testSamplesCode)
                         }
 
                         CodeType.METHOD -> {
                             val psiMethod = psiHelper.getPsiMethod(cut, codeType.objectDescription, caret)!!
                             val method = createMethodRepresentation(psiMethod)!!
+
+                            if (!isGraphCreated) {
+                                psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
+                                graph.score(method.qualifiedName)
+                                isGraphCreated = true
+                            }
                             val interestingClassesFromMethod =
-                                psiHelper
-                                    .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
-                                    .map(this::createClassRepresentation)
-                                    .toList()
+                                graph
+                                    .getInterestingNodes(
+                                        maxInputParamsDepth,
+                                    ).mapNotNull { graphNodeToClass(it) }
 
-                            psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
-                            val scores =
-                                graph.score(
-                                    method.qualifiedName,
-                                    interestingClassesFromMethod.flatMap {
-                                        listOf(it.qualifiedName) +
-                                            it.allMethods.map { m ->
-                                                m.qualifiedName
-                                            }
-                                    },
-                                )
-                            val interestingNodes = graph.getInterestingNodes().mapNotNull { graphNodeToClass(it) }
-
-                            val interestingClassesFromMethodRanked = rankInterestingClasses(interestingClassesFromMethod, scores)
                             promptGenerator.generatePromptForMethod(
                                 method,
-                                interestingNodes,
+                                interestingClassesFromMethod,
                                 testSamplesCode,
                                 psiHelper.getPackageName(),
                             )
@@ -187,11 +178,16 @@ class PromptManager(
                              */
                             if (psiMethod != null) {
                                 val method = createMethodRepresentation(psiMethod)!!
+                                if (!isGraphCreated) {
+                                    psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
+                                    graph.score(method.qualifiedName)
+                                    isGraphCreated = true
+                                }
                                 val interestingClassesFromMethod =
-                                    psiHelper
-                                        .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
-                                        .map(this::createClassRepresentation)
-                                        .toList()
+                                    graph
+                                        .getInterestingNodes(
+                                            maxInputParamsDepth,
+                                        ).mapNotNull { graphNodeToClass(it) }
 
                                 return@Computable promptGenerator.generatePromptForLine(
                                     lineUnderTest,
