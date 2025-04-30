@@ -311,6 +311,7 @@ abstract class PsiHelper(
         classesToTest: List<PsiClassWrapper>,
         interestingClasses: Set<PsiClassWrapper>,
         psiMethod: PsiMethodWrapper? = null,
+        depth: Int = 5,
     ): Graph
 
     abstract fun getPsiClassFromFqName(fqName: String): PsiClassWrapper?
