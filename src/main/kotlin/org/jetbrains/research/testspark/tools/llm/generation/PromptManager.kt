@@ -122,7 +122,13 @@ class PromptManager(
                     when (codeType.type!!) {
                         CodeType.CLASS -> {
                             if (!isGraphCreated) {
-                                psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, null)
+                                psiHelper.createGraph(
+                                    graph,
+                                    classesToTest,
+                                    interestingPsiClasses,
+                                    null,
+                                    depth = maxInputParamsDepth,
+                                )
                                 graph.score(cut!!.qualifiedName)
                                 isGraphCreated = true
                             }
@@ -139,7 +145,13 @@ class PromptManager(
                             val method = createMethodRepresentation(psiMethod)!!
 
                             if (!isGraphCreated) {
-                                psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
+                                psiHelper.createGraph(
+                                    graph,
+                                    classesToTest,
+                                    interestingPsiClasses,
+                                    psiMethod,
+                                    depth = maxInputParamsDepth,
+                                )
                                 graph.score(method.qualifiedName)
                                 isGraphCreated = true
                             }
@@ -179,7 +191,13 @@ class PromptManager(
                             if (psiMethod != null) {
                                 val method = createMethodRepresentation(psiMethod)!!
                                 if (!isGraphCreated) {
-                                    psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
+                                    psiHelper.createGraph(
+                                        graph,
+                                        classesToTest,
+                                        interestingPsiClasses,
+                                        psiMethod,
+                                        depth = maxInputParamsDepth,
+                                    )
                                     graph.score(method.qualifiedName)
                                     isGraphCreated = true
                                 }
@@ -273,9 +291,11 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${LlmSettingsArguments(
-                    project,
-                ).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth of polymorphism is ${
+                    LlmSettingsArguments(
+                        project,
+                    ).maxPolyDepth(testGenerationData.polyDepthReducing)
+                }.\n" +
                 "Maximum depth for input parameters is ${
                     LlmSettingsArguments(
                         project,
