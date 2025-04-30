@@ -162,7 +162,7 @@ abstract class Graph {
 
     fun score(
         source: String,
-        targets: List<String>,
+        targets: List<String> = emptyList(),
     ): List<Pair<String, Double>> {
         // Simple score using hops
         val results = mutableListOf<Pair<String, Double>>()
