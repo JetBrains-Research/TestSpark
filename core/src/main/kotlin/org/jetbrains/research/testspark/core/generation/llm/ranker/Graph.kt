@@ -114,7 +114,6 @@ abstract class Graph {
         var iteration = 0
 
         do {
-            hasConverged = true
             val newScores = mutableMapOf<GraphNode, Double>()
 
             for (node in nodes) {
