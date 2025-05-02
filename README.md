@@ -19,10 +19,11 @@
 <!-- Plugin description -->
 TestSpark is a plugin for generating unit tests. TestSpark natively integrates different AI-based test generation tools and techniques in the IDE.
 
-TestSpark currently supports two test generation strategies:
+TestSpark currently supports three test generation strategies:
 <ul>
         <li>LLM-based test generation (using <a href="https://openai.com">OpenAI</a>, HuggingFace, <a href="https://ai.google/">Google AI</a>, and JetBrains internal AI Assistant platform)</li>
         <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a>)</li>
+        <li>Symbolic execution-based test generation (using <a href="https://github.com/vorpal-research/kex">Kex</a>)</li>
 </ul>
 <h4>LLM-based test generation</h4>
     <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automatically checks if tests are valid before presenting it to users.</p>
@@ -34,7 +35,7 @@ TestSpark currently supports two test generation strategies:
     </ul>
 
 <h4>Local search-based test generation</h4>
-<p>For this type of test generation, TestSpark uses <a href="https://www.evosuite.org">EvoSuite</a>, which is the  most powerful search-based local test generator. </p>
+<p>For this type of test generation, TestSpark uses <a href="https://www.evosuite.org">EvoSuite</a>, which is the most powerful search-based local test generator available for Java. </p>
 <ul>
 <li>Supports up to Java 11.</li>
 <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
@@ -51,7 +52,7 @@ TestSpark currently supports two test generation strategies:
 <li>Generates tests for Java classes and methods.</li>
 </ul>
 
-<p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestSpark is currently developed and maintained by <a href="https://lp.jetbrains.com/research/ictl/">ICTL at JetBrains Research</a>.</p>
+<p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestSpark is currently developed and maintained by the <a href="https://lp.jetbrains.com/research/software-testing/">Software Testing Research team at JetBrains Research</a>.</p>
 
 ## <span style="color:crimson; font-size:150%; font-weight:bold"> DISCLAIMER </span>
 <span style="color:crimson; font-size:150%; font-weight:bold">TestSpark is currently designed to serve as an experimental tool.</span>
@@ -378,6 +379,7 @@ In addition, learn more about the structure of the plugin [here](https://github.
 
 ## Licence
 <!-- Which licence does the plugin have -->
+The TestSpark plugin is available under the [MIT License](LICENSE.md).
 
 ---
 Plugin based on the [IntelliJ Platform Plugin Template][template].
