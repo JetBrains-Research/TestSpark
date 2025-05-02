@@ -2,10 +2,12 @@ package org.jetbrains.research.testspark.core.generation.llm
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.jetbrains.research.testspark.core.data.ChatMessage
+import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
@@ -26,11 +28,20 @@ class ChatSessionManager(
 
         recordChatMessage(isUserFeedback, ChatMessage.Companion.createUserMessage(message = prompt))
 
+        val chatHistory = if (isUserFeedback) {
+            chatHistory + ChatMessage.createUserMessage(prompt)
+        } else chatHistory
+
         return requestManager.sendRequest(
             llmParams, chatHistory, isUserFeedback
-        ).onEach { result ->
+        ).map { result ->
+            val responseString = result.getDataOrNull()
+            if (responseString != null && responseString.isEmpty()) {
+                Result.Failure(error = LlmError.EmptyLlmResponse)
+            } else result
+        }.onEach { result ->
             val rawText = result.getDataOrNull()
-            if (rawText != null) {
+            if (rawText.isNullOrEmpty().not()) {
                 recordChatMessage(
                     isUserFeedback, ChatMessage.Companion.createAssistantMessage(message = rawText)
                 )
