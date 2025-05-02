@@ -104,7 +104,7 @@ fun executeTestCaseModificationRequest(
     requestManager: RequestManager,
     testsAssembler: TestsAssembler,
     errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
-): Result<TestSuiteGeneratedByLLM, TestSparkError> {
+): Result<TestSuiteGeneratedByLLM> {
     // Update Token information
     val prompt =
         buildString {
