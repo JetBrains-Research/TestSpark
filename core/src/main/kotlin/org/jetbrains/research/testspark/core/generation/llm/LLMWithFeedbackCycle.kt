@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
@@ -10,10 +9,7 @@ import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
-import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
-import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
-import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestCompiler
@@ -43,17 +39,15 @@ data class FeedbackResponse(
  * @property initialPromptMessage The initial prompt message to start the feedback cycle.
  * @property promptSizeReductionStrategy The `PromptSizeReductionStrategy` instance used for reducing the prompt size.
  * @property testSuiteFilename The name of the file in which the test suite is saved in the result path.
- * @property packageName The package name for the generated tests.
  * @property resultPath The temporary path where all the generated tests and their Jacoco report are saved.
  * @property buildPath All the directories where the compiled code of the project under test is saved.
- * @property chatSessionManager The `RequestManager` instance used for making LLM requests.
+ * @property chatSessionManager A ChatSession manager which holds chat history and manages requests to LLM.
  * @property testsAssembler The `TestsAssembler` instance used for assembling generated tests.
  * @property testCompiler The `TestCompiler` instance used for compiling tests.
  * @property testStorage The `TestsPersistentStorage` instance used for storing generated tests.
  * @property testsPresenter The `TestsPresenter` instance used for presenting generated tests.
  * @property indicator The `CustomProgressIndicator` instance used for tracking progress.
  * @property requestsCountThreshold The threshold for the maximum number of requests in the feedback cycle.
- * @property errorMonitor The `ErrorMonitor` instance used for monitoring errors.
  */
 class LLMWithFeedbackCycle(
     private val report: Report,
@@ -62,7 +56,6 @@ class LLMWithFeedbackCycle(
     private val promptSizeReductionStrategy: PromptSizeReductionStrategy,
     // filename in which the test suite is saved in the result path
     private val testSuiteFilename: String,
-    private val packageName: String,
     // temp path where all the generated tests and their jacoco report are saved
     private val resultPath: String,
     // all the directories where the compiled code of the project under test is saved. This path will be used as a classpath to run each test case
@@ -74,7 +67,6 @@ class LLMWithFeedbackCycle(
     private val testsPresenter: TestsPresenter,
     private val indicator: CustomProgressIndicator,
     private val requestsCountThreshold: Int,
-    private val errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
 ) {
     private val log = KotlinLogging.logger { this::class.java }
     private lateinit var generatedTestSuite: TestSuiteGeneratedByLLM
@@ -110,13 +102,13 @@ class LLMWithFeedbackCycle(
 
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
-            val chunks = runBlocking {
-                chatSessionManager.request(
+            val response: Result<TestSuiteGeneratedByLLM> = runBlocking {
+                val flow = chatSessionManager.request(
                     prompt = nextPromptMessage,
                     isUserFeedback = false,
-                ).toList()
+                )
+                flow.collectChunks(testsAssembler)
             }
-            val response: Result<TestSuiteGeneratedByLLM> = processStreamedData(chunks, testsAssembler)
 
             // Process stopped checking
             if (indicator.isCanceled()) throw ProcessCancelledException(module = TestSparkModule.Llm())

@@ -1,9 +1,8 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.core.error.Result
-import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -91,7 +90,6 @@ fun getClassWithTestCaseName(testCaseName: String): String {
  *
  * @param testCase: The test that is requested to be modified
  * @param task: A string representing the requested task for test modification
- * @param indicator: A progress indicator object that represents the indication of the test generation progress.
  *
  * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
  */
@@ -111,32 +109,28 @@ fun executeTestCaseModificationRequest(
             append(task)
         }
 
-    val chunks = runBlocking {
+    return runBlocking {
         chatSessionManager.request(
             prompt = prompt,
             isUserFeedback = true,
-        ).toList()
+        ).collectChunks(testsAssembler)
     }
-
-    return processStreamedData(chunks, testsAssembler)
 }
 
-fun processStreamedData(
-    chunks: List<Result<String>>,
+suspend fun Flow<Result<String>>.collectChunks(
     testsAssembler: TestsAssembler,
 ): Result<TestSuiteGeneratedByLLM> {
-    val firstResponse = chunks.first()
-    if (firstResponse is Result.Failure) {
-        return firstResponse
-    }
+    var response: Result<TestSuiteGeneratedByLLM>? = null
 
-    for (chunk in chunks) {
-        chunk.getDataOrNull()?.let {
-            testsAssembler.consume(it)
+    collect { result ->
+        when (result) {
+            is Result.Success -> testsAssembler.consume(result.data)
+            is Result.Failure -> {
+                response = result
+                return@collect
+            }
         }
     }
 
-    println("Finished processing streamed data ${testsAssembler.getContent()}")
-
-    return testsAssembler.assembleTestSuite()
+    return response ?: testsAssembler.assembleTestSuite()
 }

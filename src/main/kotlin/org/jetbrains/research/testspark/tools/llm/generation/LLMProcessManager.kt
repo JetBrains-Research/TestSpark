@@ -13,11 +13,9 @@ import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
-import org.jetbrains.research.testspark.core.generation.llm.ChatSessionManager
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -194,7 +192,6 @@ class LLMProcessManager(
                 initialPromptMessage = initialPromptMessage,
                 promptSizeReductionStrategy = promptSizeReductionStrategy,
                 testSuiteFilename = testFileName,
-                packageName = packageName,
                 resultPath = generatedTestsData.resultPath,
                 buildPath = buildPath,
                 chatSessionManager = chatSessionManager,
@@ -204,7 +201,6 @@ class LLMProcessManager(
                 testsPresenter = testsPresenter,
                 indicator = indicator,
                 requestsCountThreshold = maxRequests,
-                errorMonitor = errorMonitor,
             )
 
         val feedbackResponse =

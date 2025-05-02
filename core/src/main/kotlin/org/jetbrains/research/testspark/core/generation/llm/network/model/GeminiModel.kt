@@ -6,6 +6,10 @@ data class GeminiRequest(
     val contents: List<GeminiRequestBody>,
 )
 
+data class GeminiResponse(
+    val candidates: List<GeminiCandidate>
+)
+
 data class GeminiRequestBody(
     val parts: List<GeminiChatMessage>,
 )
@@ -14,7 +18,7 @@ data class GeminiChatMessage(
     val text: String,
 )
 
-data class GeminiReply(
+data class GeminiCandidate(
     val content: GeminiReplyContent,
     val finishReason: String,
     val avgLogprobs: Double,
@@ -35,4 +39,4 @@ fun constructGeminiRequestBody(params: LlmParams, messages: List<ChatMessage>) =
     )
 )
 
-fun GeminiReply.extractContent() = this.content.parts.first().text
+fun GeminiResponse.extractContent() = this.candidates.first().content.parts.first().text
