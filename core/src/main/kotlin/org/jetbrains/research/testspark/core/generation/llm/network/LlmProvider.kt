@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.generation.llm.network
 
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.data.LlmModuleType
 import org.jetbrains.research.testspark.core.data.TestSparkModule
@@ -10,34 +11,27 @@ import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.model.GeminiResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.model.HuggingFaceResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
+import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.model.OpenAIResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.model.constructGeminiRequestBody
 import org.jetbrains.research.testspark.core.generation.llm.network.model.constructHuggingFaceRequestBody
 import org.jetbrains.research.testspark.core.generation.llm.network.model.constructOpenAiRequestBody
-import org.jetbrains.research.testspark.core.generation.llm.network.model.extractContent
 import java.net.HttpURLConnection
 
 enum class LlmProvider(
     val url: (LlmParams) -> String,
     val supportsBearerAuth: Boolean,
-    val supportsStreaming: Boolean,
-    val constructJsonBody: Gson.(LlmParams, List<ChatMessage>) -> String,
-    val extractResponse: Gson.(rawTextResponse: String) -> String?,
+    val constructJsonBody: Json.(LlmParams, List<ChatMessage>) -> String,
+    val decodeResponse: Json.(rawTextResponse: String) -> LlmResponse,
     val mapHttpStatusCodeToError: (Int) -> TestSparkError,
 ) {
     OpenAI(
         url = { "https://api.openai.com/v1/chat/completions" },
         supportsBearerAuth = true,
-        supportsStreaming = true,
-        constructJsonBody = { params, messages ->
-            toJson(constructOpenAiRequestBody(params, messages, stream = true))
+        constructJsonBody = { params, chatHistory ->
+            encodeToString(constructOpenAiRequestBody(params, chatHistory))
         },
-        extractResponse = { rawText ->
-            if (rawText.startsWith(STREAMING_PREFIX) && rawText != "$STREAMING_PREFIX [DONE]") {
-                val chunk = fromJson(rawText.removePrefix(STREAMING_PREFIX), OpenAIResponse::class.java)
-                chunk.extractContent()
-            } else null
-        },
+        decodeResponse = { decodeFromString<OpenAIResponse>(it) },
         mapHttpStatusCodeToError = { httpCode ->
             when (httpCode) {
                 HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
@@ -49,12 +43,13 @@ enum class LlmProvider(
     Gemini(
         url = {
             val baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/"
-            "$baseUrl${it.model}:generateContent?key=${it.token}"
+            "$baseUrl${it.model}:streamGenerateContent?alt=sse&key=${it.token}"
         },
         supportsBearerAuth = false,
-        supportsStreaming = false,
-        constructJsonBody = { params, messages -> toJson(constructGeminiRequestBody(params, messages)) },
-        extractResponse = { rawText -> fromJson(rawText, GeminiResponse::class.java).extractContent() },
+        constructJsonBody = { params, chatHistory ->
+            encodeToString(constructGeminiRequestBody(params, chatHistory))
+        },
+        decodeResponse = { decodeFromString<GeminiResponse>(it) },
         mapHttpStatusCodeToError = { httpCode ->
             when (httpCode) {
                 HttpURLConnection.HTTP_INTERNAL_ERROR -> LlmError.PromptTooLong
@@ -66,22 +61,12 @@ enum class LlmProvider(
     Llama(
         url = { "https://api-inference.huggingface.co/models/meta-llama/${it.model}" },
         supportsBearerAuth = true,
-        supportsStreaming = true,
-        constructJsonBody = { params, messages ->
-            toJson(constructHuggingFaceRequestBody(params, messages, stream = true))
+        constructJsonBody = { params, chatHistory ->
+            encodeToString(constructHuggingFaceRequestBody(params, chatHistory))
         },
-        extractResponse = { rawText ->
-            if (rawText.startsWith(STREAMING_PREFIX)) {
-                val chunk = fromJson(rawText.removePrefix(STREAMING_PREFIX), HuggingFaceResponse::class.java)
-                chunk.extractContent()
-            } else null
-        },
+        decodeResponse = { decodeFromString<HuggingFaceResponse>(it) },
         mapHttpStatusCodeToError = { httpCode ->
             HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.HuggingFace))
         },
     );
-
-    companion object {
-        const val STREAMING_PREFIX = "data:"
-    }
 }

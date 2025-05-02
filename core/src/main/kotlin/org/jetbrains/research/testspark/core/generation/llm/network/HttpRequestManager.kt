@@ -1,7 +1,5 @@
 package org.jetbrains.research.testspark.core.generation.llm.network
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -22,6 +20,8 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
@@ -29,20 +29,10 @@ import java.net.HttpURLConnection
 
 class HttpRequestManager(
     private val llmProvider: LlmProvider,
-    private val client: HttpClient = HttpClient(CIO) {
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.BODY
-            sanitizeHeader { header -> header == HttpHeaders.Authorization }
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 90_000
-            connectTimeoutMillis = 15_000
-            socketTimeoutMillis = 60_000
-        }
-    },
-    private val gson: Gson = GsonBuilder().create(),
+    private val client: HttpClient = DEFAULT_HTTP_CLIENT,
+    private val json: Json = DEFAULT_JSON,
 ) : RequestManager {
+
     override suspend fun sendRequest(
         params: LlmParams,
         chatHistory: List<ChatMessage>,
@@ -51,26 +41,51 @@ class HttpRequestManager(
         client.preparePost(llmProvider.url(params)) {
             contentType(ContentType.Application.Json)
             if (llmProvider.supportsBearerAuth) bearerAuth(params.token)
-            setBody(llmProvider.constructJsonBody(gson, params, chatHistory))
+            setBody(llmProvider.constructJsonBody(json, params, chatHistory))
         }.execute { httpResponse ->
             val responseIsSuccessful = httpResponse.status.value == HttpURLConnection.HTTP_OK
             if (responseIsSuccessful) {
-                if (llmProvider.supportsStreaming) {
-                    val channel = httpResponse.body<ByteReadChannel>()
-                    while (currentCoroutineContext().isActive && !channel.isClosedForRead) {
-                        val line = channel.readUTF8Line() ?: continue
-                        val response = llmProvider.extractResponse(gson, line) ?: continue
-                        emit(Result.Success(response))
-                    }
-                } else {
-                    val rawText = httpResponse.body<String>()
-                    val response = llmProvider.extractResponse(gson, rawText)
-                    emit(Result.Success(response!!))
+                val channel = httpResponse.body<ByteReadChannel>()
+                while (currentCoroutineContext().isActive && !channel.isClosedForRead) {
+                    val chunk = channel.readUTF8Line() ?: continue
+                    val response = processChunk(chunk) ?: continue
+                    emit(Result.Success(response))
                 }
             } else {
                 val error = llmProvider.mapHttpStatusCodeToError(httpResponse.status.value)
                 emit(Result.Failure(error))
             }
+        }
+    }
+
+    fun processChunk(chunk: String): String? {
+        if (chunk.startsWith(STREAMING_PREFIX).not()) return null
+        return llmProvider.decodeResponse(json, chunk.removePrefix(STREAMING_PREFIX)).extractContent()
+    }
+
+    private companion object {
+        const val STREAMING_PREFIX = "data:"
+
+        val DEFAULT_HTTP_CLIENT = HttpClient(CIO) {
+            install(Logging) {
+                logger = Logger.DEFAULT
+                level = LogLevel.BODY
+                sanitizeHeader { header -> header == HttpHeaders.Authorization }
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 90_000
+                connectTimeoutMillis = 15_000
+                socketTimeoutMillis = 60_000
+            }
+        }
+
+        val DEFAULT_JSON = Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+
+            // this api is not error-prone; it just means it can be changed or removed in the future
+            @OptIn(ExperimentalSerializationApi::class)
+            explicitNulls = false
         }
     }
 }

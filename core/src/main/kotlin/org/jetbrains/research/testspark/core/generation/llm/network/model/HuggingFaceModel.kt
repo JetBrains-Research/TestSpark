@@ -1,47 +1,54 @@
 package org.jetbrains.research.testspark.core.generation.llm.network.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.jetbrains.research.testspark.core.data.ChatMessage
 
-data class HuggingFaceRequestBody(
+@Serializable
+data class HuggingFaceRequest(
     val inputs: String,
     val parameters: HuggingFaceParameters,
-    val stream: Boolean,
-) : LLMRequestBody()
+    val stream: Boolean = true,
+): LlmRequest()
 
+@Serializable
+data class HuggingFaceResponse(
+    val token: HuggingFaceToken,
+) : LlmResponse() {
+    override fun extractContent(): String = token.text
+}
+
+@Serializable
 data class HuggingFaceParameters(
     val temperature: Float?,
-    @SerializedName("top_p")
+    @SerialName("top_p")
     val topProbability: Float?,
-    @SerializedName("return_full_text")
+    @SerialName("return_full_text")
     val appendPromptToResponse: Boolean = false,
-    @SerializedName("min_length")
+    @SerialName("min_length")
     val minLength: Int = 4096,
-    @SerializedName("max_length")
+    @SerialName("max_length")
     val maxLength: Int = 8192,
-    @SerializedName("max_new_tokens")
+    @SerialName("max_new_tokens")
     val maxNewTokens: Int = 250,
-    @SerializedName("max_time")
+    @SerialName("max_time")
     val maxTime: Float = 120.0F,
 )
 
-data class HuggingFaceResponse(
-    val token: HuggingFaceToken,
-)
-
+@Serializable
 data class HuggingFaceToken(
     val text: String,
 )
 
-fun constructHuggingFaceRequestBody(
-    params: LlmParams, messages: List<ChatMessage>, stream: Boolean,
-) = HuggingFaceRequestBody(
-    inputs = messages.joinToString(separator = "\n") { it.content },
-    parameters = HuggingFaceParameters(
-        temperature = params.temperature,
-        topProbability = params.topProbability,
-    ),
-    stream = stream,
-)
-
-fun HuggingFaceResponse.extractContent() = this.token.text
+internal fun constructHuggingFaceRequestBody(
+    params: LlmParams, messages: List<ChatMessage>
+): HuggingFaceRequest {
+    val systemPrompt = params.systemPrompt?.let { "$it\n" } ?: ""
+    return HuggingFaceRequest(
+        inputs = systemPrompt + messages.joinToString(separator = "\n") { it.content },
+        parameters = HuggingFaceParameters(
+            temperature = params.temperature,
+            topProbability = params.topProbability,
+        ),
+    )
+}
