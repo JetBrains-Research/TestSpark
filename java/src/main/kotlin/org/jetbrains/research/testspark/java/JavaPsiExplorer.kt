@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.java
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethodCallExpression
@@ -25,6 +26,8 @@ class JavaPsiExplorer(
     val graph: Graph,
     private val project: Project,
 ) {
+    private val log = Logger.getInstance(this::class.java)
+
     val classVisited = mutableMapOf<String, Int>()
     val methodVisited = mutableMapOf<String, Int>()
 
@@ -42,6 +45,8 @@ class JavaPsiExplorer(
                 exploreClass(it as JavaPsiClassWrapper, isUnderTest = true, depth)
             }
         }
+        log.info("Number of Class visited: ${classVisited.size}")
+        log.info("Number of Method visited: ${methodVisited.size}")
         return graph
     }
 
