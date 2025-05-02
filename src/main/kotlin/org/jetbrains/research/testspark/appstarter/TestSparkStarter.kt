@@ -25,7 +25,6 @@ import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -186,7 +185,7 @@ class TestSparkStarter : ApplicationStarter {
                             LLMProcessManager(
                                 project,
                                 language = SupportedLanguage.Java,
-                                PromptManager(project, psiHelper!!, targetPsiClass.textRange.startOffset,),
+                                PromptManager(project, psiHelper!!, targetPsiClass.textRange.startOffset),
                                 testSamplesCode = "", // we don't provide samples to LLM
                                 projectSDKPath = projectSDKPath,
                             )

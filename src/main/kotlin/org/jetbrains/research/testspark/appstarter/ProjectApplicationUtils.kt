@@ -180,12 +180,13 @@ object ProjectApplicationUtils {
         }
     }
 
-    private suspend fun waitAllStartupActivitiesPassed(project: Project): Unit = suspendCoroutine {
-        logger.info("Waiting all startup activities passed $project...")
-        // ToDo: move headless mode to another branch
-        StartupManager.getInstance(project).runAfterOpened { it.resume(Unit) }
-        waitForInvokeLaterActivities()
-    }
+    private suspend fun waitAllStartupActivitiesPassed(project: Project): Unit =
+        suspendCoroutine {
+            logger.info("Waiting all startup activities passed $project...")
+            // ToDo: move headless mode to another branch
+            StartupManager.getInstance(project).runAfterOpened { it.resume(Unit) }
+            waitForInvokeLaterActivities()
+        }
 
     /**
      * Magic loop is used to wait all invoke later activities passed.

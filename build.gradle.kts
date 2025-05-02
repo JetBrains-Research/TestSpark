@@ -109,7 +109,8 @@ if (spaceCredentialsProvided()) {
                 .outputs.files.asPath,
         ) { into("TestSpark/lib") }
 
-        hasGrazieAccess!!.runtimeClasspath
+        hasGrazieAccess!!
+            .runtimeClasspath
             .elements
             .get()
             .forEach {
@@ -125,7 +126,8 @@ if (spaceCredentialsProvided()) {
                 .outputs.files.asPath,
         ) { into("TestSpark/lib") }
 
-        hasGrazieAccess!!.runtimeClasspath
+        hasGrazieAccess!!
+            .runtimeClasspath
             .elements
             .get()
             .forEach {
@@ -470,10 +472,17 @@ fun String?.orDefault(default: String): String = this ?: default
 val headless by intellijPlatformTesting.runIde.registering {
     prepareSandboxTask.configure {
         dependsOn(hasGrazieAccess!!.jarTaskName)
-        from(tasks.getByName(hasGrazieAccess!!.jarTaskName).outputs.files.asPath) { into("TestSpark/lib") }
+        from(
+            tasks
+                .getByName(hasGrazieAccess!!.jarTaskName)
+                .outputs.files.asPath,
+        ) { into("TestSpark/lib") }
 
-        hasGrazieAccess!!.runtimeClasspath
-            .elements.get().forEach {
+        hasGrazieAccess!!
+            .runtimeClasspath
+            .elements
+            .get()
+            .forEach {
                 from(it.asFile.absolutePath) { into("TestSpark/lib") }
             }
     }
@@ -493,19 +502,19 @@ val headless by intellijPlatformTesting.runIde.registering {
 
     task {
         dependsOn("buildPlugin")
-        jvmArgumentProviders += CommandLineArgumentProvider {
-            listOf(
-                "-Xmx16G",
-                "-Djava.awt.headless=true",
-                "--add-exports",
-                "java.base/jdk.internal.vm=ALL-UNNAMED",
-                "-Didea.system.path",
-            )
-        }
+        jvmArgumentProviders +=
+            CommandLineArgumentProvider {
+                listOf(
+                    "-Xmx16G",
+                    "-Djava.awt.headless=true",
+                    "--add-exports",
+                    "java.base/jdk.internal.vm=ALL-UNNAMED",
+                    "-Didea.system.path",
+                )
+            }
 
         args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
     }
 }
-
 
 fun spaceCredentialsProvided() = spaceUsername.isNotEmpty() && spacePassword.isNotEmpty()
