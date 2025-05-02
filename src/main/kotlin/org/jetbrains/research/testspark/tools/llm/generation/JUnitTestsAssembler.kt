@@ -4,10 +4,8 @@ import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
-import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -69,7 +67,12 @@ class JUnitTestsAssembler(
 
         // logging generated test cases if any
         testSuite.testCases.forEach { testCase -> log.info("Generated test case: $testCase") }
-        Result.Success(testSuite)
+
+        if (testSuite.testCases.isEmpty()) {
+            Result.Failure(error = LlmError.EmptyLlmResponse)
+        } else {
+            Result.Success(testSuite)
+        }
     } catch (_: Exception) {
         Result.Failure(LlmError.TestSuiteParsingError)
     }

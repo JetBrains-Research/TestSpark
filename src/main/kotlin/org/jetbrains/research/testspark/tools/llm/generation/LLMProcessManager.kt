@@ -5,11 +5,13 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
@@ -199,30 +201,36 @@ class LLMProcessManager(
                 testCompiler = testCompiler,
                 testStorage = testProcessor,
                 testsPresenter = testsPresenter,
-                indicator = indicator,
                 requestsCountThreshold = maxRequests,
             )
 
-        val feedbackResponse =
-            llmFeedbackCycle.run { warning ->
-                project.createNotification(warning, NotificationType.WARNING)
-            }
+        var feedbackResponse: Result<TestSuiteGeneratedByLLM>? = null
+        runBlocking {
+            llmFeedbackCycle.run().collect { result ->
+                feedbackResponse = result
+                when (result) {
+                    is Result.Success -> {
+                        val numOfCompilableTestCases = result.data.testCases.count { it.isCompilable }
+                        log.info("Add $numOfCompilableTestCases compilable test cases into generatedTestsData")
+                    }
+                    is Result.Failure -> {
+                        when (result.error) {
+                            is LlmError.EmptyLlmResponse,
+                            is LlmError.TestSuiteParsingError,
+                            is LlmError.CompilationError -> {
+                                project.createNotification(result.error, NotificationType.WARNING)
+                            }
 
-        // Process stopped checking
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
-        log.info("Feedback cycle finished execution with $feedbackResponse")
-
-        when (feedbackResponse) {
-            is Result.Success -> {
-                log.info("Add ${feedbackResponse.data.compilableTestCases.size} compilable test cases into generatedTestsData")
-            }
-
-            is Result.Failure -> {
-                project.createNotification(feedbackResponse.error, NotificationType.ERROR)
-                return null
+                            else -> project.createNotification(result.error, NotificationType.ERROR)
+                        }
+                    }
+                }
             }
         }
 
+        log.info("Feedback cycle finished execution with result: $feedbackResponse")
+
+        // Process stopped checking
         if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 
         // Error during the collecting
@@ -231,9 +239,9 @@ class LLMProcessManager(
         log.info("Save generated test suite and test cases into the project workspace")
 
         val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
-        val generatedTestSuite: TestSuiteGeneratedByLLM? = feedbackResponse.getDataOrNull()?.generatedTestSuite
-        val testSuiteRepresentation =
-            if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
+        val testSuiteRepresentation = feedbackResponse?.getDataOrNull()?.let {
+            testSuitePresenter.toString(testSuite = it)
+        }
 
         ToolUtils.transferToIJTestCases(report)
 

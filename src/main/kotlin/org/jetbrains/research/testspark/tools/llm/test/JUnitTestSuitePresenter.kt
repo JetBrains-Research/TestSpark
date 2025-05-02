@@ -34,7 +34,9 @@ class JUnitTestSuitePresenter(
 
         return testSuite.run {
             // Add each test
-            testCases.forEach { testCase -> testBody += "$testCase\n" }
+            testCases.forEach { testCase ->
+                if (testCase.isCompilable) testBody += "$testCase\n"
+            }
 
             TestGenerator.create(language).generateCode(
                 project,
