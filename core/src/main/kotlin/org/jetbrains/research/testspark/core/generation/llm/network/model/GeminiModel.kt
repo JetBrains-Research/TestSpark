@@ -10,14 +10,18 @@ data class GeminiRequest(
     val generationConfig: GeminiGenerationConfig?,
     @SerialName("system_instruction")
     val systemInstruction: GeminiSystemInstruction?,
-): LlmRequest()
+) : LlmRequest()
 
 @Serializable
 data class GeminiResponse(
     val candidates: List<GeminiCandidate>,
 ) : LlmResponse() {
-    override fun extractContent(): String = 
-        candidates.first().content.parts.first().text
+    override fun extractContent(): String =
+        candidates
+            .first()
+            .content.parts
+            .first()
+            .text
 }
 
 @Serializable
@@ -60,22 +64,27 @@ data class GeminiReplyPart(
 )
 
 internal fun constructGeminiRequestBody(
-    params: LlmParams, messages: List<ChatMessage>
+    params: LlmParams,
+    messages: List<ChatMessage>,
 ) = GeminiRequest(
-    contents = messages.map {
-        GeminiRequestContents(
-            role = when (it.role) {
-                ChatMessage.ChatRole.User -> "user"
-                ChatMessage.ChatRole.Assistant -> "model"
-            },
-            parts = listOf(GeminiTextObject(it.content)),
-        )
-    },
-    systemInstruction = params.systemPrompt?.let {
-        GeminiSystemInstruction(parts = listOf(GeminiTextObject(it)))
-    },
-    generationConfig = GeminiGenerationConfig(
-        temperature = params.temperature,
-        topP = params.topProbability,
-    )
+    contents =
+        messages.map {
+            GeminiRequestContents(
+                role =
+                    when (it.role) {
+                        ChatMessage.ChatRole.User -> "user"
+                        ChatMessage.ChatRole.Assistant -> "model"
+                    },
+                parts = listOf(GeminiTextObject(it.content)),
+            )
+        },
+    systemInstruction =
+        params.systemPrompt?.let {
+            GeminiSystemInstruction(parts = listOf(GeminiTextObject(it)))
+        },
+    generationConfig =
+        GeminiGenerationConfig(
+            temperature = params.temperature,
+            topP = params.topProbability,
+        ),
 )

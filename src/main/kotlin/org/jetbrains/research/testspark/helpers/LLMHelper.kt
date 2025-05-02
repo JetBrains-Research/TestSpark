@@ -238,8 +238,7 @@ object LLMHelper {
      *
      * @return The list of LLMPlatforms.
      */
-    fun getLLLMPlatforms(): List<LLMPlatform> =
-        listOf(OpenAIPlatform(), GraziePlatform(), HuggingFacePlatform(), GeminiPlatform())
+    fun getLLLMPlatforms(): List<LLMPlatform> = listOf(OpenAIPlatform(), GraziePlatform(), HuggingFacePlatform(), GeminiPlatform())
 
     /**
      * Checks if the token is set.
@@ -294,14 +293,15 @@ object LLMHelper {
                 jUnitVersion,
             )
 
-        val testSuite = runBlockingWithIndicatorLifecycle(indicator) {
-            executeTestCaseModificationRequest(
-                testCase,
-                task,
-                chatSessionManager,
-                testsAssembler,
-            )
-        }
+        val testSuite =
+            runBlockingWithIndicatorLifecycle(indicator) {
+                executeTestCaseModificationRequest(
+                    testCase,
+                    task,
+                    chatSessionManager,
+                    testsAssembler,
+                )
+            }
         return testSuite
     }
 

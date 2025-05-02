@@ -116,15 +116,14 @@ suspend fun executeTestCaseModificationRequest(
             append(task)
         }
 
-    return chatSessionManager.request(
-        prompt = prompt,
-        isUserFeedback = true,
-    ).collectChunks(testsAssembler)
+    return chatSessionManager
+        .request(
+            prompt = prompt,
+            isUserFeedback = true,
+        ).collectChunks(testsAssembler)
 }
 
-suspend fun Flow<Result<String>>.collectChunks(
-    testsAssembler: TestsAssembler,
-): Result<TestSuiteGeneratedByLLM> {
+suspend fun Flow<Result<String>>.collectChunks(testsAssembler: TestsAssembler): Result<TestSuiteGeneratedByLLM> {
     var response: Result<TestSuiteGeneratedByLLM>? = null
 
     collect { result ->
@@ -151,23 +150,25 @@ suspend fun Flow<Result<String>>.collectChunks(
 fun <T> runBlockingWithIndicatorLifecycle(
     indicator: CustomProgressIndicator,
     indicatorObservingIntervalMs: Long = 500,
-    action: suspend () -> T
-): T = try {
-    runBlocking {
-        coroutineScope {
-            val indicatorObserver = launch {
-                while (true) {
-                    if (indicator.isCanceled()) {
-                        this@coroutineScope.cancel()
+    action: suspend () -> T,
+): T =
+    try {
+        runBlocking {
+            coroutineScope {
+                val indicatorObserver =
+                    launch {
+                        while (true) {
+                            if (indicator.isCanceled()) {
+                                this@coroutineScope.cancel()
+                            }
+                            delay(indicatorObservingIntervalMs)
+                        }
                     }
-                    delay(indicatorObservingIntervalMs)
-                }
+                val result = action()
+                indicatorObserver.cancel()
+                result
             }
-            val result = action()
-            indicatorObserver.cancel()
-            result
         }
+    } catch (e: CancellationException) {
+        throw ProcessCancelledException(cause = e)
     }
-} catch (e: CancellationException) {
-    throw ProcessCancelledException(cause = e)
-}

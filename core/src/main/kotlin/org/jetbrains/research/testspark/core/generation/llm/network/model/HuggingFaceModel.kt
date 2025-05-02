@@ -9,7 +9,7 @@ data class HuggingFaceRequest(
     val inputs: String,
     val parameters: HuggingFaceParameters,
     val stream: Boolean = true,
-): LlmRequest()
+) : LlmRequest()
 
 @Serializable
 data class HuggingFaceResponse(
@@ -41,14 +41,16 @@ data class HuggingFaceToken(
 )
 
 internal fun constructHuggingFaceRequestBody(
-    params: LlmParams, messages: List<ChatMessage>
+    params: LlmParams,
+    messages: List<ChatMessage>,
 ): HuggingFaceRequest {
     val systemPrompt = params.systemPrompt?.let { "$it\n" } ?: ""
     return HuggingFaceRequest(
         inputs = systemPrompt + messages.joinToString(separator = "\n") { it.content },
-        parameters = HuggingFaceParameters(
-            temperature = params.temperature,
-            topProbability = params.topProbability,
-        ),
+        parameters =
+            HuggingFaceParameters(
+                temperature = params.temperature,
+                topProbability = params.topProbability,
+            ),
     )
 }

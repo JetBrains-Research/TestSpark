@@ -15,13 +15,15 @@ sealed interface Result<out D> {
 
     fun isFailure(): Boolean = this is Failure
 
-    fun <R> mapData(transform: (D) -> R): Result<R> = when (this) {
-        is Success -> Success(transform(data))
-        is Failure -> Failure(error)
-    }
+    fun <R> mapData(transform: (D) -> R): Result<R> =
+        when (this) {
+            is Success -> Success(transform(data))
+            is Failure -> Failure(error)
+        }
 
-    fun <R : TestSparkError> mapError(transform: (TestSparkError) -> R): Result<D> = when (this) {
-        is Success -> Success(data)
-        is Failure -> Failure(transform(error))
-    }
+    fun <R : TestSparkError> mapError(transform: (TestSparkError) -> R): Result<D> =
+        when (this) {
+            is Success -> Success(data)
+            is Failure -> Failure(transform(error))
+        }
 }

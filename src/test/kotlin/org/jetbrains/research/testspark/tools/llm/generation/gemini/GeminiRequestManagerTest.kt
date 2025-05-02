@@ -7,13 +7,11 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

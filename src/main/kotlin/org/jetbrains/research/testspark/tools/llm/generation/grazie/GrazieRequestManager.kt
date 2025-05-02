@@ -13,26 +13,28 @@ import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
 
-class GrazieRequestManager() : RequestManager {
+class GrazieRequestManager : RequestManager {
     override suspend fun sendRequest(
         params: LlmParams,
         chatHistory: List<ChatMessage>,
-        isUserFeedback: Boolean
+        isUserFeedback: Boolean,
     ): Flow<Result<String>> {
         val className = "org.jetbrains.research.grazie.Request"
         val request: GrazieRequest =
             Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
-        val messages = chatHistory.map {
-            val role =
-                when (it.role) {
-                    ChatMessage.ChatRole.User -> "user"
-                    ChatMessage.ChatRole.Assistant -> "assistant"
-                }
-            (role to it.content)
-        }
+        val messages =
+            chatHistory.map {
+                val role =
+                    when (it.role) {
+                        ChatMessage.ChatRole.User -> "user"
+                        ChatMessage.ChatRole.Assistant -> "assistant"
+                    }
+                (role to it.content)
+            }
 
-        return request.request(params.token, messages, params.model)
+        return request
+            .request(params.token, messages, params.model)
             .map { Result.Success(data = it) as Result<String> }
             .catch { emit(Result.Failure(error = it.toError())) }
     }
@@ -46,12 +48,13 @@ class GrazieRequestManager() : RequestManager {
                 this is ClassNotFoundException -> LlmError.GrazieNotAvailable
                 message.contains("invalid: 401") -> HttpError(httpCode = 401)
                 message.contains("invalid: 413 Payload Too Large") -> LlmError.PromptTooLong
-                promptTooLong && preconditionFailed ->LlmError.PromptTooLong
+                promptTooLong && preconditionFailed -> LlmError.PromptTooLong
 
-                else -> HttpError(
-                    message = message,
-                    module = TestSparkModule.Llm(LlmModuleType.Grazie),
-                )
+                else ->
+                    HttpError(
+                        message = message,
+                        module = TestSparkModule.Llm(LlmModuleType.Grazie),
+                    )
             }
         }
     }

@@ -37,7 +37,7 @@ enum class LlmProvider(
                 HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
                 else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.OpenAi))
             }
-        }
+        },
     ),
 
     Gemini(
@@ -55,7 +55,7 @@ enum class LlmProvider(
                 HttpURLConnection.HTTP_INTERNAL_ERROR -> LlmError.PromptTooLong
                 else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.Gemini))
             }
-        }
+        },
     ),
 
     Llama(
@@ -68,5 +68,5 @@ enum class LlmProvider(
         mapHttpStatusCodeToError = { httpCode ->
             HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.HuggingFace))
         },
-    );
+    ),
 }

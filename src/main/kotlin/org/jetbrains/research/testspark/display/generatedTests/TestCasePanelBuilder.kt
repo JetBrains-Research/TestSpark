@@ -526,16 +526,17 @@ class TestCasePanelBuilder(
                             finishProcess()
                             return
                         }
-                        
-                        val testModificationResult = LLMHelper.testModificationRequest(
-                            language = language,
-                            testCase = initialCodes[currentRequestNumber - 1],
-                            task = requestComboBox.editor.item.toString(),
-                            indicator = ijIndicator,
-                            chatSessionManager = uiContext.chatSessionManager,
-                            project = project,
-                            testGenerationOutput = uiContext.testGenerationOutput,
-                        )
+
+                        val testModificationResult =
+                            LLMHelper.testModificationRequest(
+                                language = language,
+                                testCase = initialCodes[currentRequestNumber - 1],
+                                task = requestComboBox.editor.item.toString(),
+                                indicator = ijIndicator,
+                                chatSessionManager = uiContext.chatSessionManager,
+                                project = project,
+                                testGenerationOutput = uiContext.testGenerationOutput,
+                            )
 
                         when (testModificationResult) {
                             is Result.Failure -> {
@@ -550,7 +551,7 @@ class TestCasePanelBuilder(
                                 if (testModificationResult.data.isEmpty()) {
                                     LLMErrorManager().warningProcess(
                                         LLMMessagesBundle.get("modifyWithLLMError"),
-                                        project
+                                        project,
                                     )
                                 } else {
                                     testModificationResult.data.setTestFileName(

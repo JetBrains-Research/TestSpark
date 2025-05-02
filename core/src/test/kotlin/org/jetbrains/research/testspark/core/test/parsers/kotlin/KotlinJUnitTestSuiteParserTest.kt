@@ -267,18 +267,19 @@ class KotlinJUnitTestSuiteParserTest {
     @Test
     fun testParseWithRandomBackticksAtBeginning() {
         val text =
-        """ ```
-        ```kotlin
-        import org.junit.jupiter.api.Test
-        
-        class RandomBackticksTestClass {
-            @Test
-            fun testWithRandomBackticks() {
-                // Test case implementation
+            """
+             ```
+            ```kotlin
+            import org.junit.jupiter.api.Test
+            
+            class RandomBackticksTestClass {
+                @Test
+                fun testWithRandomBackticks() {
+                    // Test case implementation
+                }
             }
-        }
-        ```
-        """.trimIndent()
+            ```
+            """.trimIndent()
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser = KotlinJUnitTestSuiteParser("org.example", JUnitVersion.JUnit5, testBodyPrinter)

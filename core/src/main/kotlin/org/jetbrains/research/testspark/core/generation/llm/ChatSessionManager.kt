@@ -24,32 +24,44 @@ class ChatSessionManager(
         prompt: String,
         isUserFeedback: Boolean,
     ): Flow<Result<String>> {
-        log.info { "Sending Request..."  }
+        log.info { "Sending Request..." }
 
         recordChatMessage(isUserFeedback, ChatMessage.Companion.createUserMessage(message = prompt))
 
-        val chatHistory = if (isUserFeedback) {
-            chatHistory + ChatMessage.createUserMessage(prompt)
-        } else chatHistory
-
-        return requestManager.sendRequest(
-            llmParams, chatHistory, isUserFeedback
-        ).map { result ->
-            val responseString = result.getDataOrNull()
-            if (responseString != null && responseString.isEmpty()) {
-                Result.Failure(error = LlmError.EmptyLlmResponse)
-            } else result
-        }.onEach { result ->
-            val rawText = result.getDataOrNull()
-            if (rawText.isNullOrEmpty().not()) {
-                recordChatMessage(
-                    isUserFeedback, ChatMessage.Companion.createAssistantMessage(message = rawText)
-                )
+        val chatHistory =
+            if (isUserFeedback) {
+                chatHistory + ChatMessage.createUserMessage(prompt)
+            } else {
+                chatHistory
             }
-        }
+
+        return requestManager
+            .sendRequest(
+                llmParams,
+                chatHistory,
+                isUserFeedback,
+            ).map { result ->
+                val responseString = result.getDataOrNull()
+                if (responseString != null && responseString.isEmpty()) {
+                    Result.Failure(error = LlmError.EmptyLlmResponse)
+                } else {
+                    result
+                }
+            }.onEach { result ->
+                val rawText = result.getDataOrNull()
+                if (rawText.isNullOrEmpty().not()) {
+                    recordChatMessage(
+                        isUserFeedback,
+                        ChatMessage.Companion.createAssistantMessage(message = rawText),
+                    )
+                }
+            }
     }
 
-    private suspend fun recordChatMessage(isUserFeedback: Boolean, message: ChatMessage) {
+    private suspend fun recordChatMessage(
+        isUserFeedback: Boolean,
+        message: ChatMessage,
+    ) {
         if (isUserFeedback) return
         mutex.withLock {
             when (message.role) {

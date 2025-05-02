@@ -133,8 +133,7 @@ class LLMProcessManager(
         // adapter for the existing prompt reduction functionality
         val promptSizeReductionStrategy =
             object : PromptSizeReductionStrategy {
-                override fun isReductionPossible(): Boolean =
-                    promptManager.isPromptSizeReductionPossible(generatedTestsData)
+                override fun isReductionPossible(): Boolean = promptManager.isPromptSizeReductionPossible(generatedTestsData)
 
                 override fun reduceSizeAndGeneratePrompt(): String {
                     if (!isReductionPossible()) {
@@ -206,11 +205,12 @@ class LLMProcessManager(
             )
 
         val testSuite = runFeedbackCycle(indicator, llmFeedbackCycle)
-        val testSuiteRepresentation = testSuite?.let {
-            log.info("Add ${it.testCases} compilable test cases into generatedTestsData")
-            val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
-            testSuitePresenter.toString(testSuite = it)
-        }
+        val testSuiteRepresentation =
+            testSuite?.let {
+                log.info("Add ${it.testCases} compilable test cases into generatedTestsData")
+                val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
+                testSuitePresenter.toString(testSuite = it)
+            }
 
         if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 
@@ -234,28 +234,30 @@ class LLMProcessManager(
     private fun runFeedbackCycle(
         indicator: CustomProgressIndicator,
         llmFeedbackCycle: LLMWithFeedbackCycle,
-    ): TestSuiteGeneratedByLLM? = runBlockingWithIndicatorLifecycle(indicator) {
-        var feedbackResponse: TestSuiteGeneratedByLLM? = null
-        llmFeedbackCycle.run().collect { result ->
-            when (result) {
-                is Result.Success -> {
-                    feedbackResponse = result.data
-                }
+    ): TestSuiteGeneratedByLLM? =
+        runBlockingWithIndicatorLifecycle(indicator) {
+            var feedbackResponse: TestSuiteGeneratedByLLM? = null
+            llmFeedbackCycle.run().collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        feedbackResponse = result.data
+                    }
 
-                is Result.Failure -> {
-                    when (result.error) {
-                        is LlmError.EmptyLlmResponse,
-                        is LlmError.TestSuiteParsingError,
-                        is LlmError.CompilationError -> {
-                            project.createNotification(result.error, NotificationType.WARNING)
+                    is Result.Failure -> {
+                        when (result.error) {
+                            is LlmError.EmptyLlmResponse,
+                            is LlmError.TestSuiteParsingError,
+                            is LlmError.CompilationError,
+                            -> {
+                                project.createNotification(result.error, NotificationType.WARNING)
+                            }
+
+                            else -> project.createNotification(result.error, NotificationType.ERROR)
                         }
-
-                        else -> project.createNotification(result.error, NotificationType.ERROR)
                     }
                 }
             }
+            log.info("Feedback cycle finished execution with result: $feedbackResponse")
+            feedbackResponse
         }
-        log.info("Feedback cycle finished execution with result: $feedbackResponse")
-        feedbackResponse
-    }
 }

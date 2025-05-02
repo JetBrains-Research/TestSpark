@@ -12,23 +12,26 @@ import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequestManager
 
 object ChatSessionManagerFactory {
-    fun getChatSessionManager(project: Project): ChatSessionManager = ChatSessionManager(
-        requestManager = getRequestManager(project),
-        llmParams = LlmParams(
-            model = LlmSettingsArguments(project).getModel(),
-            token = LlmSettingsArguments(project).getToken(),
+    fun getChatSessionManager(project: Project): ChatSessionManager =
+        ChatSessionManager(
+            requestManager = getRequestManager(project),
+            llmParams =
+                LlmParams(
+                    model = LlmSettingsArguments(project).getModel(),
+                    token = LlmSettingsArguments(project).getToken(),
+                ),
         )
-    )
 
     private fun getRequestManager(project: Project): RequestManager {
         val model = LlmSettingsArguments(project).getModel()
         return when (val platform = LlmSettingsArguments(project).currentLLMPlatformName()) {
             DefaultLLMSettingsState.grazieName -> GrazieRequestManager()
             DefaultLLMSettingsState.openAIName -> HttpRequestManager(LlmProvider.OpenAI)
-            DefaultLLMSettingsState.huggingFaceName -> when {
-                model in LlamaModels -> HttpRequestManager(LlmProvider.Llama)
-                else -> throw IllegalStateException("Unsupported model: $model")
-            }
+            DefaultLLMSettingsState.huggingFaceName ->
+                when {
+                    model in LlamaModels -> HttpRequestManager(LlmProvider.Llama)
+                    else -> throw IllegalStateException("Unsupported model: $model")
+                }
             DefaultLLMSettingsState.geminiName -> HttpRequestManager(LlmProvider.Gemini)
             else -> throw IllegalStateException("Unknown selected platform: $platform")
         }

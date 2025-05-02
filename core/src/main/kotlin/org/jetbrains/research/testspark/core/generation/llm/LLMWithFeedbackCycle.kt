@@ -58,71 +58,74 @@ class LLMWithFeedbackCycle(
     private val log = KotlinLogging.logger { this::class.java }
     private lateinit var generatedTestSuite: TestSuiteGeneratedByLLM
 
-    fun run(): Flow<Result<TestSuiteGeneratedByLLM>> = flow {
-        var iteration = 0
-        var nextPromptMessage = initialPromptMessage
-        val generatedTestSuites: MutableList<TestSuiteGeneratedByLLM> = mutableListOf()
+    fun run(): Flow<Result<TestSuiteGeneratedByLLM>> =
+        flow {
+            var iteration = 0
+            var nextPromptMessage = initialPromptMessage
+            val generatedTestSuites: MutableList<TestSuiteGeneratedByLLM> = mutableListOf()
 
-        while (iteration < requestsCountThreshold) {
-            iteration++
-            log.info { "Iteration #$iteration of feedback cycle" }
+            while (iteration < requestsCountThreshold) {
+                iteration++
+                log.info { "Iteration #$iteration of feedback cycle" }
 
-            val chunks: Flow<Result<String>> = chatSessionManager.request(
-                prompt = nextPromptMessage,
-                isUserFeedback = false,
-            )
-            val testSuiteResult: Result<TestSuiteGeneratedByLLM> = chunks.collectChunks(testsAssembler)
+                val chunks: Flow<Result<String>> =
+                    chatSessionManager.request(
+                        prompt = nextPromptMessage,
+                        isUserFeedback = false,
+                    )
+                val testSuiteResult: Result<TestSuiteGeneratedByLLM> = chunks.collectChunks(testsAssembler)
 
-            when (testSuiteResult) {
-                is Result.Success -> log.info { "Test suite generated successfully: ${testSuiteResult.data}" }
+                when (testSuiteResult) {
+                    is Result.Success -> log.info { "Test suite generated successfully: ${testSuiteResult.data}" }
 
-                is Result.Failure -> {
-                    log.info { "Cannot parse a test suite from the LLM response. LLM response: '$testSuiteResult'" }
-                    emit(testSuiteResult)
-                    nextPromptMessage = generatePromptMessage(testSuiteResult.error) ?: break
+                    is Result.Failure -> {
+                        log.info { "Cannot parse a test suite from the LLM response. LLM response: '$testSuiteResult'" }
+                        emit(testSuiteResult)
+                        nextPromptMessage = generatePromptMessage(testSuiteResult.error) ?: break
 
-                    /**
-                     * The current attempt does not count as a failure since it was rejected due to the prompt size
-                     * exceeding the threshold
-                     */
-                    if (testSuiteResult.error is LlmError.PromptTooLong) iteration--
+                        /**
+                         * The current attempt does not count as a failure since it was rejected due to the prompt size
+                         * exceeding the threshold
+                         */
+                        if (testSuiteResult.error is LlmError.PromptTooLong) iteration--
+                        continue
+                    }
+                }
+
+                val testSuite = testSuiteResult.data
+                generatedTestSuites.add(testSuite)
+                compileTestCases(testSuite)
+
+                if (testSuite.testCases.any { it.isCompilable.not() }) {
+                    log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }
+                    emit(Result.Failure(LlmError.CompilationError))
+                    nextPromptMessage = generateCompilationErrorPrompt(testSuite)
                     continue
                 }
+
+                break
             }
 
-            val testSuite = testSuiteResult.data
-            generatedTestSuites.add(testSuite)
-            compileTestCases(testSuite)
-
-            if (testSuite.testCases.any { it.isCompilable.not() }) {
-                log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }
-                emit(Result.Failure(LlmError.CompilationError))
-                nextPromptMessage = generateCompilationErrorPrompt(testSuite)
-                continue
+            log.info { "Result is compilable" }
+            val resultingTestSuite = joinTestSuites(generatedTestSuites)
+            if (resultingTestSuite != null) {
+                emit(Result.Success(resultingTestSuite))
+                recordReport(report, resultingTestSuite.testCases)
             }
-
-            break
         }
-
-        log.info { "Result is compilable" }
-        val resultingTestSuite = joinTestSuites(generatedTestSuites)
-        if (resultingTestSuite != null) {
-            emit(Result.Success(resultingTestSuite))
-            recordReport(report, resultingTestSuite.testCases)
-        }
-    }
 
     private fun compileTestCases(testSuite: TestSuiteGeneratedByLLM) {
         testSuite.testCases.forEachIndexed { index, testCase ->
             val testCaseName = getClassWithTestCaseName(testCase.name)
             val testCaseFilename = "$testCaseName.${language.extension}"
             val testCaseRepresentation = testsPresenter.representTestCase(testSuite, index)
-            val saveFilepath = testStorage.saveGeneratedTest(
-                packageString = testSuite.packageName,
-                code = testCaseRepresentation,
-                resultPath = resultPath,
-                testFileName = testCaseFilename,
-            )
+            val saveFilepath =
+                testStorage.saveGeneratedTest(
+                    packageString = testSuite.packageName,
+                    code = testCaseRepresentation,
+                    resultPath = resultPath,
+                    testFileName = testCaseFilename,
+                )
             testCase.isCompilable = compileTest(saveFilepath).isSuccessful()
         }
     }
@@ -135,27 +138,30 @@ class LLMWithFeedbackCycle(
         return testCompiler.compileCode(
             path = File(filePath).absolutePath,
             projectBuildPath = buildPath,
-            workingDir = resultPath
+            workingDir = resultPath,
         )
     }
 
-    private fun generatePromptMessage(error: TestSparkError) = when (error) {
-        is LlmError.EmptyLlmResponse -> {
-            "You have provided an empty answer! Please, answer my previous question with the same formats"
-        }
+    private fun generatePromptMessage(error: TestSparkError) =
+        when (error) {
+            is LlmError.EmptyLlmResponse -> {
+                "You have provided an empty answer! Please, answer my previous question with the same formats"
+            }
 
-        is LlmError.PromptTooLong -> {
-            if (promptSizeReductionStrategy.isReductionPossible()) {
-                promptSizeReductionStrategy.reduceSizeAndGeneratePrompt()
-            } else null
-        }
+            is LlmError.PromptTooLong -> {
+                if (promptSizeReductionStrategy.isReductionPossible()) {
+                    promptSizeReductionStrategy.reduceSizeAndGeneratePrompt()
+                } else {
+                    null
+                }
+            }
 
-        is LlmError.TestSuiteParsingError -> {
-            "The provided code is not parsable. Please, generate the correct code"
-        }
+            is LlmError.TestSuiteParsingError -> {
+                "The provided code is not parsable. Please, generate the correct code"
+            }
 
-        else -> null
-    }
+            else -> null
+        }
 
     private fun generateCompilationErrorPrompt(testSuite: TestSuiteGeneratedByLLM): String {
         val generatedTestSuitePath: String =

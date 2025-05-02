@@ -14,9 +14,9 @@ class JUnitTestSuiteParserStrategy {
     private class ParserError(
         cause: Throwable? = null,
     ) : TestSparkError(
-        module = TestSparkModule.Common,
-        cause = cause,
-    )
+            module = TestSparkModule.Common,
+            cause = cause,
+        )
 
     companion object {
         fun parseJUnitTestSuite(
@@ -28,12 +28,15 @@ class JUnitTestSuiteParserStrategy {
         ): TestSuiteGeneratedByLLM {
             require(rawText.isNotBlank()) { "The raw text is blank" }
 
-            val rawCode = if (rawText.contains("```")) {
-                rawText
-                    .replace(oldValue = "```", newValue = "")
-                    .trimIndent()
-                    .trim()
-            } else rawText
+            val rawCode =
+                if (rawText.contains("```")) {
+                    rawText
+                        .replace(oldValue = "```", newValue = "")
+                        .trimIndent()
+                        .trim()
+                } else {
+                    rawText
+                }
 
             // save imports
             val imports =

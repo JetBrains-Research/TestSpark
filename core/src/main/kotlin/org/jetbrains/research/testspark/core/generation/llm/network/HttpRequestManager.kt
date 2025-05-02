@@ -33,32 +33,33 @@ class HttpRequestManager(
     private val client: HttpClient = DEFAULT_HTTP_CLIENT,
     private val json: Json = DEFAULT_JSON,
 ) : RequestManager {
-
     override suspend fun sendRequest(
         params: LlmParams,
         chatHistory: List<ChatMessage>,
-        isUserFeedback: Boolean
-    ): Flow<Result<String>> = flow {
-        client.preparePost(llmProvider.url(params)) {
-            contentType(ContentType.Application.Json)
-            if (llmProvider.supportsBearerAuth) bearerAuth(params.token)
-            setBody(llmProvider.constructJsonBody(json, params, chatHistory))
-        }.execute { httpResponse ->
-            val responseIsSuccessful = httpResponse.status.value == HttpURLConnection.HTTP_OK
-            if (responseIsSuccessful) {
-                val channel = httpResponse.body<ByteReadChannel>()
-                while (currentCoroutineContext().isActive && !channel.isClosedForRead) {
-                    val chunk = channel.readUTF8Line() ?: continue
-                    val response = processChunk(chunk) ?: continue
-                    emit(Result.Success(response))
+        isUserFeedback: Boolean,
+    ): Flow<Result<String>> =
+        flow {
+            client
+                .preparePost(llmProvider.url(params)) {
+                    contentType(ContentType.Application.Json)
+                    if (llmProvider.supportsBearerAuth) bearerAuth(params.token)
+                    setBody(llmProvider.constructJsonBody(json, params, chatHistory))
+                }.execute { httpResponse ->
+                    val responseIsSuccessful = httpResponse.status.value == HttpURLConnection.HTTP_OK
+                    if (responseIsSuccessful) {
+                        val channel = httpResponse.body<ByteReadChannel>()
+                        while (currentCoroutineContext().isActive && !channel.isClosedForRead) {
+                            val chunk = channel.readUTF8Line() ?: continue
+                            val response = processChunk(chunk) ?: continue
+                            emit(Result.Success(response))
+                        }
+                    } else {
+                        var error = llmProvider.mapHttpStatusCodeToError(httpResponse.status.value)
+                        if (error is HttpError) error = error.copy(message = httpResponse.status.description)
+                        emit(Result.Failure(error))
+                    }
                 }
-            } else {
-                var error = llmProvider.mapHttpStatusCodeToError(httpResponse.status.value)
-                if (error is HttpError) error = error.copy(message = httpResponse.status.description)
-                emit(Result.Failure(error))
-            }
         }
-    }
 
     fun processChunk(chunk: String): String? {
         if (chunk.startsWith(STREAMING_PREFIX).not()) return null
@@ -68,26 +69,28 @@ class HttpRequestManager(
     private companion object {
         const val STREAMING_PREFIX = "data:"
 
-        val DEFAULT_HTTP_CLIENT = HttpClient(CIO) {
-            install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.BODY
-                sanitizeHeader { header -> header == HttpHeaders.Authorization }
+        val DEFAULT_HTTP_CLIENT =
+            HttpClient(CIO) {
+                install(Logging) {
+                    logger = Logger.DEFAULT
+                    level = LogLevel.BODY
+                    sanitizeHeader { header -> header == HttpHeaders.Authorization }
+                }
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 90_000
+                    connectTimeoutMillis = 15_000
+                    socketTimeoutMillis = 60_000
+                }
             }
-            install(HttpTimeout) {
-                requestTimeoutMillis = 90_000
-                connectTimeoutMillis = 15_000
-                socketTimeoutMillis = 60_000
+
+        val DEFAULT_JSON =
+            Json {
+                ignoreUnknownKeys = true
+                encodeDefaults = true
+
+                // this api is not error-prone; it just means it can be changed or removed in the future
+                @OptIn(ExperimentalSerializationApi::class)
+                explicitNulls = false
             }
-        }
-
-        val DEFAULT_JSON = Json {
-            ignoreUnknownKeys = true
-            encodeDefaults = true
-
-            // this api is not error-prone; it just means it can be changed or removed in the future
-            @OptIn(ExperimentalSerializationApi::class)
-            explicitNulls = false
-        }
     }
 }

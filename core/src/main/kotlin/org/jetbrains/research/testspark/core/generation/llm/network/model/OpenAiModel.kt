@@ -12,7 +12,7 @@ data class OpenAIRequest(
     val temperature: Float?,
     @SerialName("top_p")
     val topProbability: Float? = null,
-): LlmRequest()
+) : LlmRequest()
 
 @Serializable
 data class OpenAIResponse(
@@ -42,16 +42,19 @@ data class Delta(
 )
 
 internal fun constructOpenAiRequestBody(
-    params: LlmParams, messages: List<ChatMessage>
+    params: LlmParams,
+    messages: List<ChatMessage>,
 ) = OpenAIRequest(
     model = params.model,
-    messages = messages.map { message ->
-        val role = when (message.role) {
-            ChatMessage.ChatRole.User -> "user"
-            ChatMessage.ChatRole.Assistant -> "assistant"
-        }
-        OpenAIChatMessage(role, message.content)
-    },
+    messages =
+        messages.map { message ->
+            val role =
+                when (message.role) {
+                    ChatMessage.ChatRole.User -> "user"
+                    ChatMessage.ChatRole.Assistant -> "assistant"
+                }
+            OpenAIChatMessage(role, message.content)
+        },
     temperature = params.temperature,
     topProbability = params.topProbability,
 )

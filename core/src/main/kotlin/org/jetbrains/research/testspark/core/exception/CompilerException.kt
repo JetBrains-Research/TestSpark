@@ -44,4 +44,4 @@ class ClassFileNotFoundException(
     val filePath: String,
 ) : CompilerException()
 
-class TestSavingFailureException() : CompilerException()
+class TestSavingFailureException : CompilerException()

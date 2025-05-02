@@ -2,7 +2,6 @@ package org.jetbrains.research.grazie
 
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.research.testSpark.grazie.TestGeneration
-import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequest
 
 class Request : GrazieRequest {
