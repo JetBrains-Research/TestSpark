@@ -42,7 +42,7 @@ class TopButtonsPanelBuilder {
     fun update(generatedTestsTabData: GeneratedTestsTabData) {
         val passedTestsCount =
             generatedTestsTabData.testCasePanelFactories
-                .filter { !it.isRemoved() }
+                .filter { it.isRemoved().not() && it.isShown() }
                 .count { it.getError()?.isEmpty() == true }
 
         val removedTestsCount = generatedTestsTabData.testCasePanelFactories.count { it.isRemoved() }
@@ -51,17 +51,20 @@ class TopButtonsPanelBuilder {
             removeAllButton.doClick()
             return
         }
+
+        val numOfShownTests =
+            generatedTestsTabData.testCaseIdToPanel.size - generatedTestsTabData.hiddenTestCases.size
         testsSelectedLabel.text =
             String.format(
                 testsSelectedText,
                 generatedTestsTabData.testsSelected,
-                generatedTestsTabData.testCaseIdToPanel.size,
+                numOfShownTests,
             )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 passedTestsCount,
-                generatedTestsTabData.testCaseIdToPanel.size,
+                numOfShownTests,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
@@ -81,11 +84,18 @@ class TopButtonsPanelBuilder {
         selected: Boolean,
         generatedTestsTabData: GeneratedTestsTabData,
     ) {
-        generatedTestsTabData.testCaseIdToPanel.forEach { (_, jPanel) ->
-            val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
-        }
-        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseIdToPanel.size else 0
+        generatedTestsTabData.testCaseIdToPanel
+            .filter { it.key !in generatedTestsTabData.hiddenTestCases }
+            .forEach { (_, jPanel) ->
+                val checkBox = jPanel.getComponent(0) as JCheckBox
+                checkBox.isSelected = selected
+            }
+        generatedTestsTabData.testsSelected =
+            if (selected) {
+                generatedTestsTabData.testCaseIdToPanel.size - generatedTestsTabData.hiddenTestCases.size
+            } else {
+                0
+            }
     }
 
     /**
@@ -115,7 +125,7 @@ class TopButtonsPanelBuilder {
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            testCasePanelFactory.addTask(tasks)
+            if (testCasePanelFactory.isShown()) testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
         executeTasks(project, tasks, generatedTestsTabData)
