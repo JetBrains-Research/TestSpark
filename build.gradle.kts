@@ -470,7 +470,7 @@ fun String?.orDefault(default: String): String = this ?: default
  * @param enableCoverage flag to enable/disable coverage computation
  */
 val headless by intellijPlatformTesting.runIde.registering {
-    if (hasGrazieAccess == null){
+    if (hasGrazieAccess == null) {
         println("ERROR: Grazie access not found, skipping headless test generation")
         return@registering
     }
