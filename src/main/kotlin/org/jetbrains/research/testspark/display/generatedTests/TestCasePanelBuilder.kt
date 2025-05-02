@@ -66,6 +66,7 @@ import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -82,7 +83,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import kotlin.collections.HashMap
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -97,6 +97,9 @@ class TestCasePanelBuilder(
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
 ) {
+    private var visibleTestCasePanel: JPanel? = null
+    private var hiddenTestCasePanel: JPanel? = null
+
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
@@ -120,6 +123,7 @@ class TestCasePanelBuilder(
     private val dimensionSize = 7
 
     private var isRemoved = false
+    private var isShown = true
 
     // Add an editor to modify the test source code
     private val languageTextField =
@@ -307,6 +311,7 @@ class TestCasePanelBuilder(
         runTestButton.isEnabled = true
         buttonsPanel.add(runTestButton)
         buttonsPanel.add(Box.createHorizontalGlue())
+        buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
         resetToLastRunButton.isEnabled = false
@@ -331,8 +336,7 @@ class TestCasePanelBuilder(
         }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
-        removeButton.addActionListener { remove() }
-
+        removeButton.addActionListener { toggleTestCaseVisibility(false) }
         sendButton.addActionListener { sendRequest() }
 
         /**
@@ -341,6 +345,34 @@ class TestCasePanelBuilder(
          */
         requestComboBox.preferredSize = Dimension(0, 0)
         requestComboBox.isEditable = true
+
+        return panel
+    }
+
+    private fun getHiddenTestCasePanel(): JPanel {
+        val panel = JPanel()
+        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+
+        val removedTestJLabel = JLabel(PluginLabelsBundle.get("removedTestJLabel"))
+        val removePermanentlyButton = JButton(PluginLabelsBundle.get("removeTestLabel"))
+        val undoButton = JButton(PluginLabelsBundle.get("undoButtonLabel"))
+
+        val buttonPanel = JPanel()
+        buttonPanel.layout = BoxLayout(buttonPanel, BoxLayout.X_AXIS)
+        buttonPanel.add(Box.createHorizontalGlue())
+        buttonPanel.add(removePermanentlyButton)
+        buttonPanel.add(Box.createRigidArea(Dimension(10, 0)))
+        buttonPanel.add(undoButton)
+        buttonPanel.add(Box.createHorizontalGlue())
+
+        panel.add(Box.createRigidArea(Dimension(0, 10)))
+        removedTestJLabel.alignmentX = Component.CENTER_ALIGNMENT
+        panel.add(removedTestJLabel)
+        panel.add(Box.createRigidArea(Dimension(0, 10)))
+        panel.add(buttonPanel)
+
+        removePermanentlyButton.addActionListener { removePermanently() }
+        undoButton.addActionListener { toggleTestCaseVisibility(true) }
 
         return panel
     }
@@ -751,16 +783,44 @@ class TestCasePanelBuilder(
      * 2. Removing the test case from the cache.
      * 3. Updating the UI.
      */
-    private fun remove() {
+    private fun removePermanently() {
+        val indexOfSeparatorBelowTestCase =
+            generatedTestsTabData.allTestCasePanel.getComponentZOrder(hiddenTestCasePanel) + 1
+        generatedTestsTabData.allTestCasePanel.remove(hiddenTestCasePanel)
+        generatedTestsTabData.allTestCasePanel.remove(indexOfSeparatorBelowTestCase)
+
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.id, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
-
+        if (isShown) {
+            ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+        }
         GenerateTestsTabHelper.update(generatedTestsTabData)
+    }
+
+    private fun toggleTestCaseVisibility(visible: Boolean) {
+        isShown = visible
+        if (visible) {
+            val componentIndex = generatedTestsTabData.allTestCasePanel.getComponentZOrder(hiddenTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.remove(hiddenTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.add(visibleTestCasePanel, componentIndex)
+
+            GenerateTestsTabHelper.showTestCase(testCase.id, generatedTestsTabData)
+            ReportUpdater.addTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+        } else {
+            val currentTestCasePanel = generatedTestsTabData.testCaseIdToPanel[testCase.id]!!
+            if (visibleTestCasePanel == null) visibleTestCasePanel = currentTestCasePanel
+            if (hiddenTestCasePanel == null) hiddenTestCasePanel = getHiddenTestCasePanel()
+            val componentIndex = generatedTestsTabData.allTestCasePanel.getComponentZOrder(currentTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.remove(currentTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.add(hiddenTestCasePanel!!, componentIndex)
+
+            GenerateTestsTabHelper.hideTestCase(testCase.id, generatedTestsTabData)
+            ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+        }
     }
 
     /**
@@ -827,6 +887,8 @@ class TestCasePanelBuilder(
      * @return true if the item is removed, false otherwise.
      */
     fun isRemoved() = isRemoved
+
+    fun isShown() = isShown
 
     /**
      * Updates the current test case with the specified test name and test code.

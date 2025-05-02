@@ -176,7 +176,7 @@ class GeneratedTestsTabBuilder(
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
-            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), testCasePanel.preferredSize.height)
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 
@@ -205,7 +205,10 @@ class GeneratedTestsTabBuilder(
     fun applyTests(): Boolean {
         // Filter the selected test cases
         val selectedTestCasePanels =
-            generatedTestsTabData.testCaseIdToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+            generatedTestsTabData.testCaseIdToPanel.filter {
+                val testIsNotHidden = !generatedTestsTabData.hiddenTestCases.contains(it.key)
+                (it.value.getComponent(0) as JCheckBox).isSelected && testIsNotHidden
+            }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)
