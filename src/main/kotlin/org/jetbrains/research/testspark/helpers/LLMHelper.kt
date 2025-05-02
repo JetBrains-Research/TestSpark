@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.generation.llm.ChatSessionManager
 import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
-import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
+import org.jetbrains.research.testspark.core.generation.llm.runBlockingWithIndicatorLifecycle
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
@@ -294,12 +294,14 @@ object LLMHelper {
                 jUnitVersion,
             )
 
-        val testSuite = executeTestCaseModificationRequest(
-            testCase,
-            task,
-            chatSessionManager,
-            testsAssembler,
-        )
+        val testSuite = runBlockingWithIndicatorLifecycle(indicator) {
+            executeTestCaseModificationRequest(
+                testCase,
+                task,
+                chatSessionManager,
+                testsAssembler,
+            )
+        }
         return testSuite
     }
 

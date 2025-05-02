@@ -82,7 +82,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import kotlin.collections.HashMap
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -527,7 +526,7 @@ class TestCasePanelBuilder(
                             finishProcess()
                             return
                         }
-
+                        
                         val testModificationResult = LLMHelper.testModificationRequest(
                             language = language,
                             testCase = initialCodes[currentRequestNumber - 1],

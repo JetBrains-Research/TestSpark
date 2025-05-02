@@ -13,7 +13,7 @@ sealed class LlmError(
 
     data object EmptyLlmResponse : LlmError()
 
-    data object TestSuiteParsingError : LlmError()
+    data class TestSuiteParsingError(override val cause: Throwable?) : LlmError(cause)
 
     data object NoCompilableTestCasesGenerated : LlmError()
 

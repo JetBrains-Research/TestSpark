@@ -5,11 +5,6 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
@@ -23,6 +18,7 @@ import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
+import org.jetbrains.research.testspark.core.generation.llm.runBlockingWithIndicatorLifecycle
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
@@ -47,7 +43,6 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.nio.file.Path
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -210,14 +205,7 @@ class LLMProcessManager(
                 requestsCountThreshold = maxRequests,
             )
 
-        val testSuite = runBlocking {
-            try {
-                runFeedbackCycle(indicator, llmFeedbackCycle)
-            } catch (_: CancellationException) {
-                throw ProcessCancelledException(TestSparkModule.Llm())
-            }
-        }
-
+        val testSuite = runFeedbackCycle(indicator, llmFeedbackCycle)
         val testSuiteRepresentation = testSuite?.let {
             log.info("Add ${it.testCases} compilable test cases into generatedTestsData")
             val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
@@ -243,44 +231,31 @@ class LLMProcessManager(
         return UIContext(projectContext, generatedTestsData, chatSessionManager, indicatorController, errorMonitor)
     }
 
-    private suspend fun runFeedbackCycle(
+    private fun runFeedbackCycle(
         indicator: CustomProgressIndicator,
         llmFeedbackCycle: LLMWithFeedbackCycle,
-    ): TestSuiteGeneratedByLLM? {
-        var feedbackResponse: Result<TestSuiteGeneratedByLLM>? = null
-        coroutineScope {
-            val indicatorObserver = launch {
-                while (true) {
-                    if (indicator.isCanceled()) {
-                        this@coroutineScope.cancel()
-                    }
-                    delay(500)
+    ): TestSuiteGeneratedByLLM? = runBlockingWithIndicatorLifecycle(indicator) {
+        var feedbackResponse: TestSuiteGeneratedByLLM? = null
+        llmFeedbackCycle.run().collect { result ->
+            when (result) {
+                is Result.Success -> {
+                    feedbackResponse = result.data
                 }
-            }
 
-            llmFeedbackCycle.run().collect { result ->
-                when (result) {
-                    is Result.Success -> {
-                        feedbackResponse = result
-                    }
-
-                    is Result.Failure -> {
-                        when (result.error) {
-                            is LlmError.EmptyLlmResponse,
-                            is LlmError.TestSuiteParsingError,
-                            is LlmError.CompilationError -> {
-                                project.createNotification(result.error, NotificationType.WARNING)
-                            }
-
-                            else -> project.createNotification(result.error, NotificationType.ERROR)
+                is Result.Failure -> {
+                    when (result.error) {
+                        is LlmError.EmptyLlmResponse,
+                        is LlmError.TestSuiteParsingError,
+                        is LlmError.CompilationError -> {
+                            project.createNotification(result.error, NotificationType.WARNING)
                         }
+
+                        else -> project.createNotification(result.error, NotificationType.ERROR)
                     }
                 }
             }
-
-            indicatorObserver.cancel()
         }
         log.info("Feedback cycle finished execution with result: $feedbackResponse")
-        return feedbackResponse?.getDataOrNull()
+        feedbackResponse
     }
 }

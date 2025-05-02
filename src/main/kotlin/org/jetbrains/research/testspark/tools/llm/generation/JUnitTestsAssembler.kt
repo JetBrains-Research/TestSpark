@@ -73,7 +73,7 @@ class JUnitTestsAssembler(
         } else {
             Result.Success(testSuite)
         }
-    } catch (_: Exception) {
-        Result.Failure(LlmError.TestSuiteParsingError)
+    } catch (e: Exception) {
+        Result.Failure(LlmError.TestSuiteParsingError(cause = e))
     }
 }

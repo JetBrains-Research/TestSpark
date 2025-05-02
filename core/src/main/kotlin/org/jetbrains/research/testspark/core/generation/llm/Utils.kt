@@ -1,8 +1,15 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -93,7 +100,7 @@ fun getClassWithTestCaseName(testCaseName: String): String {
  *
  * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
  */
-fun executeTestCaseModificationRequest(
+suspend fun executeTestCaseModificationRequest(
     testCase: String,
     task: String,
     chatSessionManager: ChatSessionManager,
@@ -109,12 +116,10 @@ fun executeTestCaseModificationRequest(
             append(task)
         }
 
-    return runBlocking {
-        chatSessionManager.request(
-            prompt = prompt,
-            isUserFeedback = true,
-        ).collectChunks(testsAssembler)
-    }
+    return chatSessionManager.request(
+        prompt = prompt,
+        isUserFeedback = true,
+    ).collectChunks(testsAssembler)
 }
 
 suspend fun Flow<Result<String>>.collectChunks(
@@ -133,4 +138,36 @@ suspend fun Flow<Result<String>>.collectChunks(
     }
 
     return response ?: testsAssembler.assembleTestSuite()
+}
+
+/**
+ * Executes the provided [action], while constantly monitoring [indicator] cancellation in parallel.
+ * If the indicator is canceled, it stops the execution, cancels the coroutine, and returns null.
+ *
+ * @param indicator an instance of [CustomProgressIndicator]
+ * @param indicatorObservingIntervalMs specifies an interval between indicator cancellation checks
+ * @param action block of code to be executed
+ */
+fun <T> runBlockingWithIndicatorLifecycle(
+    indicator: CustomProgressIndicator,
+    indicatorObservingIntervalMs: Long = 500,
+    action: suspend () -> T
+): T = try {
+    runBlocking {
+        coroutineScope {
+            val indicatorObserver = launch {
+                while (true) {
+                    if (indicator.isCanceled()) {
+                        this@coroutineScope.cancel()
+                    }
+                    delay(indicatorObservingIntervalMs)
+                }
+            }
+            val result = action()
+            indicatorObserver.cancel()
+            result
+        }
+    }
+} catch (e: CancellationException) {
+    throw ProcessCancelledException(cause = e)
 }

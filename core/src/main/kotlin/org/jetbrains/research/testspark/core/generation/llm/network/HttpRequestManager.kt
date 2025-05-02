@@ -23,6 +23,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.core.data.ChatMessage
+import org.jetbrains.research.testspark.core.error.HttpError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
 import java.net.HttpURLConnection
@@ -52,7 +53,8 @@ class HttpRequestManager(
                     emit(Result.Success(response))
                 }
             } else {
-                val error = llmProvider.mapHttpStatusCodeToError(httpResponse.status.value)
+                var error = llmProvider.mapHttpStatusCodeToError(httpResponse.status.value)
+                if (error is HttpError) error = error.copy(message = httpResponse.status.description)
                 emit(Result.Failure(error))
             }
         }

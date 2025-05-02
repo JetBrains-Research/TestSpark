@@ -11,5 +11,6 @@ sealed class CommonException(
     )
 
 class ProcessCancelledException(
-    module: TestSparkModule,
-) : CommonException(module)
+    module: TestSparkModule = TestSparkModule.Common,
+    cause: Throwable? = null,
+) : CommonException(module, cause)
