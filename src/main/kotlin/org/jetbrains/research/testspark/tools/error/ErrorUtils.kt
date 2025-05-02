@@ -14,6 +14,7 @@ import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.exception.CommonException
 import org.jetbrains.research.testspark.core.exception.CompilerException
+import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
 import org.jetbrains.research.testspark.core.exception.TestSparkException
 import org.jetbrains.research.testspark.tools.error.message.commonExceptionMessage
 import org.jetbrains.research.testspark.tools.error.message.compilerExceptionMessage
@@ -35,12 +36,16 @@ fun Project.createNotification(
 fun Project.createNotification(
     exception: TestSparkException,
     notificationType: NotificationType,
-) = createNotification(
-    module = exception.module,
-    message = exception.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
-    notificationType = notificationType,
-    logMessage = "$exception ${exception.displayMessage?.let { ": $it" } ?: ""}",
-)
+) {
+    // process cancellation exceptions are part of the normal execution flow
+    if (exception is ProcessCancelledException) return
+    return createNotification(
+        module = exception.module,
+        message = exception.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
+        notificationType = notificationType,
+        logMessage = "$exception ${exception.displayMessage?.let { ": $it" } ?: ""}",
+    )
+}
 
 val TestSparkException.displayMessage: String?
     get() =

@@ -5,6 +5,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
@@ -43,6 +47,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.nio.file.Path
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -133,7 +138,8 @@ class LLMProcessManager(
         // adapter for the existing prompt reduction functionality
         val promptSizeReductionStrategy =
             object : PromptSizeReductionStrategy {
-                override fun isReductionPossible(): Boolean = promptManager.isPromptSizeReductionPossible(generatedTestsData)
+                override fun isReductionPossible(): Boolean =
+                    promptManager.isPromptSizeReductionPossible(generatedTestsData)
 
                 override fun reduceSizeAndGeneratePrompt(): String {
                     if (!isReductionPossible()) {
@@ -204,15 +210,60 @@ class LLMProcessManager(
                 requestsCountThreshold = maxRequests,
             )
 
+        val testSuite = runBlocking {
+            try {
+                runFeedbackCycle(indicator, llmFeedbackCycle)
+            } catch (_: CancellationException) {
+                throw ProcessCancelledException(TestSparkModule.Llm())
+            }
+        }
+
+        val testSuiteRepresentation = testSuite?.let {
+            log.info("Add ${it.testCases} compilable test cases into generatedTestsData")
+            val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
+            testSuitePresenter.toString(testSuite = it)
+        }
+
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
+
+        ToolUtils.transferToIJTestCases(report)
+
+        log.info("Save generated test suite and test cases into the project workspace")
+        ToolUtils.saveData(
+            project,
+            report,
+            getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation, language),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN),
+            projectContext.fileUrlAsString!!,
+            generatedTestsData,
+            testsExecutionResultManager,
+            language,
+        )
+
+        return UIContext(projectContext, generatedTestsData, chatSessionManager, indicatorController, errorMonitor)
+    }
+
+    private suspend fun runFeedbackCycle(
+        indicator: CustomProgressIndicator,
+        llmFeedbackCycle: LLMWithFeedbackCycle,
+    ): TestSuiteGeneratedByLLM? {
         var feedbackResponse: Result<TestSuiteGeneratedByLLM>? = null
-        runBlocking {
+        coroutineScope {
+            val indicatorObserver = launch {
+                while (true) {
+                    if (indicator.isCanceled()) {
+                        this@coroutineScope.cancel()
+                    }
+                    delay(500)
+                }
+            }
+
             llmFeedbackCycle.run().collect { result ->
-                feedbackResponse = result
                 when (result) {
                     is Result.Success -> {
-                        val numOfCompilableTestCases = result.data.testCases.count { it.isCompilable }
-                        log.info("Add $numOfCompilableTestCases compilable test cases into generatedTestsData")
+                        feedbackResponse = result
                     }
+
                     is Result.Failure -> {
                         when (result.error) {
                             is LlmError.EmptyLlmResponse,
@@ -226,36 +277,10 @@ class LLMProcessManager(
                     }
                 }
             }
-        }
 
+            indicatorObserver.cancel()
+        }
         log.info("Feedback cycle finished execution with result: $feedbackResponse")
-
-        // Process stopped checking
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
-
-        // Error during the collecting
-        if (errorMonitor.hasErrorOccurred()) throw ProcessCancelledException(TestSparkModule.Llm())
-
-        log.info("Save generated test suite and test cases into the project workspace")
-
-        val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
-        val testSuiteRepresentation = feedbackResponse?.getDataOrNull()?.let {
-            testSuitePresenter.toString(testSuite = it)
-        }
-
-        ToolUtils.transferToIJTestCases(report)
-
-        ToolUtils.saveData(
-            project,
-            report,
-            getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation, language),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN),
-            projectContext.fileUrlAsString!!,
-            generatedTestsData,
-            testsExecutionResultManager,
-            language,
-        )
-
-        return UIContext(projectContext, generatedTestsData, chatSessionManager, indicatorController, errorMonitor)
+        return feedbackResponse?.getDataOrNull()
     }
 }
