@@ -13,9 +13,11 @@ import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
+import org.jetbrains.research.testspark.core.generation.llm.ChatSessionManager
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -126,8 +128,7 @@ class LLMProcessManager(
         val initialPromptMessage =
             promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        // initiate a new RequestManager
-        val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
+        val chatSessionManager = ChatSessionManagerFactory.getChatSessionManager(project)
 
         // adapter for the existing prompt reduction functionality
         val promptSizeReductionStrategy =
@@ -196,7 +197,7 @@ class LLMProcessManager(
                 packageName = packageName,
                 resultPath = generatedTestsData.resultPath,
                 buildPath = buildPath,
-                requestManager = requestManager,
+                chatSessionManager = chatSessionManager,
                 testsAssembler = testsAssembler,
                 testCompiler = testCompiler,
                 testStorage = testProcessor,
@@ -251,6 +252,6 @@ class LLMProcessManager(
             language,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager, indicatorController, errorMonitor)
+        return UIContext(projectContext, generatedTestsData, chatSessionManager, indicatorController, errorMonitor)
     }
 }

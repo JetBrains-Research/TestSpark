@@ -27,7 +27,7 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.kex.KexSettingsArguments
 import org.jetbrains.research.testspark.tools.kex.error.KexErrorManager
-import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
+import org.jetbrains.research.testspark.tools.llm.generation.ChatSessionManagerFactory
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
 import java.io.IOException
@@ -156,7 +156,7 @@ class KexProcessManager(
         return UIContext(
             projectContext,
             generatedTestsData,
-            StandardRequestManagerFactory(project).getRequestManager(project),
+            ChatSessionManagerFactory.getChatSessionManager(project),
             indicatorController,
             errorMonitor,
         )

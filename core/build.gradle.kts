@@ -1,6 +1,7 @@
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version "2.1.0"
     `maven-publish`
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
 group = "org.jetbrains.research"
@@ -18,6 +19,16 @@ dependencies {
     compileOnly(kotlin("stdlib"))
 
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    val ktorVersion = "3.1.2"
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation("com.google.code.gson:gson:2.12.1")
 }
 
 tasks.test {

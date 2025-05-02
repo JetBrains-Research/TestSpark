@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.data.TestSparkModule
@@ -8,7 +10,7 @@ import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
-import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
+import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -44,7 +46,7 @@ data class FeedbackResponse(
  * @property packageName The package name for the generated tests.
  * @property resultPath The temporary path where all the generated tests and their Jacoco report are saved.
  * @property buildPath All the directories where the compiled code of the project under test is saved.
- * @property requestManager The `RequestManager` instance used for making LLM requests.
+ * @property chatSessionManager The `RequestManager` instance used for making LLM requests.
  * @property testsAssembler The `TestsAssembler` instance used for assembling generated tests.
  * @property testCompiler The `TestCompiler` instance used for compiling tests.
  * @property testStorage The `TestsPersistentStorage` instance used for storing generated tests.
@@ -65,7 +67,7 @@ class LLMWithFeedbackCycle(
     private val resultPath: String,
     // all the directories where the compiled code of the project under test is saved. This path will be used as a classpath to run each test case
     private val buildPath: String,
-    private val requestManager: RequestManager,
+    private val chatSessionManager: ChatSessionManager,
     private val testsAssembler: TestsAssembler,
     private val testCompiler: TestCompiler,
     private val testStorage: TestsPersistentStorage,
@@ -108,16 +110,13 @@ class LLMWithFeedbackCycle(
 
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
-            val response: Result<TestSuiteGeneratedByLLM> =
-                requestManager.request(
-                    language = language,
+            val chunks = runBlocking {
+                chatSessionManager.request(
                     prompt = nextPromptMessage,
-                    indicator = indicator,
-                    packageName = packageName,
-                    testsAssembler = testsAssembler,
                     isUserFeedback = false,
-                    errorMonitor,
-                )
+                ).toList()
+            }
+            val response: Result<TestSuiteGeneratedByLLM> = processStreamedData(chunks, testsAssembler)
 
             // Process stopped checking
             if (indicator.isCanceled()) throw ProcessCancelledException(module = TestSparkModule.Llm())

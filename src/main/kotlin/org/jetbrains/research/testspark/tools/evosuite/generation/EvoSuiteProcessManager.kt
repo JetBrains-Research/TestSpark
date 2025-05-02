@@ -33,7 +33,7 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuiteSettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
-import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
+import org.jetbrains.research.testspark.tools.llm.generation.ChatSessionManagerFactory
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.FileReader
 import java.nio.charset.Charset
@@ -252,7 +252,7 @@ class EvoSuiteProcessManager(
         return UIContext(
             projectContext,
             generatedTestsData,
-            StandardRequestManagerFactory(project).getRequestManager(project),
+            ChatSessionManagerFactory.getChatSessionManager(project),
             indicatorController,
             errorMonitor,
         )

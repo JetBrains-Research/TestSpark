@@ -4,6 +4,10 @@ import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.LlmError
+import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -48,11 +52,11 @@ class JUnitTestsAssembler(
         }
     }
 
-    override fun assembleTestSuite(): TestSuiteGeneratedByLLM? {
+    override fun assembleTestSuite(): Result<TestSuiteGeneratedByLLM> = try {
         val testSuite = junitTestSuiteParser.parseTestSuite(super.getContent())
 
         // save RunWith
-        if (testSuite?.annotation?.isNotBlank() == true) {
+        if (testSuite.annotation.isNotBlank()) {
             generationData.annotation = testSuite.annotation
             generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
         } else {
@@ -61,10 +65,12 @@ class JUnitTestsAssembler(
         }
 
         // save annotations and pre-set methods
-        generationData.otherInfo = testSuite?.otherInfo ?: ""
+        generationData.otherInfo = testSuite.otherInfo
 
         // logging generated test cases if any
-        testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
-        return testSuite
+        testSuite.testCases.forEach { testCase -> log.info("Generated test case: $testCase") }
+        Result.Success(testSuite)
+    } catch (_: Exception) {
+        Result.Failure(LlmError.TestSuiteParsingError)
     }
 }

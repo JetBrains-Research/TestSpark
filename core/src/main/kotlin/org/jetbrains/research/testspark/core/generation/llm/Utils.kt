@@ -1,11 +1,9 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testspark.core.error.Result
-import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
-import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
-import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
-import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -34,6 +32,7 @@ fun getPackageFromTestSuiteCode(
                 ?.get(1)
                 ?.value
                 .orEmpty()
+
         SupportedLanguage.Java ->
             javaPackagePattern
                 .find(testSuiteCode)
@@ -97,13 +96,10 @@ fun getClassWithTestCaseName(testCaseName: String): String {
  * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
  */
 fun executeTestCaseModificationRequest(
-    language: SupportedLanguage,
     testCase: String,
     task: String,
-    indicator: CustomProgressIndicator,
-    requestManager: RequestManager,
+    chatSessionManager: ChatSessionManager,
     testsAssembler: TestsAssembler,
-    errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
 ): Result<TestSuiteGeneratedByLLM> {
     // Update Token information
     val prompt =
@@ -115,18 +111,32 @@ fun executeTestCaseModificationRequest(
             append(task)
         }
 
-    val packageName = getPackageFromTestSuiteCode(testCase, language)
-
-    val response =
-        requestManager.request(
-            language,
-            prompt,
-            indicator,
-            packageName,
-            testsAssembler,
+    val chunks = runBlocking {
+        chatSessionManager.request(
+            prompt = prompt,
             isUserFeedback = true,
-            errorMonitor,
-        )
+        ).toList()
+    }
 
-    return response
+    return processStreamedData(chunks, testsAssembler)
+}
+
+fun processStreamedData(
+    chunks: List<Result<String>>,
+    testsAssembler: TestsAssembler,
+): Result<TestSuiteGeneratedByLLM> {
+    val firstResponse = chunks.first()
+    if (firstResponse is Result.Failure) {
+        return firstResponse
+    }
+
+    for (chunk in chunks) {
+        chunk.getDataOrNull()?.let {
+            testsAssembler.consume(it)
+        }
+    }
+
+    println("Finished processing streamed data ${testsAssembler.getContent()}")
+
+    return testsAssembler.assembleTestSuite()
 }

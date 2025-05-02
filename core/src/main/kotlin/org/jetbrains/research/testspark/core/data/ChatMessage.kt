@@ -1,19 +1,19 @@
 package org.jetbrains.research.testspark.core.data
 
-open class ChatMessage protected constructor(
+data class ChatMessage(
     val role: ChatRole,
-    val content: String,
+    val contentBuilder: StringBuilder
 ) {
     enum class ChatRole {
         User,
         Assistant,
     }
+
+    val content: String
+        get() = contentBuilder.toString()
+
+    companion object {
+        fun createUserMessage(message: String) = ChatMessage(ChatRole.User, StringBuilder(message))
+        fun createAssistantMessage(message: String) = ChatMessage(ChatRole.Assistant, StringBuilder(message))
+    }
 }
-
-class ChatUserMessage(
-    content: String,
-) : ChatMessage(ChatRole.User, content)
-
-class ChatAssistantMessage(
-    content: String,
-) : ChatMessage(ChatRole.Assistant, content)

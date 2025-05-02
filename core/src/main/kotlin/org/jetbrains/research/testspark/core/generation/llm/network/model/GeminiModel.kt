@@ -1,4 +1,6 @@
-package org.jetbrains.research.testspark.tools.llm.generation.gemini
+package org.jetbrains.research.testspark.core.generation.llm.network.model
+
+import org.jetbrains.research.testspark.core.data.ChatMessage
 
 data class GeminiRequest(
     val contents: List<GeminiRequestBody>,
@@ -26,3 +28,11 @@ data class GeminiReplyContent(
 data class GeminiReplyPart(
     val text: String,
 )
+
+fun constructGeminiRequestBody(params: LlmParams, messages: List<ChatMessage>) = GeminiRequest(
+    contents = listOf(
+        GeminiRequestBody(parts = messages.map { GeminiChatMessage(it.content) })
+    )
+)
+
+fun GeminiReply.extractContent() = this.content.parts.first().text
