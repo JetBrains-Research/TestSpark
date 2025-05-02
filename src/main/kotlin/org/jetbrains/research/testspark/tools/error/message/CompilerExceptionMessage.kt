@@ -7,6 +7,7 @@ import org.jetbrains.research.testspark.core.exception.CompilerException
 import org.jetbrains.research.testspark.core.exception.JavaCompilerNotFoundException
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.exception.KotlinCompilerNotFoundException
+import org.jetbrains.research.testspark.core.exception.TestSavingFailureException
 
 val CompilerException.compilerExceptionMessage: String?
     get() =
@@ -18,4 +19,5 @@ val CompilerException.compilerExceptionMessage: String?
                 PluginMessagesBundle.get("compilerNotFoundErrorMessage").format("Java", javaHomeDirectoryPath)
             is KotlinCompilerNotFoundException ->
                 PluginMessagesBundle.get("compilerNotFoundErrorMessage").format("Kotlin", kotlinSdkHomeDirectory)
+            is TestSavingFailureException -> LLMMessagesBundle.get("savingTestFileIssue")
         }

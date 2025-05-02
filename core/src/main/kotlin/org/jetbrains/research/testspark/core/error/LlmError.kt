@@ -17,8 +17,6 @@ sealed class LlmError(
 
     data object NoCompilableTestCasesGenerated : LlmError()
 
-    data object FailedToSaveTestFiles : LlmError()
-
     data object CompilationError : LlmError()
 
     data object UnsetTokenError : LlmError()

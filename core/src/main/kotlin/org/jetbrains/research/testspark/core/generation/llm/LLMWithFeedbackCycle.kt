@@ -8,6 +8,7 @@ import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.error.TestSparkError
+import org.jetbrains.research.testspark.core.exception.TestSavingFailureException
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
@@ -22,8 +23,6 @@ import java.io.File
 /**
  * LLMWithFeedbackCycle class represents a feedback cycle for an LLM.
  *
- * 1. Make a request
- *
  * @property report The `Report` instance used for storing generated tests.
  * @property language The `SupportedLanguage` enum value representing the programming language used.
  * @property initialPromptMessage The initial prompt message to start the feedback cycle.
@@ -36,7 +35,6 @@ import java.io.File
  * @property testCompiler The `TestCompiler` instance used for compiling tests.
  * @property testStorage The `TestsPersistentStorage` instance used for storing generated tests.
  * @property testsPresenter The `TestsPresenter` instance used for presenting generated tests.
- * @property indicator The `CustomProgressIndicator` instance used for tracking progress.
  * @property requestsCountThreshold The threshold for the maximum number of requests in the feedback cycle.
  */
 class LLMWithFeedbackCycle(
@@ -130,8 +128,9 @@ class LLMWithFeedbackCycle(
     }
 
     private fun compileTest(filePath: String): ExecutionResult {
-        // TODO replace with custom exception
-        require(File(filePath).exists()) { "Failed to save test file $filePath" }
+        if (File(filePath).exists().not()) {
+            throw TestSavingFailureException()
+        }
 
         return testCompiler.compileCode(
             path = File(filePath).absolutePath,
