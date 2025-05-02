@@ -2,7 +2,6 @@ import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
-import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -46,6 +45,8 @@ repositories {
     // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html#default-repositories
     intellijPlatform {
         defaultRepositories()
+        intellijDependencies()
+        localPlatformArtifacts()
     }
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
     maven("https://www.jetbrains.com/intellij-repository/snapshots")
@@ -65,21 +66,23 @@ repositories {
     }
 }
 
+var hasGrazieAccess: SourceSet? = null
+
 if (spaceCredentialsProvided()) {
     // Add the new source set
-    val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
+    hasGrazieAccess = sourceSets.create("hasGrazieAccess")
     // add output of main source set to new source set class path
-    hasGrazieAccess.compileClasspath += sourceSets.main.get().output
+    hasGrazieAccess!!.compileClasspath += sourceSets.main.get().output
 
     // register feature variant
-    java.registerFeature(hasGrazieAccess.name) {
-        usingSourceSet(hasGrazieAccess)
+    java.registerFeature(hasGrazieAccess!!.name) {
+        usingSourceSet(hasGrazieAccess!!)
     }
 
     // Add the dependencies for the new source set
     dependencies {
-        add(hasGrazieAccess.implementationConfigurationName, "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        add(hasGrazieAccess.implementationConfigurationName, "org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
+        add(hasGrazieAccess!!.implementationConfigurationName, "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+        add(hasGrazieAccess!!.implementationConfigurationName, "org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
     }
 
     tasks.register("checkCredentials") {
@@ -89,24 +92,24 @@ if (spaceCredentialsProvided()) {
             ).files()
     }
 
-    tasks.named(hasGrazieAccess.jarTaskName).configure {
+    tasks.named(hasGrazieAccess!!.jarTaskName).configure {
         dependsOn("checkCredentials")
     }
 
-    tasks.named<Jar>(hasGrazieAccess.jarTaskName) {
+    tasks.named<Jar>(hasGrazieAccess!!.jarTaskName) {
         exclude("**/plugin.xml")
     }
 
     // add build of new source set as the part of UI testing
     tasks.prepareTestSandbox.configure {
-        dependsOn(hasGrazieAccess.jarTaskName)
+        dependsOn(hasGrazieAccess!!.jarTaskName)
         from(
             tasks
-                .getByName(hasGrazieAccess.jarTaskName)
+                .getByName(hasGrazieAccess!!.jarTaskName)
                 .outputs.files.asPath,
         ) { into("TestSpark/lib") }
 
-        hasGrazieAccess.runtimeClasspath
+        hasGrazieAccess!!.runtimeClasspath
             .elements
             .get()
             .forEach {
@@ -115,14 +118,14 @@ if (spaceCredentialsProvided()) {
     }
     // add build of new source set as the part of pluginBuild process
     tasks.prepareSandbox.configure {
-        dependsOn(hasGrazieAccess.jarTaskName)
+        dependsOn(hasGrazieAccess!!.jarTaskName)
         from(
             tasks
-                .getByName(hasGrazieAccess.jarTaskName)
+                .getByName(hasGrazieAccess!!.jarTaskName)
                 .outputs.files.asPath,
         ) { into("TestSpark/lib") }
 
-        hasGrazieAccess.runtimeClasspath
+        hasGrazieAccess!!.runtimeClasspath
             .elements
             .get()
             .forEach {
@@ -464,7 +467,19 @@ fun String?.orDefault(default: String): String = this ?: default
  * @param out The output directory for the project.
  * @param enableCoverage flag to enable/disable coverage computation
  */
-tasks.create<RunIdeTask>("headless") {
+val headless by intellijPlatformTesting.runIde.registering {
+    prepareSandboxTask.configure {
+        dependsOn(hasGrazieAccess!!.jarTaskName)
+        from(tasks.getByName(hasGrazieAccess!!.jarTaskName).outputs.files.asPath) { into("TestSpark/lib") }
+
+        hasGrazieAccess!!.runtimeClasspath
+            .elements.get().forEach {
+                from(it.asFile.absolutePath) { into("TestSpark/lib") }
+            }
+    }
+    type = IntelliJPlatformType.IntellijIdeaCommunity
+    version = properties("platformVersion")
+
     val root: String? by project
     val file: String? by project
     val cut: String? by project
@@ -476,15 +491,21 @@ tasks.create<RunIdeTask>("headless") {
     val out: String? by project
     val enableCoverage: String? by project
 
-    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
+    task {
+        dependsOn("buildPlugin")
+        jvmArgumentProviders += CommandLineArgumentProvider {
+            listOf(
+                "-Xmx16G",
+                "-Djava.awt.headless=true",
+                "--add-exports",
+                "java.base/jdk.internal.vm=ALL-UNNAMED",
+                "-Didea.system.path",
+            )
+        }
 
-    jvmArgs(
-        "-Xmx16G",
-        "-Djava.awt.headless=true",
-        "--add-exports",
-        "java.base/jdk.internal.vm=ALL-UNNAMED",
-        "-Didea.system.path",
-    )
+        args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
+    }
 }
+
 
 fun spaceCredentialsProvided() = spaceUsername.isNotEmpty() && spacePassword.isNotEmpty()
