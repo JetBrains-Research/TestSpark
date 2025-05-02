@@ -29,7 +29,12 @@ class ChatSessionManager(
         return requestManager.sendRequest(
             llmParams, chatHistory, isUserFeedback
         ).onEach { result ->
-            recordChatMessage(isUserFeedback, ChatMessage.Companion.createUserMessage(message = prompt))
+            val rawText = result.getDataOrNull()
+            if (rawText != null) {
+                recordChatMessage(
+                    isUserFeedback, ChatMessage.Companion.createAssistantMessage(message = rawText)
+                )
+            }
         }
     }
 
