@@ -84,16 +84,17 @@ class TestSparkStarter : ApplicationStarter {
         }
 
         // open and resolve the project
-        val project = try {
-            JvmProjectConfigurator().openProject(
-                Paths.get(projectPath),
-                fullResolve = true,
-                parentDisposable = Disposer.newDisposable(),
-            )
-        } catch (e: Throwable) {
-            e.printStackTrace(System.err)
-            exitProcess(1)
-        }
+        val project =
+            try {
+                JvmProjectConfigurator().openProject(
+                    Paths.get(projectPath),
+                    fullResolve = true,
+                    parentDisposable = Disposer.newDisposable(),
+                )
+            } catch (e: Throwable) {
+                e.printStackTrace(System.err)
+                exitProcess(1)
+            }
 
         ApplicationManager.getApplication().invokeAndWait {
             println("Detected project: $project")
@@ -111,10 +112,11 @@ class TestSparkStarter : ApplicationStarter {
 
                         // get target PsiClass
                         val psiFile = PsiManager.getInstance(project).findFile(cutSourceVirtualFile) as PsiJavaFile
-                        val targetPsiClass = detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
-                            println("Couldn't find $classUnderTestName in $cutSourceFilePath")
-                            exitProcess(1)
-                        }
+                        val targetPsiClass =
+                            detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
+                                println("Couldn't find $classUnderTestName in $cutSourceFilePath")
+                                exitProcess(1)
+                            }
 
                         println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
 
@@ -127,35 +129,47 @@ class TestSparkStarter : ApplicationStarter {
                         settingsState.grazieModel = model
                         settingsState.classPrompts =
                             JsonEncoding.encode(mutableListOf(File(promptTemplateFile).readText()))
-                        settingsState.junitVersion = when (jUnitVersion.filter { it.isDigit() }) {
-                            "4" -> JUnitVersion.JUnit4
-                            "5" -> JUnitVersion.JUnit5
-                            else -> {
-                                throw IllegalArgumentException("JUnit version $jUnitVersion is not supported. Supported JUnit versions are '4' and '5'")
+                        settingsState.junitVersion =
+                            when (jUnitVersion.filter { it.isDigit() }) {
+                                "4" -> JUnitVersion.JUnit4
+                                "5" -> JUnitVersion.JUnit5
+                                else -> {
+                                    throw IllegalArgumentException(
+                                        "JUnit version $jUnitVersion is not supported. Supported JUnit versions are '4' and '5'",
+                                    )
+                                }
                             }
-                        }
                         project.service<PluginSettingsService>().state.buildPath = classPath
 
                         // Prepare Project Context
                         // First, get CUT Module
-                        val cutModule = ProjectFileIndex.getInstance(project)
-                            .getModuleForFile(targetPsiClass.containingFile.virtualFile)
+                        val cutModule =
+                            ProjectFileIndex
+                                .getInstance(project)
+                                .getModuleForFile(targetPsiClass.containingFile.virtualFile)
                         // Then, instantiate the project context
-                        val projectContext = ProjectContext(
-                            classPath,
-                            output,
-                            targetPsiClass.qualifiedName,
-                            cutModule,
-                        )
+                        val projectContext =
+                            ProjectContext(
+                                classPath,
+                                output,
+                                targetPsiClass.qualifiedName,
+                                cutModule,
+                            )
                         // Prepare the test generation data
-                        val testGenerationData = TestGenerationData(
-                            resultPath = output,
-                            testResultName = "HeadlessGeneratedTests",
-                        )
+                        val testGenerationData =
+                            TestGenerationData(
+                                resultPath = output,
+                                testResultName = "HeadlessGeneratedTests",
+                            )
                         println("[TestSpark Starter] Indexing is done")
 
                         // get package name
-                        val packageList = targetPsiClass.qualifiedName.toString().split(".").dropLast(1).toMutableList()
+                        val packageList =
+                            targetPsiClass.qualifiedName
+                                .toString()
+                                .split(".")
+                                .dropLast(1)
+                                .toMutableList()
                         val packageName = packageList.joinToString(".")
 
                         // Get PsiHelper
@@ -164,34 +178,37 @@ class TestSparkStarter : ApplicationStarter {
                             // TODO exception: the support for the current language does not exist
                         }
                         // Create a process Manager
-                        val llmProcessManager = Llm()
-                            .getLLMProcessManager(
-                                project,
-                                psiHelper!!,
-                                targetPsiClass.textRange.startOffset,
-                                testSamplesCode = "", // we don't provide samples to LLM
-                                projectSDKPath = projectSDKPath,
-                            )
+                        val llmProcessManager =
+                            Llm()
+                                .getLLMProcessManager(
+                                    project,
+                                    psiHelper!!,
+                                    targetPsiClass.textRange.startOffset,
+                                    testSamplesCode = "", // we don't provide samples to LLM
+                                    projectSDKPath = projectSDKPath,
+                                )
 
                         println("[TestSpark Starter] Starting the test generation process")
                         // Start test generation
                         val indicator = HeadlessProgressIndicator()
                         val errorMonitor = DefaultErrorMonitor()
-                        val testCompiler = TestCompilerFactory.create(
-                            project,
-                            settingsState.junitVersion,
-                            psiHelper.language,
-                            projectSDKPath.toString(),
-                        )
-                        val uiContext = llmProcessManager.runTestGenerator(
-                            indicator,
-                            FragmentToTestData(CodeType.CLASS),
-                            packageName,
-                            projectContext,
-                            testGenerationData,
-                            errorMonitor,
-                            testsExecutionResultManager,
-                        )
+                        val testCompiler =
+                            TestCompilerFactory.create(
+                                project,
+                                settingsState.junitVersion,
+                                psiHelper.language,
+                                projectSDKPath.toString(),
+                            )
+                        val uiContext =
+                            llmProcessManager.runTestGenerator(
+                                indicator,
+                                FragmentToTestData(CodeType.CLASS),
+                                packageName,
+                                projectContext,
+                                testGenerationData,
+                                errorMonitor,
+                                testsExecutionResultManager,
+                            )
 
                         // Check test Generation Output
                         if (uiContext != null) {
@@ -235,8 +252,8 @@ class TestSparkStarter : ApplicationStarter {
      * @param project the project inder test
      * @return the project SDK for running and compiling tests generated in headless mode
      */
-    private fun getProjectSdkPath(project: Project): Path {
-        return when (val projectSdk = ProjectRootManager.getInstance(project).projectSdk) {
+    private fun getProjectSdkPath(project: Project): Path =
+        when (val projectSdk = ProjectRootManager.getInstance(project).projectSdk) {
             null -> {
                 println("Did not resolve the project SDK, using default SDK")
                 Paths.get(System.getProperty("java.home"))
@@ -244,7 +261,6 @@ class TestSparkStarter : ApplicationStarter {
 
             else -> Paths.get(projectSdk.homeDirectory!!.path)
         }
-    }
 
     private fun runTestsWithCoverageCollection(
         project: Project,
@@ -265,17 +281,18 @@ class TestSparkStarter : ApplicationStarter {
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // The current test is compiled and is ready to run jacoco
 
-                val testExecutionError = TestProcessor(project, projectSDKPath).createXmlFromJacoco(
-                    it.nameWithoutExtension,
-                    "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
-                    testcaseName,
-                    classPath,
-                    packageList.joinToString("."),
-                    out,
-                    projectContext,
-                    testCompiler,
-                    junitVersion,
-                )
+                val testExecutionError =
+                    TestProcessor(project, projectSDKPath).createXmlFromJacoco(
+                        it.nameWithoutExtension,
+                        "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
+                        testcaseName,
+                        classPath,
+                        packageList.joinToString("."),
+                        out,
+                        projectContext,
+                        testCompiler,
+                        junitVersion,
+                    )
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)
             }
@@ -296,7 +313,10 @@ class TestSparkStarter : ApplicationStarter {
         targetPath.toFile().writeText(testExecutionError.replace("\tat ", "\nat "))
     }
 
-    private fun detectPsiClass(classes: Array<PsiClass>, classUnderTestName: String): PsiClass? {
+    private fun detectPsiClass(
+        classes: Array<PsiClass>,
+        classUnderTestName: String,
+    ): PsiClass? {
         for (psiClass in classes) {
             if (psiClass.qualifiedName == classUnderTestName) {
                 return psiClass

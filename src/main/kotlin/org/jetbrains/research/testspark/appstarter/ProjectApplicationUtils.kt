@@ -45,13 +45,10 @@ class ConversionListenerImpl : ConversionListener {
         logger.info("Project successfully converted.")
     }
 
-    override fun error(message: String) {
-        throw ProjectConfiguratorException(message)
-    }
+    override fun error(message: String): Unit = throw ProjectConfiguratorException(message)
 
-    override fun cannotWriteToFiles(readonlyFiles: List<Path>) {
+    override fun cannotWriteToFiles(readonlyFiles: List<Path>): Unit =
         throw ProjectConfiguratorException("Can not write to files ${readonlyFiles.joinToString { it.fileName.toString() }}")
-    }
 }
 
 class ConfiguratorContextImpl(
@@ -61,24 +58,31 @@ class ConfiguratorContextImpl(
     private val virtualFilesFilter: Predicate<VirtualFile> = Predicate { true },
 ) : ConfiguratorContext {
     private val logger = LoggerFactory.getLogger(javaClass)
-    override fun getProgressIndicator() = indicator
-    override fun getLogger() = object : CommandLineInspectionProgressReporter {
-        override fun reportError(message: String) {
-            logger.warn("ERROR: $message")
-        }
 
-        override fun reportMessage(minVerboseLevel: Int, message: String) {
-            logger.info("PROGRESS: $message")
+    override fun getProgressIndicator() = indicator
+
+    override fun getLogger() =
+        object : CommandLineInspectionProgressReporter {
+            override fun reportError(message: String) {
+                logger.warn("ERROR: $message")
+            }
+
+            override fun reportMessage(
+                minVerboseLevel: Int,
+                message: String,
+            ) {
+                logger.info("PROGRESS: $message")
+            }
         }
-    }
 
     override fun getProjectPath() = projectRoot
+
     override fun getFilesFilter(): Predicate<Path> = filesFilter
+
     override fun getVirtualFilesFilter(): Predicate<VirtualFile> = virtualFilesFilter
 }
 
 object ProjectApplicationUtils {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
@@ -93,7 +97,11 @@ object ProjectApplicationUtils {
      *
      * return app.open() ?: throw ProjectApplicationException("Can not open project")
      */
-    suspend fun openProject(projectPath: Path, parentDisposable: Disposable, projectToClose: Project? = null): Project {
+    suspend fun openProject(
+        projectPath: Path,
+        parentDisposable: Disposable,
+        projectToClose: Project? = null,
+    ): Project {
         ApplicationManager.getApplication().assertIsNonDispatchThread()
         ApplicationManagerEx.getApplicationEx().isSaveAllowed = false
 
@@ -105,8 +113,9 @@ object ProjectApplicationUtils {
 
         configureProjectEnvironment(projectPath)
 
-        val project = openOrImport(projectPath, projectToClose, forceOpenInNewFrame = true)
-            ?: throw ProjectConfiguratorException("Can not open or import project from $projectPath.")
+        val project =
+            openOrImport(projectPath, projectToClose, forceOpenInNewFrame = true)
+                ?: throw ProjectConfiguratorException("Can not open or import project from $projectPath.")
         Disposer.register(parentDisposable) { closeProject(project) }
 
         waitAllStartupActivitiesPassed(project)
@@ -125,8 +134,9 @@ object ProjectApplicationUtils {
     }
 
     private suspend fun convertProject(projectPath: Path) {
-        val conversionService = ConversionService.getInstance()
-            ?: throw ProjectConfiguratorException("Can not convert project $projectPath")
+        val conversionService =
+            ConversionService.getInstance()
+                ?: throw ProjectConfiguratorException("Can not convert project $projectPath")
         val conversionResult = conversionService.convertSilently(projectPath, ConversionListenerImpl())
         if (conversionResult.openingIsCanceled()) {
             throw ProjectConfiguratorException("Project opening is canceled $projectPath")
@@ -165,12 +175,13 @@ object ProjectApplicationUtils {
 //        }
     }
 
-    private suspend fun waitAllStartupActivitiesPassed(project: Project): Unit = suspendCoroutine {
-        logger.info("Waiting all startup activities passed $project...")
-        // ToDo: move headless mode to another branch
+    private suspend fun waitAllStartupActivitiesPassed(project: Project): Unit =
+        suspendCoroutine {
+            logger.info("Waiting all startup activities passed $project...")
+            // ToDo: move headless mode to another branch
 //        StartupManager.getInstance(project).runAfterOpened { it.resume(Unit) }
-        waitForInvokeLaterActivities()
-    }
+            waitForInvokeLaterActivities()
+        }
 
     /**
      * Magic loop is used to wait all invoke later activities passed.
@@ -191,34 +202,39 @@ class JvmProjectResolver {
     fun resolveProject(project: Project) {
         logger.info("Started to resolve project ${project.name}.")
         val configurator = getProjectConfigurator(project)
-        val projectPath = project.basePath?.let { Path.of(it) }
-            ?: throw ProjectConfiguratorException("Undefined base path for project ${project.name}")
+        val projectPath =
+            project.basePath?.let { Path.of(it) }
+                ?: throw ProjectConfiguratorException("Undefined base path for project ${project.name}")
         val context = ConfiguratorContextImpl(projectPath)
 
         ProjectApplicationUtils.resolveProject(project, configurator, context)
     }
 
-    private fun getProjectConfigurator(project: Project): CommandLineInspectionProjectConfigurator {
-        return if (MavenProjectsManager.getInstance(project).isMavenizedProject) {
+    private fun getProjectConfigurator(project: Project): CommandLineInspectionProjectConfigurator =
+        if (MavenProjectsManager.getInstance(project).isMavenizedProject) {
             logger.info("Project ${project.name} considered to be maven")
             MavenCommandLineInspectionProjectConfigurator()
         } else {
             logger.info("Project ${project.name} considered to be gradle")
             GradleCommandLineProjectConfigurator()
         }
-    }
 }
 
 class JvmProjectConfigurator {
     private val projectResolver = JvmProjectResolver()
 
-    fun openProject(projectPath: Path, fullResolve: Boolean, parentDisposable: Disposable): Project = runBlocking {
-        val project = ProjectApplicationUtils.openProject(projectPath, parentDisposable)
+    fun openProject(
+        projectPath: Path,
+        fullResolve: Boolean,
+        parentDisposable: Disposable,
+    ): Project =
+        runBlocking {
+            val project = ProjectApplicationUtils.openProject(projectPath, parentDisposable)
 
-        if (fullResolve) {
-            projectResolver.resolveProject(project)
+            if (fullResolve) {
+                projectResolver.resolveProject(project)
+            }
+
+            project
         }
-
-        project
-    }
 }
