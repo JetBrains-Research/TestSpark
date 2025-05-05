@@ -126,7 +126,7 @@ class JavaPsiExplorer(
         depth: Int = 0,
     ): String? {
         val methodFqName = javaMethod.fqName
-        if (isStdLib(methodFqName)) return null
+        if (depth <= 0 || isStdLib(methodFqName)) return null
 
         val oldDepth = methodVisited.put(methodFqName, depth)
 
