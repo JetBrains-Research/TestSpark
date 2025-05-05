@@ -86,7 +86,7 @@ class PromptManager(
                     val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
 
                     ProjectUnderTestFileCreator.log(
-                        "interestingClasses: [\n${
+                        "old interestingClasses: [\n${
                             interestingClasses.joinToString("\n") { "\t${it.qualifiedName}" }
                         }\n]",
                     )
@@ -152,6 +152,11 @@ class PromptManager(
                                     .getInterestingNodes(
                                         maxInputParamsDepth,
                                     ).mapNotNull { graphNodeToClass(it) }
+                            ProjectUnderTestFileCreator.log(
+                                "graph interestingClasses: [\n${
+                                    interestingClassesRanked.joinToString("\n") { "\t${it.qualifiedName}" }
+                                }\n]",
+                            )
                             promptGenerator.generatePromptForClass(interestingClassesRanked, testSamplesCode)
                         }
 
