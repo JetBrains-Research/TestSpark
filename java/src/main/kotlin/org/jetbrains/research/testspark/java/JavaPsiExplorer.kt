@@ -11,6 +11,7 @@ import com.intellij.psi.PsiTypeParameter
 import com.intellij.psi.PsiVariable
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphEdge
@@ -47,8 +48,8 @@ class JavaPsiExplorer(
                 exploreClass(it as JavaPsiClassWrapper, isUnderTest = true, depth)
             }
         }
-        log.info("Number of Class visited: ${classVisited.size}")
-        log.info("Number of Method visited: ${methodVisited.size}")
+        ProjectUnderTestFileCreator.log("Number of Class visited: ${classVisited.size}")
+        ProjectUnderTestFileCreator.log("Number of Method visited: ${methodVisited.size}")
         return graph
     }
 
