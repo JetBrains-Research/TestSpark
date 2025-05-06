@@ -36,6 +36,14 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.4.1</h4>
+            <ul>
+                <li>Improved an error handling structure.</li>
+                <li>Changed TestSpark’s vendor to JetBrains.</li>
+                <li>Refactored the core LLM feedback-cycle algorithm.</li>
+                <li>Fixed minor bugs.</li>
+                <li>Support IDEA 252.*</li>
+            </ul>
         <h4>0.4.0</h4>
             <ul>
                 <li>Add support for Google AI as an LLM.</li>
