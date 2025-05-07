@@ -245,6 +245,7 @@ class TestSparkStarter : ApplicationStarter {
                         exitProcess(0)
                     } catch (e: Throwable) {
                         println("[TestSpark Starter] Exiting the headless mode with an exception")
+                        ProjectUnderTestFileCreator.log(e.stackTraceToString())
 
                         ProjectManager.getInstance().closeAndDispose(project)
                         e.printStackTrace(System.err)
