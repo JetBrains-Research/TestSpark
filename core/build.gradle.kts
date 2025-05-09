@@ -19,7 +19,7 @@ dependencies {
 
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
 
-    implementation("com.kuzudb:kuzu:0.9.0")
+    implementation("com.kuzudb:kuzu:0.10.0")
 }
 
 tasks.test {
