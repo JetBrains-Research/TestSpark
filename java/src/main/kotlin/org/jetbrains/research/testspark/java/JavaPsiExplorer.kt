@@ -39,9 +39,11 @@ class JavaPsiExplorer(
     ): Graph {
         val javaPsiMethod = psiMethod as? JavaPsiMethodWrapper
         if (javaPsiMethod != null) {
+            log.info("Explore method: ${psiMethod.fqName}")
             exploreMethod(javaPsiMethod, isUnderTest = true, depth = depth)
         } else {
             classesToTest.firstOrNull()?.let {
+                log.info("Explore class: ${it.qualifiedName}")
                 exploreClass(it as JavaPsiClassWrapper, isUnderTest = true, depth)
             }
         }
