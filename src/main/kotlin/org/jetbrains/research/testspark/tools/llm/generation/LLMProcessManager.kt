@@ -8,6 +8,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.Result
@@ -185,6 +186,7 @@ class LLMProcessManager(
                 homeDirectory,
             )
 
+        ProjectUnderTestFileCreator.tries = 0
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
         val llmFeedbackCycle =
             LLMWithFeedbackCycle(

@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.data.LlmModuleType
 import org.jetbrains.research.testspark.core.data.TestSparkModule
@@ -27,12 +28,15 @@ class GrazieRequestManager(
         errorMonitor: ErrorMonitor,
     ): Result<Unit, TestSparkError> =
         try {
+            ProjectUnderTestFileCreator.log("Prompt contains ${prompt.length} characters")
+            ProjectUnderTestFileCreator.addPrompt(prompt)
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
             val requestError = request.request(token, getMessages(), llmModel, testsAssembler)
 
             if (requestError.isNotEmpty()) {
+                ProjectUnderTestFileCreator.addError(requestError)
                 with(requestError) {
                     when {
                         contains("invalid: 401") ->
@@ -59,6 +63,7 @@ class GrazieRequestManager(
                     }
                 }
             } else {
+                ProjectUnderTestFileCreator.addResponse(testsAssembler.getContent())
                 Result.Success(data = Unit)
             }
         } catch (_: ClassNotFoundException) {

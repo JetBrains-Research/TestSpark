@@ -16,6 +16,7 @@ import com.intellij.psi.PsiManager
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
@@ -201,6 +202,7 @@ class TestSparkStarter : ApplicationStarter {
                                 psiHelper.language,
                                 projectSDKPath.toString(),
                             )
+                        ProjectUnderTestFileCreator.projectUnderTestOutputDirectory = output
                         val uiContext =
                             llmProcessManager.runTestGenerator(
                                 indicator,
