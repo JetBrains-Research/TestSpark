@@ -1,16 +1,9 @@
 package org.jetbrains.research.testspark.runner
 
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
-import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
-import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuiteSettingsArguments
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -19,25 +12,12 @@ import org.junit.jupiter.api.TestInstance
 class SettingsArgumentsLlmEvoSuiteTest {
     private lateinit var settingsState: EvoSuiteSettingsState
 
-    private lateinit var fixture: CodeInsightTestFixture
-
     @BeforeEach
     fun setUp() {
-        val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
-            IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
-
-        fixture = JavaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(projectBuilder.fixture)
-        fixture.setUp()
-
-        val settingsService = ApplicationManager.getApplication().getService(EvoSuiteSettingsService::class.java)
+        val settingsService = EvoSuiteSettingsService()
         settingsService.loadState(EvoSuiteSettingsState())
 
         settingsState = settingsService.state
-    }
-
-    @AfterEach
-    fun tearDown() {
-        fixture.tearDown()
     }
 
     @Test
