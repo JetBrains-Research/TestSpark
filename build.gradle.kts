@@ -505,6 +505,7 @@ val headless by intellijPlatformTesting.runIde.registering {
     val enableCoverage: String? by project
 
     task {
+        doNotTrackState("The task is not supposed to be tracked")
         dependsOn("buildPlugin")
         jvmArgumentProviders +=
             CommandLineArgumentProvider {
