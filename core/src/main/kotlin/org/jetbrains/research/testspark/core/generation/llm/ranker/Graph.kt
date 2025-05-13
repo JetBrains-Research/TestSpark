@@ -503,7 +503,7 @@ class KuzuGraph(
                         isUnitUnderTest = classNode.isUnitUnderTest,
                         isStandardLibrary = classNode.isStandardLibrary,
                         score = classNode.score,
-                        children = methodNodes.sortedByDescending { it.score },
+                        children = droppedElbow(methodNodes),
                     ),
                 )
             }
@@ -520,6 +520,17 @@ class KuzuGraph(
             isStandardLibrary = ValueNodeUtil.getPropertyValueAt(value, 3).getValue(),
             score = ValueNodeUtil.getPropertyValueAt(value, 4).getValue(),
         )
+
+    private fun droppedElbow(nodes: List<GraphNode>): List<GraphNode> {
+        if (nodes.size <= 2) return nodes
+        val sorted = nodes.sortedByDescending { it.score }
+        val drops = sorted.zipWithNext { a, b -> a.score - b.score }
+        val elbowIndex = drops.indices.maxByOrNull { drops[it] } ?: 0
+        val maxScoreToTake = sorted[elbowIndex + 1].score
+        val selectedNodes = sorted.takeWhile { it.score >= maxScoreToTake }
+        log.debug { "Taking: ${selectedNodes.size} nodes out of ${sorted.size}" }
+        return selectedNodes
+    }
 
     fun close() {
         conn.close()
