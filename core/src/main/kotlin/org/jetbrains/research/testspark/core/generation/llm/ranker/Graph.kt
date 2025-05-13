@@ -455,15 +455,15 @@ class KuzuGraph(
         val statement =
             conn.prepare(
                 """
-                MATCH (m:Method), (c:Class), (t)
-                WITH avg(m.score) AS mAvgScore, avg(c.score) AS cAvgScore, count(t) as totalNodes
-                MATCH p=(a {isUnitUnderTest: true})-[r:HAS_METHOD|:HAS_RETURN_TYPE|:HAS_TYPE_PARAMETER|:HAS_TYPE_PROPERTY|:INHERITANCE|:FROM|:HAS_CONSTRUCTOR|:THROWS*1..$maxDepthForGraph]-(c:Method)
-                WITH list_creation(a,c) as sd, nodes(r) as r, mAvgScore, cAvgScore, totalNodes
+                MATCH (m:Method), (c:Class)
+                WITH avg(m.score) AS mAvgScore, avg(c.score) AS cAvgScore
+                MATCH p=(a {isUnitUnderTest: true})-[r:HAS_METHOD|:HAS_RETURN_TYPE|:HAS_TYPE_PARAMETER|:HAS_TYPE_PROPERTY|:HAS_CONSTRUCTOR|:THROWS*1..$maxDepthForGraph]-(c:Method)
+                WITH list_creation(a,c) as sd, nodes(r) as r, mAvgScore, cAvgScore
                 UNWIND list_concat(r,sd) as rn
                 WITH rn, CASE
                         WHEN label(rn) = "Class" THEN 0
                         ELSE mAvgScore
-                    END AS avgScore, label(rn) as la,totalNodes
+                    END AS avgScore, label(rn) as la
                 WHERE rn.score >= avgScore
                 WITH collect(DISTINCT rn.fqName) as nodesId
                 MATCH (c:Class)-[r:HAS_METHOD|:HAS_CONSTRUCTOR]->(m:Method)
