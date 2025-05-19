@@ -142,6 +142,7 @@ dependencies {
     intellijPlatform {
         // make a custom version of IDEA
         if (ideaLocalPath != "") {
+            println("Use local IDE")
             local(ideaLocalPath)
         } else {
             create(properties("platformType"), properties("platformVersion"))
