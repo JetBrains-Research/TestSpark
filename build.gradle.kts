@@ -17,8 +17,7 @@ val spaceUsername =
     System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePassword =
     System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
-
-val ideaLocalPath = System.getenv("IDEA_LOCAL_PATH") ?: ""
+val ideaLocalPath = project.properties["ideaLocalPath"]?.toString() ?: ""
 
 // the test generation module for interacting with Grazie (used when the space credentials are provided)
 val grazieTestGenerationVersion = "1.0.9"
