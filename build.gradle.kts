@@ -18,6 +18,8 @@ val spaceUsername =
 val spacePassword =
     System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
 
+val ideaLocalPath = System.getenv("IDEA_LOCAL_PATH") ?: ""
+
 // the test generation module for interacting with Grazie (used when the space credentials are provided)
 val grazieTestGenerationVersion = "1.0.9"
 
@@ -140,7 +142,11 @@ dependencies {
     // Check platform V2 documentation for more details: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
         // make a custom version of IDEA
-        create(properties("platformType"), properties("platformVersion"))
+        if (ideaLocalPath != "") {
+            local(ideaLocalPath)
+        } else {
+            create(properties("platformType"), properties("platformVersion"))
+        }
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
         bundledPlugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
