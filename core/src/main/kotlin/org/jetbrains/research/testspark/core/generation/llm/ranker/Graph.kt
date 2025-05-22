@@ -121,7 +121,12 @@ abstract class Graph {
                 val incomingScoreSum =
                     incomingEdges.sumOf { edge ->
                         val sourceNode = nodes.find { it.fqName == edge.from } ?: return@sumOf 0.0
-                        scores[sourceNode]!! * (graphEdgeTypeWeight(edge.type, sourceNode) / outWeightedDegreeMap[sourceNode]!!)
+                        val degree = outWeightedDegreeMap[sourceNode]!!
+                        if (degree > 0) {
+                            scores[sourceNode]!! * (graphEdgeTypeWeight(edge.type, sourceNode) / degree)
+                        } else {
+                            0.0
+                        }
                     }
 
                 val newScore = (1 - dampingFactor) / totalNodes + dampingFactor * incomingScoreSum
