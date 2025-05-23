@@ -7,6 +7,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -16,7 +17,6 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.javaPackagePattern
 import org.jetbrains.research.testspark.core.utils.kotlinPackagePattern
 import java.util.Locale
-import org.jetbrains.research.testspark.core.error.LlmError
 
 // TODO: find a better place for the below functions
 
