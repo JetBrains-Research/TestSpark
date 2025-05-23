@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.javaPackagePattern
 import org.jetbrains.research.testspark.core.utils.kotlinPackagePattern
 import java.util.Locale
+import org.jetbrains.research.testspark.core.error.LlmError
 
 // TODO: find a better place for the below functions
 
@@ -124,19 +125,25 @@ suspend fun executeTestCaseModificationRequest(
 }
 
 suspend fun Flow<Result<String>>.collectChunks(testsAssembler: TestsAssembler): Result<TestSuiteGeneratedByLLM> {
-    var response: Result<TestSuiteGeneratedByLLM>? = null
+    var failureResponse: Result<TestSuiteGeneratedByLLM>? = null
 
     collect { result ->
         when (result) {
             is Result.Success -> testsAssembler.consume(result.data)
             is Result.Failure -> {
-                response = result
+                failureResponse = result
                 return@collect
             }
         }
     }
 
-    return response ?: testsAssembler.assembleTestSuite()
+    val testSuite = testsAssembler.assembleTestSuite()
+
+    return if (testSuite.isSuccess()) {
+        testSuite
+    } else {
+        failureResponse ?: Result.Failure(LlmError.EmptyLlmResponse)
+    }
 }
 
 /**
