@@ -15,38 +15,42 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 @EnabledIfEnvironmentVariable(named = "GOOGLE_API_KEY", matches = ".+")
 class GeminiRequestManagerTest {
     private val requestManager = HttpRequestManager(llmProvider = LlmProvider.Gemini)
-    private val llmParams = LlmParams(
-        model = "gemini-1.5-flash",
-        token = System.getenv("GOOGLE_API_KEY")!!,
-    )
+    private val llmParams =
+        LlmParams(
+            model = "gemini-1.5-flash",
+            token = System.getenv("GOOGLE_API_KEY")!!,
+        )
 
     @Test
-    fun `test request manager implementation for Google Gemini`() = runTest {
-        val prompt =
-            """
-            You are a Java tester.  Provide a test case that covers the following code snippet:
+    fun `test request manager implementation for Google Gemini`() =
+        runTest {
+            val prompt =
+                """
+                You are a Java tester.  Provide a test case that covers the following code snippet:
 
-            ```java
-            package com.example;
-            public class Foo {
-              public int sign(int x) {
-                if (x > 0) return 1
-                if (x < 0) return -1
-                return 0
-              }
-            }
-            ```
-            """.trimIndent()
-        val chunks = requestManager.sendRequest(
-            llmParams,
-            listOf(ChatMessage.createUserMessage(prompt)),
-        ).toList()
-        assertAll(
-            chunks.map { chunk ->
-                { assertTrue(chunk.isSuccess()) }
-            }
-        )
-    }
+                ```java
+                package com.example;
+                public class Foo {
+                  public int sign(int x) {
+                    if (x > 0) return 1
+                    if (x < 0) return -1
+                    return 0
+                  }
+                }
+                ```
+                """.trimIndent()
+            val chunks =
+                requestManager
+                    .sendRequest(
+                        llmParams,
+                        listOf(ChatMessage.createUserMessage(prompt)),
+                    ).toList()
+            assertAll(
+                chunks.map { chunk ->
+                    { assertTrue(chunk.isSuccess()) }
+                },
+            )
+        }
 
     @Test
     fun `test the retrieved Gemini models`() {
