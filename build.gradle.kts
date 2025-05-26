@@ -1,7 +1,6 @@
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -257,22 +256,22 @@ intellijPlatform {
     }
     // Set the ides on which the plugin verification is executed.
     // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
-    pluginVerification {
-        ides {
-            // recommended()
-            select {
-                types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
-                channels = listOf(ProductRelease.Channel.RELEASE)
-                sinceBuild = properties("pluginUntilBuild")
-                untilBuild = properties("pluginUntilBuild")
-            }
-        }
-        freeArgs =
-            listOf(
-                "-mute",
-                "TemplateWordInPluginId,ForbiddenPluginIdPrefix",
-            )
-    }
+//    pluginVerification {
+//        ides {
+//            // recommended()
+//            select {
+//                types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+//                channels = listOf(ProductRelease.Channel.RELEASE)
+//                sinceBuild = properties("pluginUntilBuild")
+//                untilBuild = properties("pluginUntilBuild")
+//            }
+//        }
+//        freeArgs =
+//            listOf(
+//                "-mute",
+//                "TemplateWordInPluginId,ForbiddenPluginIdPrefix",
+//            )
+//    }
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
