@@ -508,8 +508,7 @@ class KuzuGraph(
                         isUnitUnderTest = classNode.isUnitUnderTest,
                         isStandardLibrary = classNode.isStandardLibrary,
                         score = classNode.score,
-//                        children = droppedElbow(methodNodes),
-                        children = methodNodes.sortedByDescending { it.score },
+                        children = droppedElbow(methodNodes),
                     ),
                 )
             }
