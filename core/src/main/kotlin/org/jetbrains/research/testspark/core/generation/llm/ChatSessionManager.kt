@@ -39,7 +39,6 @@ class ChatSessionManager(
             .sendRequest(
                 llmParams,
                 chatHistory,
-                isUserFeedback,
             ).map { result ->
                 val responseString = result.getDataOrNull()
                 if (responseString != null && responseString.isEmpty()) {

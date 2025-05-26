@@ -36,7 +36,6 @@ class HttpRequestManager(
     override suspend fun sendRequest(
         params: LlmParams,
         chatHistory: List<ChatMessage>,
-        isUserFeedback: Boolean,
     ): Flow<Result<String>> =
         flow {
             client

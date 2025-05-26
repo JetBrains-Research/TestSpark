@@ -17,7 +17,6 @@ class GrazieRequestManager : RequestManager {
     override suspend fun sendRequest(
         params: LlmParams,
         chatHistory: List<ChatMessage>,
-        isUserFeedback: Boolean,
     ): Flow<Result<String>> {
         val className = "org.jetbrains.research.grazie.Request"
         val request: GrazieRequest =

@@ -9,6 +9,5 @@ interface RequestManager {
     suspend fun sendRequest(
         params: LlmParams,
         chatHistory: List<ChatMessage>,
-        isUserFeedback: Boolean = false,
     ): Flow<Result<String>>
 }

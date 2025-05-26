@@ -216,6 +216,9 @@ dependencies {
     // https://mvnrepository.com/artifact/net.jqwik/jqwik
     testImplementation("net.jqwik:jqwik:1.6.5")
 
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-test
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+
     // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
