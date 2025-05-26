@@ -154,7 +154,7 @@ class JavaPsiExplorer(
         val usedClasses = mutableListOf<String>()
 
         // explore the class if we come from calls
-        if (javaMethod.containingClass is JavaPsiClassWrapper) {
+        if (javaMethod.containingClass is JavaPsiClassWrapper && classVisited[methodFqName] == null) {
             exploreClass(javaMethod.containingClass, depth = depth)?.let {
                 usedClasses.add(it)
             }
