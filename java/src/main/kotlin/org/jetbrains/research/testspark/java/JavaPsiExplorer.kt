@@ -77,6 +77,7 @@ class JavaPsiExplorer(
                 ),
             )
         } else if (oldDepth >= depth) {
+            classVisited.put(clsFqName, oldDepth)
             return clsFqName
         }
 
@@ -145,6 +146,7 @@ class JavaPsiExplorer(
                 ),
             )
         } else if (oldDepth >= depth) {
+            methodVisited.put(methodFqName, oldDepth)
             return methodFqName
         }
 
