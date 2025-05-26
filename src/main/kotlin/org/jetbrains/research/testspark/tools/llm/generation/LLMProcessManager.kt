@@ -26,7 +26,6 @@ import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.utils.PipelineUtils
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -131,7 +130,6 @@ class LLMProcessManager(
             promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
         // EVALUATION PIPELINE CODE
         val testSuiteName = projectContext.classFQN ?: packageName
-        PipelineUtils.savePrompt(initialPromptMessage, testSuiteName)
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
