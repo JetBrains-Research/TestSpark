@@ -56,7 +56,6 @@ class LLMWithFeedbackCycle(
     private val requestsCountThreshold: Int,
 ) {
     private val log = KotlinLogging.logger { this::class.java }
-    private lateinit var generatedTestSuite: TestSuiteGeneratedByLLM
 
     fun run(): Flow<Result<TestSuiteGeneratedByLLM>> =
         flow {
@@ -97,7 +96,7 @@ class LLMWithFeedbackCycle(
                 compileTestCases(testSuite)
 
                 if (testSuite.testCases.any { it.isCompilable.not() }) {
-                    log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }
+                    log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(testSuite)}" }
                     emit(Result.Failure(LlmError.CompilationError))
                     nextPromptMessage = generateCompilationErrorPrompt(testSuite)
                     continue
@@ -167,7 +166,7 @@ class LLMWithFeedbackCycle(
         val generatedTestSuitePath: String =
             testStorage.saveGeneratedTest(
                 testSuite.packageName,
-                testsPresenter.representTestSuite(generatedTestSuite),
+                testsPresenter.representTestSuite(testSuite),
                 resultPath,
                 testSuiteFilename,
             )
