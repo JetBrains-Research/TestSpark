@@ -35,6 +35,7 @@ import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
@@ -83,7 +84,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -97,7 +97,7 @@ class TestCasePanelBuilder(
     private val generatedTestsTabData: GeneratedTestsTabData,
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
-    private val userExperienceReport: UserExperienceReport
+    private val userExperienceReport: UserExperienceReport,
 ) {
     private var visibleTestCasePanel: JPanel? = null
     private var hiddenTestCasePanel: JPanel? = null

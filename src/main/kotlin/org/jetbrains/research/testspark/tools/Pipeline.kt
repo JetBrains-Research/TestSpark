@@ -14,6 +14,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.exception.TestSparkException
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -27,7 +28,6 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
-import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.

@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.collectors
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.tools.GenerationTool
 
-
 class UserExperienceReport(generationTool: GenerationTool) {
     // Test generation id
     var id: String? = null

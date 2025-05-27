@@ -8,6 +8,7 @@ import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
@@ -17,7 +18,6 @@ import org.jetbrains.research.testspark.tools.GenerationTool
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import java.awt.Component
 import javax.swing.JOptionPane
-import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 /**
  * The TestSparkDisplayBuilder class is responsible for displaying the generated test cases and related information in the TestSpark tool window.
