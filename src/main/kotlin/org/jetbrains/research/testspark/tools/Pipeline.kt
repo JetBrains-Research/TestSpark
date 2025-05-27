@@ -27,6 +27,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -54,6 +55,8 @@ class Pipeline(
     val generatedTestsData = TestGenerationData()
     val generationTool = GenerationTool.from(generationToolName)
 
+    val userExperienceReport = UserExperienceReport(generationTool)
+
     init {
         val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)
 
@@ -61,6 +64,8 @@ class Pipeline(
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"
+
+        userExperienceReport.id = id
 
         ApplicationManager.getApplication().runWriteAction {
             projectContext.projectClassPath =
@@ -93,6 +98,8 @@ class Pipeline(
         testSparkDisplayManager.clear()
         testsExecutionResultManager.clear()
         indicatorController.finished()
+
+        userExperienceReport.codeType = codeType.type!!
 
         val projectBuilder = ProjectBuilder(project, errorMonitor)
 
@@ -152,6 +159,7 @@ class Pipeline(
                                 project,
                                 testsExecutionResultManager,
                                 generationTool,
+                                userExperienceReport,
                             )
                         }
                     }

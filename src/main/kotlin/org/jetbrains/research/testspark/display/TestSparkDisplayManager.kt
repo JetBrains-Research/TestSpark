@@ -17,6 +17,7 @@ import org.jetbrains.research.testspark.tools.GenerationTool
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import java.awt.Component
 import javax.swing.JOptionPane
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 /**
  * The TestSparkDisplayBuilder class is responsible for displaying the generated test cases and related information in the TestSpark tool window.
@@ -50,6 +51,7 @@ class TestSparkDisplayManager {
         project: Project,
         testsExecutionResultManager: TestsExecutionResultManager,
         generationTool: GenerationTool,
+        userExperienceReport: UserExperienceReport,
     ) {
         this.toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         this.contentManager = toolWindow!!.contentManager
@@ -66,6 +68,7 @@ class TestSparkDisplayManager {
                 coverageVisualisationTabBuilder!!,
                 testsExecutionResultManager,
                 generationTool,
+                userExperienceReport,
             )
 
         generatedTestsTabBuilder!!.show(contentManager!!, language)

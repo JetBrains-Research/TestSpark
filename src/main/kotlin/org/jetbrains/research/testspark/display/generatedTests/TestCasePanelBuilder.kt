@@ -83,6 +83,7 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -96,6 +97,7 @@ class TestCasePanelBuilder(
     private val generatedTestsTabData: GeneratedTestsTabData,
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
+    private val userExperienceReport: UserExperienceReport
 ) {
     private var visibleTestCasePanel: JPanel? = null
     private var hiddenTestCasePanel: JPanel? = null
@@ -210,9 +212,15 @@ class TestCasePanelBuilder(
                 likeButton.icon = TestSparkIcons.like
             } else if (likeButton.icon == TestSparkIcons.like) {
                 likeButton.icon = TestSparkIcons.likeSelected
+                userExperienceReport.likedDislikedCollector.logEvent(
+                    true,
+                    getTestId(),
+                    userExperienceReport.generationTool,
+                    userExperienceReport.codeType!!,
+                    testCase.testCode != initialCodes[currentRequestNumber - 1],
+                )
             }
             dislikeButton.icon = TestSparkIcons.dislike
-//            TODO add implementation
         }
 
         dislikeButton.addActionListener {
@@ -220,9 +228,15 @@ class TestCasePanelBuilder(
                 dislikeButton.icon = TestSparkIcons.dislike
             } else if (dislikeButton.icon == TestSparkIcons.dislike) {
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
+                userExperienceReport.likedDislikedCollector.logEvent(
+                    false,
+                    getTestId(),
+                    userExperienceReport.generationTool,
+                    userExperienceReport.codeType!!,
+                    testCase.testCode != initialCodes[currentRequestNumber - 1],
+                )
             }
             likeButton.icon = TestSparkIcons.like
-//            TODO add implementation
         }
 
         copyButton.addActionListener {
@@ -900,6 +914,8 @@ class TestCasePanelBuilder(
                 .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
+
+    private fun getTestId(): String = userExperienceReport.id!! + "_" + testCase.id
 
     /**
      * Retrieves the editor text field from the current UI context.

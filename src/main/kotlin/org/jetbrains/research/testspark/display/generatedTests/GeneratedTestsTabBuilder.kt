@@ -25,6 +25,7 @@ import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 /**
  * This class is responsible for building and managing the "Generated Tests" tab in TestSpark.
@@ -38,6 +39,7 @@ class GeneratedTestsTabBuilder(
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
+    private val userExperienceReport: UserExperienceReport,
 ) {
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData(uiContext.indicatorController)
 
@@ -166,6 +168,7 @@ class GeneratedTestsTabBuilder(
                     generatedTestsTabData,
                     testsExecutionResultManager,
                     generationTool,
+                    userExperienceReport,
                 )
             testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
