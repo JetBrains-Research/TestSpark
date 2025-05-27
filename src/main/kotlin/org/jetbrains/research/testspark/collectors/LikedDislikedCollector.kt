@@ -27,11 +27,24 @@ class LikedDislikedCollector : CounterUsagesCollector() {
     private val level: EnumEventField<CodeType> = CollectorsHelper.getLevel()
     private val isModified = EventFields.Boolean("is_modified")
 
-    private val event = group.registerVarargEvent(eventId, liked, testId, generationTool, level, isModified)
+    private val event = group.registerVarargEvent(
+        eventId,
+        liked,
+        testId,
+        generationTool,
+        level,
+        isModified,
+    )
 
     override fun getGroup() = group
 
-    fun logEvent(liked: Boolean, testId: String, generationTool: GenerationTool, level: CodeType, isModified: Boolean) {
+    fun logEvent(
+        liked: Boolean,
+        testId: String,
+        generationTool: GenerationTool,
+        level: CodeType,
+        isModified: Boolean,
+    ) {
         val data: List<EventPair<*>> = arrayListOf(
             this.liked.with(liked),
             this.testId.with(testId),

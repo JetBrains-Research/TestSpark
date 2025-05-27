@@ -7,6 +7,7 @@ import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
@@ -25,7 +26,6 @@ import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
-import org.jetbrains.research.testspark.collectors.UserExperienceReport
 
 /**
  * This class is responsible for building and managing the "Generated Tests" tab in TestSpark.

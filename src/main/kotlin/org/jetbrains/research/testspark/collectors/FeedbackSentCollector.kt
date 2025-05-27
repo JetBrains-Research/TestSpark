@@ -25,11 +25,22 @@ class FeedbackSentCollector : CounterUsagesCollector() {
     private val level: EnumEventField<CodeType> = CollectorsHelper.getLevel()
     private val isModified = EventFields.Boolean("is_modified")
 
-    private val event = group.registerVarargEvent(eventId, testId, generationTool, level, isModified)
+    private val event = group.registerVarargEvent(
+        eventId,
+        testId,
+        generationTool,
+        level,
+        isModified,
+    )
 
     override fun getGroup() = group
 
-    fun logEvent(testId: String, generationTool: GenerationTool, level: CodeType, isModified: Boolean) {
+    fun logEvent(
+        testId: String,
+        generationTool: GenerationTool,
+        level: CodeType,
+        isModified: Boolean
+    ) {
         val data: List<EventPair<*>> = arrayListOf(
             this.testId.with(testId),
             this.generationTool.with(generationTool),
