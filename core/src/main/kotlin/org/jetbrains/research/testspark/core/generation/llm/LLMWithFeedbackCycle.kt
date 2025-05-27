@@ -67,6 +67,9 @@ class LLMWithFeedbackCycle(
                 iteration++
                 log.info { "Iteration #$iteration of feedback cycle" }
 
+                // ensure the testsAssembler is empty before each iteration
+                testsAssembler.clear()
+
                 val chunks: Flow<Result<String>> =
                     chatSessionManager.request(
                         prompt = nextPromptMessage,
