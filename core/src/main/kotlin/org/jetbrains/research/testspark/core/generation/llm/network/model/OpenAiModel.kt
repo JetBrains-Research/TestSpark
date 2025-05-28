@@ -12,12 +12,12 @@ data class OpenAIRequest(
     val temperature: Float?,
     @SerialName("top_p")
     val topProbability: Float? = null,
-) : LlmRequest()
+) : LlmRequest
 
 @Serializable
 data class OpenAIResponse(
     val choices: List<OpenAIChoice>,
-) : LlmResponse() {
+) : LlmResponse {
     override fun extractContent(): String = choices.first().delta.content
 }
 

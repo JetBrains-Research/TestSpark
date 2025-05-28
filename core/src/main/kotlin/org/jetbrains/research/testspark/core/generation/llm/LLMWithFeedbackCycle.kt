@@ -119,7 +119,7 @@ class LLMWithFeedbackCycle(
     private fun compileTestCases(testSuite: TestSuiteGeneratedByLLM) {
         testSuite.testCases.forEachIndexed { index, testCase ->
             val testCaseName = getClassWithTestCaseName(testCase.name)
-            val testCaseFilename = "$testCaseName.${language.extension}"
+            val testCaseFilename = "$testCaseName${language.extension}"
             val testCaseRepresentation = testsPresenter.representTestCase(testSuite, index)
             val saveFilepath =
                 testStorage.saveGeneratedTest(

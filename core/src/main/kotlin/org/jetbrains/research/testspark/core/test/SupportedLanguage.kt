@@ -7,6 +7,6 @@ enum class SupportedLanguage(
     val languageId: String,
     val extension: String,
 ) {
-    Java(languageId = "JAVA", extension = "java"),
-    Kotlin(languageId = "kotlin", extension = "kt"),
+    Java(languageId = "JAVA", extension = ".java"),
+    Kotlin(languageId = "kotlin", extension = ".kt"),
 }

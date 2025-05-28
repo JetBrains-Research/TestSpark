@@ -9,12 +9,12 @@ data class HuggingFaceRequest(
     val inputs: String,
     val parameters: HuggingFaceParameters,
     val stream: Boolean = true,
-) : LlmRequest()
+) : LlmRequest
 
 @Serializable
 data class HuggingFaceResponse(
     val token: HuggingFaceToken,
-) : LlmResponse() {
+) : LlmResponse {
     override fun extractContent(): String = token.text
 }
 

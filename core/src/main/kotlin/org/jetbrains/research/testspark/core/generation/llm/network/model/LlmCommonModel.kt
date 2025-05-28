@@ -1,10 +1,10 @@
 package org.jetbrains.research.testspark.core.generation.llm.network.model
 
-abstract class LlmResponse {
-    abstract fun extractContent(): String
+interface LlmResponse {
+    fun extractContent(): String
 }
 
-abstract class LlmRequest
+interface LlmRequest
 
 data class LlmParams(
     val model: String,

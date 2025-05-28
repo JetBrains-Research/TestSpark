@@ -10,12 +10,12 @@ data class GeminiRequest(
     val generationConfig: GeminiGenerationConfig?,
     @SerialName("system_instruction")
     val systemInstruction: GeminiSystemInstruction?,
-) : LlmRequest()
+) : LlmRequest
 
 @Serializable
 data class GeminiResponse(
     val candidates: List<GeminiCandidate>,
-) : LlmResponse() {
+) : LlmResponse {
     override fun extractContent(): String =
         candidates
             .first()
