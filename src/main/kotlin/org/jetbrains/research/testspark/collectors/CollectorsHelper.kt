@@ -41,6 +41,11 @@ object CollectorsHelper {
     fun getIndividualTestsGroupID(): String = "individual.tests"
 
     /**
+     * Returns the group ID for tests set.
+     */
+    fun getTestsSetGroupID(): String = "tests.set"
+
+    /**
      * Returns the EventLogGroup object for the given groupId.
      */
     fun getGroup(groupId: String) = EventLogGroup(groupId, EVENT_LOG_GROUP_VERSION)

@@ -22,6 +22,7 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
+import kotlin.system.measureTimeMillis
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
@@ -112,6 +113,13 @@ class Pipeline(
             .run(
                 object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
                     override fun run(indicator: ProgressIndicator) {
+                        // Add collector logging
+                        userExperienceReport.testGenerationStartTime = System.currentTimeMillis()
+                        userExperienceReport.testGenerationStartedCollector.logEvent(
+                            userExperienceReport.generationTool,
+                            userExperienceReport.codeType!!,
+                        )
+
                         try {
                             val ijIndicator = IJProgressIndicator(indicator)
                             indicatorController.activeIndicators.add(ijIndicator)
@@ -150,6 +158,13 @@ class Pipeline(
                         updateEditor(uiContext!!.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
+                            // Add collector logging
+                            userExperienceReport.testGenerationFinishedCollector.logEvent(
+                                System.currentTimeMillis() - userExperienceReport.testGenerationStartTime!!,
+                                userExperienceReport.generationTool,
+                                userExperienceReport.codeType!!,
+                            )
+
                             val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
                             testSparkDisplayManager.display(
                                 report,

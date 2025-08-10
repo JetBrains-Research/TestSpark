@@ -574,6 +574,13 @@ class TestCasePanelBuilder(
                             return
                         }
 
+                        userExperienceReport.feedbackSentCollector.logEvent(
+                            getTestId(),
+                            userExperienceReport.generationTool,
+                            userExperienceReport.codeType!!,
+                            testCase.testCode != initialCodes[currentRequestNumber - 1],
+                        )
+
                         val testModificationResult =
                             LLMHelper.testModificationRequest(
                                 language,

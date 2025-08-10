@@ -19,4 +19,8 @@ class UserExperienceReport(
     val feedbackSentCollector = FeedbackSentCollector()
 
     val likedDislikedCollector = LikedDislikedCollector()
+
+    val testGenerationStartedCollector = TestGenerationStartedCollector()
+
+    val testGenerationFinishedCollector = TestGenerationFinishedCollector()
 }
