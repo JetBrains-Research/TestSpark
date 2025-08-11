@@ -930,4 +930,6 @@ class TestCasePanelBuilder(
      * @return the editor text field
      */
     fun getEditorTextField(): EditorTextField = languageTextField
+
+    fun isTestCaseModified(): Boolean = testCase.testCode != initialCodes[0]
 }

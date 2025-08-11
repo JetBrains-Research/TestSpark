@@ -222,6 +222,20 @@ class GeneratedTestsTabBuilder(
 
         val applyingResult = displayUtils!!.applyTests(project, uiContext, testCaseComponents)
 
+        // Get a number of modified tests
+        var modifiedTestsCount = 0
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
+            if (testCasePanelFactory.isTestCaseModified()) modifiedTestsCount++
+        }
+
+        // Add collector logging
+        userExperienceReport.integratedTestsCollector.logEvent(
+            testCaseComponents.size,
+            userExperienceReport.generationTool,
+            userExperienceReport.codeType!!,
+            modifiedTestsCount,
+        )
+
         // Remove the selected test cases from the cache and the tool window UI
         if (applyingResult) clear()
 

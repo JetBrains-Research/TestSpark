@@ -24,7 +24,7 @@ class UserExperienceReport(
 
     val testGenerationFinishedCollector = TestGenerationFinishedCollector()
 
-//    val testGenerationFinishedCollector = TestGenerationFinishedCollector()
+    val integratedTestsCollector = IntegratedTestsCollector()
 
     val generatedTestsCollector = GeneratedTestsCollector()
 
