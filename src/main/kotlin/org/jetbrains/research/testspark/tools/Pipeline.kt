@@ -157,14 +157,20 @@ class Pipeline(
                         updateEditor(uiContext!!.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
+                            val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
+
                             // Add collector logging
                             userExperienceReport.testGenerationFinishedCollector.logEvent(
                                 System.currentTimeMillis() - userExperienceReport.testGenerationStartTime!!,
                                 userExperienceReport.generationTool,
                                 userExperienceReport.codeType!!,
                             )
+                            userExperienceReport.generatedTestsCollector.logEvent(
+                                report.testCaseList.size,
+                                userExperienceReport.generationTool,
+                                userExperienceReport.codeType!!,
+                            )
 
-                            val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
                             testSparkDisplayManager.display(
                                 report,
                                 editor!!,

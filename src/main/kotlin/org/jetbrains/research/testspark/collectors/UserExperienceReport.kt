@@ -26,7 +26,7 @@ class UserExperienceReport(
 
 //    val testGenerationFinishedCollector = TestGenerationFinishedCollector()
 
-//    val testGenerationFinishedCollector = TestGenerationFinishedCollector()
+    val generatedTestsCollector = GeneratedTestsCollector()
 
     val coverageStatusShowedCollector = CoverageStatusShowedCollector()
 }

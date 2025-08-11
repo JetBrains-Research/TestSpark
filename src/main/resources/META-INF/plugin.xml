@@ -270,6 +270,7 @@
         <statistics.counterUsagesCollector implementationClass="org.jetbrains.research.testspark.collectors.TestGenerationStartedCollector"/>
         <statistics.counterUsagesCollector implementationClass="org.jetbrains.research.testspark.collectors.TestGenerationFinishedCollector"/>
         <statistics.counterUsagesCollector implementationClass="org.jetbrains.research.testspark.collectors.CoverageStatusShowedCollector"/>
+        <statistics.counterUsagesCollector implementationClass="org.jetbrains.research.testspark.collectors.GeneratedTestsCollector"/>
 
     </extensions>
 

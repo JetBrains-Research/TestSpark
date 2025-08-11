@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.collectors
 import com.intellij.internal.statistic.eventLog.EventLogGroup
 import com.intellij.internal.statistic.eventLog.events.EnumEventField
 import com.intellij.internal.statistic.eventLog.events.EventFields
+import com.intellij.internal.statistic.eventLog.events.IntEventField
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.tools.GenerationTool
 
@@ -54,6 +55,11 @@ object CollectorsHelper {
      * Returns the EventLogGroup object for the given groupId.
      */
     fun getGroup(groupId: String) = EventLogGroup(groupId, EVENT_LOG_GROUP_VERSION)
+
+    /**
+     * Returns the count of an event field.
+     */
+    fun getCount(): IntEventField = IntEventField("count")
 
     /**
      * Returns the technique field for an event.
