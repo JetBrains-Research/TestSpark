@@ -46,6 +46,11 @@ object CollectorsHelper {
     fun getTestsSetGroupID(): String = "tests.set"
 
     /**
+     * Returns the group ID for tests coverage.
+     */
+    fun getTestsCoverageGroupID(): String = "tests.coverage"
+
+    /**
      * Returns the EventLogGroup object for the given groupId.
      */
     fun getGroup(groupId: String) = EventLogGroup(groupId, EVENT_LOG_GROUP_VERSION)
@@ -64,4 +69,9 @@ object CollectorsHelper {
      * Returns the test ID for an event.
      */
     fun getTestID() = EventFields.StringValidatedByRegexp("id", testIDRegex.pattern)
+
+    /**
+     * Returns the session ID for the event.
+     */
+    fun getSessionID() = EventFields.StringValidatedByRegexp("id", sessionIDRegex.pattern)
 }

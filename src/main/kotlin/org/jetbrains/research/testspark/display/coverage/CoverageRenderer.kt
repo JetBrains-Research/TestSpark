@@ -24,6 +24,7 @@ import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
@@ -57,6 +58,7 @@ class CoverageRenderer(
     private val mapMutantsToTests: HashMap<String, MutableList<Int>>,
     private val project: Project,
     private val generatedTestsTabData: GeneratedTestsTabData,
+    private val userExperienceReport: UserExperienceReport,
 ) : ActiveGutterRenderer,
     LineMarkerRendererEx {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
@@ -129,6 +131,8 @@ class CoverageRenderer(
             false,
             HintHint(editor, point),
         )
+
+        userExperienceReport.coverageStatusShowedCollector.logEvent(userExperienceReport.id!!)
     }
 
     /**

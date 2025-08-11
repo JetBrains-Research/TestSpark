@@ -23,7 +23,10 @@ class TestGenerationStartedCollector : CounterUsagesCollector() {
 
     override fun getGroup() = group
 
-    fun logEvent(generationTool: GenerationTool, level: CodeType) {
+    fun logEvent(
+        generationTool: GenerationTool,
+        level: CodeType,
+    ) {
         event.log(generationTool, level)
     }
 }

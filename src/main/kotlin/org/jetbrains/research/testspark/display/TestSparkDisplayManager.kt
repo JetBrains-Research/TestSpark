@@ -58,7 +58,7 @@ class TestSparkDisplayManager {
 
         this.editor = editor
 
-        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor)
+        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor, userExperienceReport)
         generatedTestsTabBuilder =
             GeneratedTestsTabBuilder(
                 project,
