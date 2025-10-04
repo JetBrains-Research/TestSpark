@@ -124,5 +124,6 @@ class JavaPsiClassWrapper(
         return qualifiedName == other.qualifiedName && qualifiedName.isNotEmpty()
     }
 
-    override fun hashCode(): Int = qualifiedName.hashCode()
+    override fun hashCode(): Int =
+        if (qualifiedName.isNotEmpty()) qualifiedName.hashCode() else System.identityHashCode(this)
 }
