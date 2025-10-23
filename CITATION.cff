@@ -1,0 +1,114 @@
+cff-version: "1.2.0"
+message: If you use this software, please cite it using these metadata.
+title: TestSpark
+authors:
+  - family-names: Sapozhnikov
+    given-names: Arkadii
+  - family-names: "Zelenjak"
+    given-names: "Jegor"
+  - family-names: "Derakhshanfar"
+    given-names: "Pouria"
+  - family-names: "Mladenov"
+    given-names: "Martin"
+  - family-names: "Vasilev"
+    given-names: "Kiril"
+  - family-names: "Artiukhov"
+    given-names: "Vladislav"
+  - family-names: "Datskiv"
+    given-names: "Sergey"
+  - family-names: "Todorov"
+    given-names: "Lyuben"
+  - family-names: "Braun"
+    given-names: "Ekaterina"
+  - family-names: "Zaitsev"
+    given-names: "Iurii"
+  - family-names: "Sviridov"
+    given-names: "Nikolai"
+  - family-names: "Santelé"
+    given-names: "Victor"
+  - family-names: "Abdullin"
+    given-names: "Azat"
+  - family-names: "Biliaiev"
+    given-names: "Danylo"
+  - family-names: "Lukasczyk"
+    given-names: "Stephan"
+    orcid: "https://orcid.org/0000-0002-0092-3476"
+  - family-names: "Mir"
+    given-names: "Amir M."
+  - family-names: "Kovalenko"
+    given-names: "Vladimir"
+  - family-names: "Panichella"
+    given-names: "Annibale"
+  - family-names: "Olsthoorn"
+    given-names: "Mitchell"
+keywords:
+  - "test generation"
+  - "unit test"
+  - "IntelliJ IDEA"
+  - "plugin"
+  - "LLM"
+  - "java"
+  - "kotlin"
+license: "MIT"
+references:
+  - authors:
+    - family-names: Sapozhnikov
+      given-names: Arkadii
+      orcid: "https://orcid.org/0009-0002-1693-1937"
+    - family-names: Olsthoorn
+      given-names: Mitchell
+      orcid: "https://orcid.org/0000-0003-0551-6690"
+    - family-names: Panichella
+      given-names: Annibale
+      orcid: "https://orcid.org/0000-0002-7395-3588"
+    - family-names: Kovalenko
+      given-names: Vladimir
+      orcid: "https://orcid.org/0000-0001-5880-7323"
+    - family-names: Derakhshanfar
+      given-names: Pouria
+      orcid: "https://orcid.org/0000-0003-3549-9019"
+    title: "TestSpark: IntelliJ IDEA's Ultimate Test Generation Companion"
+    doi: 10.1145/3639478.3640024
+    conference:
+      name: "46th International Conference on Software Engineering (ICSE 2024 Companion)"
+    type: conference-paper
+    year: 2024
+  - authors:
+    - family-names: Abdullin
+      given-names: Azat
+      orcid: "https://orcid.org/0000-0002-9669-2587"
+    - family-names: Derakhshanfar
+      given-names: Pouria
+      orcid: "https://orcid.org/0000-0003-3549-9019"
+    - family-names: Panichella
+      given-names: Annibale
+      orcid: "https://orcid.org/0000-0002-7395-3588"
+    title: "TestWars: A Comparative Study of SBST, Symbolic Execution, and LLM-Based Approaches to Unit Test Generation"
+    doi: 10.1109/ICST62969.2025.10989033
+    conference:
+      name: "18th IEEE International Conference on Software Testing, Verification and Validation (ICST 2025)"
+    type: conference-paper
+    year: 2025
+preferred-citation:
+  type: conference-paper
+  authors:
+  - family-names: Sapozhnikov
+    given-names: Arkadii
+    orcid: "https://orcid.org/0009-0002-1693-1937"
+  - family-names: Olsthoorn
+    given-names: Mitchell
+    orcid: "https://orcid.org/0000-0003-0551-6690"
+  - family-names: Panichella
+    given-names: Annibale
+    orcid: "https://orcid.org/0000-0002-7395-3588"
+  - family-names: Kovalenko
+    given-names: Vladimir
+    orcid: "https://orcid.org/0000-0001-5880-7323"
+  - family-names: Derakhshanfar
+    given-names: Pouria
+    orcid: "https://orcid.org/0000-0003-3549-9019"
+  doi: 10.1145/3639478.3640024
+  conference:
+    name: "46th International Conference on Software Engineering Companion (ICSE '24 Companion)"
+  title: "TestSpark: IntelliJ IDEA's Ultimate Test Generation Companion"
+  year: 2024

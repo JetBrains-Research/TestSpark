@@ -1,8 +1,10 @@
 # TestSpark
 
-![Build](https://github.com/JetBrains-Research/TestSpark/workflows/Build/badge.svg)
+[![Build](https://github.com/JetBrains-Research/TestSpark/actions/workflows/build.yml/badge.svg?branch=development)](https://github.com/JetBrains-Research/TestSpark/actions/workflows/build.yml)
 [![Version](https://img.shields.io/jetbrains/plugin/v/21024-testspark.svg)](https://plugins.jetbrains.com/plugin/21024-testspark)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/21024-testspark.svg)](https://plugins.jetbrains.com/plugin/21024-testspark)
+![Research](https://jb.gg/badges/research-plastic.svg)
+[![License MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ![TestSpark Logo](readme-images/pngs/logo/TestSparkPluginLogo.png#gh-light-mode-only)
 ![TestSpark White Logo](readme-images/pngs/logo/TestSparkPluginLogo_dark.png#gh-dark-mode-only)
@@ -53,6 +55,30 @@ TestSpark currently supports three test generation strategies:
 </ul>
 
 <p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestSpark is currently developed and maintained by the <a href="https://lp.jetbrains.com/research/software-testing/">Software Testing Research team at JetBrains Research</a>.</p>
+
+<p>If you are using TestSpark as part of your research, please cite it as follows:</p>
+
+```bibtex
+@inproceedings{DBLP:conf/icse/SapozhnikovOPKD24,
+  author       = {Arkadii Sapozhnikov and
+                  Mitchell Olsthoorn and
+                  Annibale Panichella and
+                  Vladimir Kovalenko and
+                  Pouria Derakhshanfar},
+  title        = {TestSpark: IntelliJ IDEA's Ultimate Test Generation Companion},
+  booktitle    = {Proceedings of the 2024 {IEEE/ACM} 46th International Conference on
+                  Software Engineering: Companion Proceedings, {ICSE} Companion 2024,
+                  Lisbon, Portugal, April 14-20, 2024},
+  pages        = {30--34},
+  publisher    = {{ACM}},
+  year         = {2024},
+  url          = {https://doi.org/10.1145/3639478.3640024},
+  doi          = {10.1145/3639478.3640024},
+  timestamp    = {Sun, 19 Jan 2025 13:14:42 +0100},
+  biburl       = {https://dblp.org/rec/conf/icse/SapozhnikovOPKD24.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+```
 
 ## <span style="color:crimson; font-size:150%; font-weight:bold"> DISCLAIMER </span>
 <span style="color:crimson; font-size:150%; font-weight:bold">TestSpark is currently designed to serve as an experimental tool.</span>
