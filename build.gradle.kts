@@ -282,7 +282,7 @@ tasks {
     runIde {
         jvmArgumentProviders +=
             CommandLineArgumentProvider {
-                listOf("-Didea.kotlin.plugin.use.k2=true")
+                listOf("-Didea.kotlin.plugin.use.k2=true", "-Dfus.internal.test.mode=true", "-Didea.is.internal=true")
             }
     }
 

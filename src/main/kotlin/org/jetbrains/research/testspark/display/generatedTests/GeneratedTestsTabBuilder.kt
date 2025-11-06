@@ -7,6 +7,7 @@ import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
@@ -38,6 +39,7 @@ class GeneratedTestsTabBuilder(
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
+    private val userExperienceReport: UserExperienceReport,
 ) {
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData(uiContext.indicatorController)
 
@@ -166,6 +168,7 @@ class GeneratedTestsTabBuilder(
                     generatedTestsTabData,
                     testsExecutionResultManager,
                     generationTool,
+                    userExperienceReport,
                 )
             testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
@@ -218,6 +221,20 @@ class GeneratedTestsTabBuilder(
                 .map { it.document.text }
 
         val applyingResult = displayUtils!!.applyTests(project, uiContext, testCaseComponents)
+
+        // Get a number of modified tests
+        var modifiedTestsCount = 0
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
+            if (testCasePanelFactory.isTestCaseModified()) modifiedTestsCount++
+        }
+
+        // Add collector logging
+        userExperienceReport.integratedTestsCollector.logEvent(
+            testCaseComponents.size,
+            userExperienceReport.generationTool,
+            userExperienceReport.codeType!!,
+            modifiedTestsCount,
+        )
 
         // Remove the selected test cases from the cache and the tool window UI
         if (applyingResult) clear()

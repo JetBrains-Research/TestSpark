@@ -35,6 +35,7 @@ import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
@@ -96,6 +97,7 @@ class TestCasePanelBuilder(
     private val generatedTestsTabData: GeneratedTestsTabData,
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
+    private val userExperienceReport: UserExperienceReport,
 ) {
     private var visibleTestCasePanel: JPanel? = null
     private var hiddenTestCasePanel: JPanel? = null
@@ -210,9 +212,15 @@ class TestCasePanelBuilder(
                 likeButton.icon = TestSparkIcons.like
             } else if (likeButton.icon == TestSparkIcons.like) {
                 likeButton.icon = TestSparkIcons.likeSelected
+                userExperienceReport.likedDislikedCollector.logEvent(
+                    true,
+                    getTestId(),
+                    userExperienceReport.generationTool,
+                    userExperienceReport.codeType!!,
+                    testCase.testCode != initialCodes[currentRequestNumber - 1],
+                )
             }
             dislikeButton.icon = TestSparkIcons.dislike
-//            TODO add implementation
         }
 
         dislikeButton.addActionListener {
@@ -220,9 +228,15 @@ class TestCasePanelBuilder(
                 dislikeButton.icon = TestSparkIcons.dislike
             } else if (dislikeButton.icon == TestSparkIcons.dislike) {
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
+                userExperienceReport.likedDislikedCollector.logEvent(
+                    false,
+                    getTestId(),
+                    userExperienceReport.generationTool,
+                    userExperienceReport.codeType!!,
+                    testCase.testCode != initialCodes[currentRequestNumber - 1],
+                )
             }
             likeButton.icon = TestSparkIcons.like
-//            TODO add implementation
         }
 
         copyButton.addActionListener {
@@ -559,6 +573,13 @@ class TestCasePanelBuilder(
                             finishProcess()
                             return
                         }
+
+                        userExperienceReport.feedbackSentCollector.logEvent(
+                            getTestId(),
+                            userExperienceReport.generationTool,
+                            userExperienceReport.codeType!!,
+                            testCase.testCode != initialCodes[currentRequestNumber - 1],
+                        )
 
                         val testModificationResult =
                             LLMHelper.testModificationRequest(
@@ -901,10 +922,14 @@ class TestCasePanelBuilder(
         testCase.testCode = languageTextField.document.text
     }
 
+    private fun getTestId(): String = userExperienceReport.id!! + "_" + testCase.id
+
     /**
      * Retrieves the editor text field from the current UI context.
      *
      * @return the editor text field
      */
     fun getEditorTextField(): EditorTextField = languageTextField
+
+    fun isTestCaseModified(): Boolean = testCase.testCode != initialCodes[0]
 }

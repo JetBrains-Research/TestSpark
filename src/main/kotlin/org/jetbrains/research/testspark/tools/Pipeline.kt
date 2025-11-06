@@ -14,6 +14,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.exception.TestSparkException
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -54,6 +55,8 @@ class Pipeline(
     val generatedTestsData = TestGenerationData()
     val generationTool = GenerationTool.from(generationToolName)
 
+    val userExperienceReport = UserExperienceReport(generationTool)
+
     init {
         val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)
 
@@ -61,6 +64,8 @@ class Pipeline(
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"
+
+        userExperienceReport.id = id
 
         ApplicationManager.getApplication().runWriteAction {
             projectContext.projectClassPath =
@@ -94,6 +99,8 @@ class Pipeline(
         testsExecutionResultManager.clear()
         indicatorController.finished()
 
+        userExperienceReport.codeType = codeType.type!!
+
         val projectBuilder = ProjectBuilder(project, errorMonitor)
 
         var editor: Editor? = null
@@ -105,6 +112,13 @@ class Pipeline(
             .run(
                 object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
                     override fun run(indicator: ProgressIndicator) {
+                        // Add collector logging
+                        userExperienceReport.testGenerationStartTime = System.currentTimeMillis()
+                        userExperienceReport.testGenerationStartedCollector.logEvent(
+                            userExperienceReport.generationTool,
+                            userExperienceReport.codeType!!,
+                        )
+
                         try {
                             val ijIndicator = IJProgressIndicator(indicator)
                             indicatorController.activeIndicators.add(ijIndicator)
@@ -144,6 +158,19 @@ class Pipeline(
 
                         if (editor != null) {
                             val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
+
+                            // Add collector logging
+                            userExperienceReport.testGenerationFinishedCollector.logEvent(
+                                System.currentTimeMillis() - userExperienceReport.testGenerationStartTime!!,
+                                userExperienceReport.generationTool,
+                                userExperienceReport.codeType!!,
+                            )
+                            userExperienceReport.generatedTestsCollector.logEvent(
+                                report.testCaseList.size,
+                                userExperienceReport.generationTool,
+                                userExperienceReport.codeType!!,
+                            )
+
                             testSparkDisplayManager.display(
                                 report,
                                 editor!!,
@@ -152,6 +179,7 @@ class Pipeline(
                                 project,
                                 testsExecutionResultManager,
                                 generationTool,
+                                userExperienceReport,
                             )
                         }
                     }

@@ -8,6 +8,7 @@ import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.UserExperienceReport
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
@@ -50,13 +51,14 @@ class TestSparkDisplayManager {
         project: Project,
         testsExecutionResultManager: TestsExecutionResultManager,
         generationTool: GenerationTool,
+        userExperienceReport: UserExperienceReport,
     ) {
         this.toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         this.contentManager = toolWindow!!.contentManager
 
         this.editor = editor
 
-        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor)
+        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor, userExperienceReport)
         generatedTestsTabBuilder =
             GeneratedTestsTabBuilder(
                 project,
@@ -66,6 +68,7 @@ class TestSparkDisplayManager {
                 coverageVisualisationTabBuilder!!,
                 testsExecutionResultManager,
                 generationTool,
+                userExperienceReport,
             )
 
         generatedTestsTabBuilder!!.show(contentManager!!, language)
