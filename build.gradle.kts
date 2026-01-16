@@ -136,9 +136,11 @@ dependencies {
         // make a custom version of IDEA
         create(properties("platformType"), properties("platformVersion"))
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-        bundledPlugins(providers.gradleProperty("platformPlugins").map {
-            it.split(',') + "com.intellij.gradle"
-        })
+        bundledPlugins(
+            providers.gradleProperty("platformPlugins").map {
+                it.split(',') + "com.intellij.gradle"
+            },
+        )
 
         pluginVerifier()
         zipSigner()
