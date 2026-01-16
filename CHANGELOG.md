@@ -2,6 +2,30 @@
 
 # TestSpark Changelog
 ## Unreleased
+
+## 0.4.2
+### Added
+- Support IDEA `253.*`.
+
+## 0.4.1
+### Fixed
+- Changed TestSpark's vendor to JetBrains
+- Fixed minor bugs
+### Changed 
+- Improved the error-handling structure
+### Added
+- Support IDEA `252.*`.
+
+## 0.4.0
+### Fixed
+- Resolve compatibility issues with Marketplace verifier
+### Changed
+- Improve the collection of sample test code candidates
+### Added
+- Support for Google AI as an LLM
+- KEX as a new test generation feature
+- Support IDEA `251.*`.
+
 ## 0.3.1
 ### Fixed
 - Multiple minor bugs in test generation algorithms.
