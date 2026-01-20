@@ -8,11 +8,10 @@ import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
-import org.jetbrains.research.testspark.core.error.TestSparkError
+import org.jetbrains.research.testspark.core.generation.llm.ChatSessionManager
 import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
-import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
+import org.jetbrains.research.testspark.core.generation.llm.runBlockingWithIndicatorLifecycle
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
@@ -273,16 +272,10 @@ object LLMHelper {
         testCase: String,
         task: String,
         indicator: CustomProgressIndicator,
-        requestManager: RequestManager,
+        chatSessionManager: ChatSessionManager,
         project: Project,
         testGenerationOutput: TestGenerationData,
-        errorMonitor: ErrorMonitor,
-    ): Result<TestSuiteGeneratedByLLM, TestSparkError> {
-        // Update Token information
-        if (!updateToken(requestManager, project, errorMonitor)) {
-            return Result.Failure(error = LlmError.UnsetTokenError)
-        }
-
+    ): Result<TestSuiteGeneratedByLLM> {
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
         val testBodyPrinter = TestBodyPrinter.create(language)
         val testSuiteParser =
@@ -301,30 +294,15 @@ object LLMHelper {
             )
 
         val testSuite =
-            executeTestCaseModificationRequest(
-                language,
-                testCase,
-                task,
-                indicator,
-                requestManager,
-                testsAssembler,
-                errorMonitor,
-            )
+            runBlockingWithIndicatorLifecycle(indicator) {
+                executeTestCaseModificationRequest(
+                    testCase,
+                    task,
+                    chatSessionManager,
+                    testsAssembler,
+                )
+            }
         return testSuite
-    }
-
-    /**
-     * Updates token based on the last entries of settings and check if the token is valid
-     *
-     * @return True if the token is set, false otherwise.
-     */
-    private fun updateToken(
-        requestManager: RequestManager,
-        project: Project,
-        errorMonitor: ErrorMonitor,
-    ): Boolean {
-        requestManager.token = LlmSettingsArguments(project).getToken()
-        return LlmSettingsArguments(project).isTokenSet()
     }
 
     /**
@@ -444,5 +422,7 @@ object LLMHelper {
      *
      * @return an array of string representing the available HuggingFace models
      */
-    private fun getHuggingFaceModels(): Array<String> = arrayOf("Meta-Llama-3-8B-Instruct", "Meta-Llama-3-70B-Instruct")
+    private fun getHuggingFaceModels(): Array<String> = LlamaModels
+
+    val LlamaModels = arrayOf("Meta-Llama-3-8B-Instruct", "Meta-Llama-3-70B-Instruct")
 }

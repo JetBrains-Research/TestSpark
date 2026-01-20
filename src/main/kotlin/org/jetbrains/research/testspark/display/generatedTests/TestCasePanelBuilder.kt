@@ -562,14 +562,13 @@ class TestCasePanelBuilder(
 
                         val testModificationResult =
                             LLMHelper.testModificationRequest(
-                                language,
-                                initialCodes[currentRequestNumber - 1],
-                                requestComboBox.editor.item.toString(),
-                                ijIndicator,
-                                uiContext.requestManager!!,
-                                project,
-                                uiContext.testGenerationOutput,
-                                uiContext.errorMonitor,
+                                language = language,
+                                testCase = initialCodes[currentRequestNumber - 1],
+                                task = requestComboBox.editor.item.toString(),
+                                indicator = ijIndicator,
+                                chatSessionManager = uiContext.chatSessionManager,
+                                project = project,
+                                testGenerationOutput = uiContext.testGenerationOutput,
                             )
 
                         when (testModificationResult) {
@@ -583,7 +582,10 @@ class TestCasePanelBuilder(
 
                             is Result.Success -> {
                                 if (testModificationResult.data.isEmpty()) {
-                                    LLMErrorManager().warningProcess(LLMMessagesBundle.get("modifyWithLLMError"), project)
+                                    LLMErrorManager().warningProcess(
+                                        LLMMessagesBundle.get("modifyWithLLMError"),
+                                        project,
+                                    )
                                 } else {
                                     testModificationResult.data.setTestFileName(
                                         getClassWithTestCaseName(testCase.testName),

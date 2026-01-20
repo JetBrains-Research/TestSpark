@@ -1,54 +1,42 @@
 package org.jetbrains.research.testspark.settings
 
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
-import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
-import com.intellij.testFramework.fixtures.TestFixtureBuilder
+import com.intellij.openapi.project.Project
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsComponent
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EvoSuiteSettingsConfigurableTest {
     private lateinit var settingsComponent: EvoSuiteSettingsComponent
     private lateinit var settingsState: EvoSuiteSettingsState
-    private lateinit var fixture: CodeInsightTestFixture
 
     private lateinit var settingsConfigurable: EvoSuiteSettingsConfigurable
 
+    private val project = Mockito.mock(Project::class.java)
+
     @BeforeEach
     fun setUp() {
-        val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
-            IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
+        val evoSuiteSettingsService = EvoSuiteSettingsService()
 
-        fixture =
-            JavaTestFixtureFactory
-                .getFixtureFactory()
-                .createCodeInsightFixture(projectBuilder.fixture)
-        fixture.setUp()
+        `when`(project.getService(EvoSuiteSettingsService::class.java)).thenReturn(evoSuiteSettingsService)
 
-        settingsConfigurable = EvoSuiteSettingsConfigurable(fixture.project)
+        settingsConfigurable = EvoSuiteSettingsConfigurable(project)
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = fixture.project.getService(EvoSuiteSettingsService::class.java).state
-    }
-
-    @AfterEach
-    fun tearDown() {
-        fixture.tearDown()
+        settingsState = evoSuiteSettingsService.state
     }
 
     @Test

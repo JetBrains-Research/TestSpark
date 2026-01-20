@@ -1,10 +1,15 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
-import org.jetbrains.research.testspark.core.error.TestSparkError
-import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
-import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
-import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
+import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -34,6 +39,7 @@ fun getPackageFromTestSuiteCode(
                 ?.get(1)
                 ?.value
                 .orEmpty()
+
         SupportedLanguage.Java ->
             javaPackagePattern
                 .find(testSuiteCode)
@@ -92,19 +98,15 @@ fun getClassWithTestCaseName(testCaseName: String): String {
  *
  * @param testCase: The test that is requested to be modified
  * @param task: A string representing the requested task for test modification
- * @param indicator: A progress indicator object that represents the indication of the test generation progress.
  *
  * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
  */
-fun executeTestCaseModificationRequest(
-    language: SupportedLanguage,
+suspend fun executeTestCaseModificationRequest(
     testCase: String,
     task: String,
-    indicator: CustomProgressIndicator,
-    requestManager: RequestManager,
+    chatSessionManager: ChatSessionManager,
     testsAssembler: TestsAssembler,
-    errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
-): Result<TestSuiteGeneratedByLLM, TestSparkError> {
+): Result<TestSuiteGeneratedByLLM> {
     // Update Token information
     val prompt =
         buildString {
@@ -115,18 +117,65 @@ fun executeTestCaseModificationRequest(
             append(task)
         }
 
-    val packageName = getPackageFromTestSuiteCode(testCase, language)
-
-    val response =
-        requestManager.request(
-            language,
-            prompt,
-            indicator,
-            packageName,
-            testsAssembler,
+    return chatSessionManager
+        .request(
+            prompt = prompt,
             isUserFeedback = true,
-            errorMonitor,
-        )
-
-    return response
+        ).collectChunks(testsAssembler)
 }
+
+suspend fun Flow<Result<String>>.collectChunks(testsAssembler: TestsAssembler): Result<TestSuiteGeneratedByLLM> {
+    var failureResponse: Result<TestSuiteGeneratedByLLM>? = null
+
+    collect { result ->
+        when (result) {
+            is Result.Success -> testsAssembler.consume(result.data)
+            is Result.Failure -> {
+                failureResponse = result
+                return@collect
+            }
+        }
+    }
+
+    val testSuite = testsAssembler.assembleTestSuite()
+
+    return if (testSuite.isSuccess()) {
+        testSuite
+    } else {
+        failureResponse ?: Result.Failure(LlmError.EmptyLlmResponse)
+    }
+}
+
+/**
+ * Executes the provided [action], while constantly monitoring [indicator] cancellation in parallel.
+ * If the indicator is canceled, it stops the execution, cancels the coroutine, and returns null.
+ *
+ * @param indicator an instance of [CustomProgressIndicator]
+ * @param indicatorObservingIntervalMs specifies an interval between indicator cancellation checks
+ * @param action block of code to be executed
+ */
+fun <T> runBlockingWithIndicatorLifecycle(
+    indicator: CustomProgressIndicator,
+    indicatorObservingIntervalMs: Long = 500,
+    action: suspend () -> T,
+): T =
+    try {
+        runBlocking {
+            coroutineScope {
+                val indicatorObserver =
+                    launch {
+                        while (true) {
+                            if (indicator.isCanceled()) {
+                                this@coroutineScope.cancel()
+                            }
+                            delay(indicatorObservingIntervalMs)
+                        }
+                    }
+                val result = action()
+                indicatorObserver.cancel()
+                result
+            }
+        }
+    } catch (e: CancellationException) {
+        throw ProcessCancelledException(cause = e)
+    }

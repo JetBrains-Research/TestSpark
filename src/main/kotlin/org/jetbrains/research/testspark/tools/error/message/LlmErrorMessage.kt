@@ -11,7 +11,6 @@ val LlmError.llmErrorDisplayMessage: String?
             is LlmError.PromptTooLong -> LLMMessagesBundle.get("tooLongPromptRequest")
             is LlmError.GrazieNotAvailable -> LLMMessagesBundle.get("grazieError")
             is LlmError.NoCompilableTestCasesGenerated -> LLMMessagesBundle.get("invalidLLMResult")
-            is LlmError.FailedToSaveTestFiles -> LLMMessagesBundle.get("savingTestFileIssue")
             is LlmError.CompilationError -> LLMMessagesBundle.get("compilationError")
             is LlmError.EmptyLlmResponse -> LLMMessagesBundle.get("emptyResponse")
             is LlmError.TestSuiteParsingError -> LLMMessagesBundle.get("emptyResponse")

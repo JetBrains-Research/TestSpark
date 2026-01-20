@@ -4,6 +4,8 @@ import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.error.LlmError
+import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -48,23 +50,31 @@ class JUnitTestsAssembler(
         }
     }
 
-    override fun assembleTestSuite(): TestSuiteGeneratedByLLM? {
-        val testSuite = junitTestSuiteParser.parseTestSuite(super.getContent())
+    override fun assembleTestSuite(): Result<TestSuiteGeneratedByLLM> =
+        try {
+            val testSuite = junitTestSuiteParser.parseTestSuite(super.getContent())
 
-        // save RunWith
-        if (testSuite?.annotation?.isNotBlank() == true) {
-            generationData.annotation = testSuite.annotation
-            generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
-        } else {
-            generationData.annotation = ""
-            generationData.importsCode.remove(junitVersion.runWithAnnotationMeta.import)
+            // save RunWith
+            if (testSuite.annotation.isNotBlank()) {
+                generationData.annotation = testSuite.annotation
+                generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
+            } else {
+                generationData.annotation = ""
+                generationData.importsCode.remove(junitVersion.runWithAnnotationMeta.import)
+            }
+
+            // save annotations and pre-set methods
+            generationData.otherInfo = testSuite.otherInfo
+
+            // logging generated test cases if any
+            testSuite.testCases.forEach { testCase -> log.info("Generated test case: $testCase") }
+
+            if (testSuite.testCases.isEmpty()) {
+                Result.Failure(error = LlmError.EmptyLlmResponse)
+            } else {
+                Result.Success(testSuite)
+            }
+        } catch (e: Exception) {
+            Result.Failure(LlmError.TestSuiteParsingError(cause = e))
         }
-
-        // save annotations and pre-set methods
-        generationData.otherInfo = testSuite?.otherInfo ?: ""
-
-        // logging generated test cases if any
-        testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
-        return testSuite
-    }
 }

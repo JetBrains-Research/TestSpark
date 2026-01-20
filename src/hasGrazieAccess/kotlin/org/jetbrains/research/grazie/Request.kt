@@ -1,29 +1,16 @@
 package org.jetbrains.research.grazie
 
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.research.testSpark.grazie.TestGeneration
-import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequest
 
 class Request : GrazieRequest {
-    override fun request(
+    override suspend fun request(
         token: String,
         messages: List<Pair<String, String>>,
         profile: String,
-        testsAssembler: TestsAssembler,
-    ): String {
+    ): Flow<String> {
         val generation = TestGeneration(token)
-        var errorMessage = ""
-        runBlocking {
-            generation
-                .generate(messages, profile)
-                .catch {
-                    errorMessage = it.message.toString()
-                }.collect {
-                    testsAssembler.consume(it)
-                }
-        }
-        return errorMessage
+        return generation.generate(messages, profile)
     }
 }

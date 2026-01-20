@@ -14,6 +14,7 @@ data class TestCaseGeneratedByLLM(
     var throwsException: String = "",
     var lines: MutableList<TestLine> = mutableListOf(),
     val printTestBodyStrategy: TestBodyPrinter,
+    var isCompilable: Boolean = true,
 ) {
     /**
      * Compares this object to the specified object for equality.

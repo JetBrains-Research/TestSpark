@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.settings.plugin
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
@@ -30,7 +29,7 @@ class PluginSettingsConfigurable(
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: PluginSettingsState = project.service<PluginSettingsService>().state
+        val settingsState: PluginSettingsState = project.getService(PluginSettingsService::class.java).state
         settingsComponent!!.showCoverageCheckboxSelected = settingsState.showCoverageCheckboxSelected
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
@@ -45,7 +44,7 @@ class PluginSettingsConfigurable(
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: PluginSettingsState = project.service<PluginSettingsService>().state
+        val settingsState: PluginSettingsState = project.getService(PluginSettingsService::class.java).state
         var modified: Boolean = settingsComponent!!.buildPath != settingsState.buildPath
         modified = modified or (settingsComponent!!.showCoverageCheckboxSelected != settingsState.showCoverageCheckboxSelected)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
@@ -59,7 +58,7 @@ class PluginSettingsConfigurable(
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: PluginSettingsState = project.service<PluginSettingsService>().state
+        val settingsState: PluginSettingsState = project.getService(PluginSettingsService::class.java).state
         settingsState.showCoverageCheckboxSelected = settingsComponent!!.showCoverageCheckboxSelected
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen

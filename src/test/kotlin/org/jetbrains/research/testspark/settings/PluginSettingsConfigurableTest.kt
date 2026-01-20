@@ -1,13 +1,8 @@
 package org.jetbrains.research.testspark.settings
 
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
-import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
-import com.intellij.testFramework.fixtures.TestFixtureBuilder
+import com.intellij.openapi.project.Project
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsComponent
@@ -24,6 +19,8 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -33,40 +30,37 @@ class PluginSettingsConfigurableTest {
     private lateinit var settingsComponent: PluginSettingsComponent
     private lateinit var settingsEvoComponent: EvoSuiteSettingsComponent
     private lateinit var settingsState: PluginSettingsState
-    private lateinit var fixture: CodeInsightTestFixture
     private lateinit var settingsApplicationState: LLMSettingsState
+
+    private val project = Mockito.mock(Project::class.java)
 
     @BeforeEach
     fun setUp() {
-        val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
-            IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
+        val evoSuiteSettingsService = EvoSuiteSettingsService()
+        val pluginSettingsService = PluginSettingsService()
+        val llmSettingsService = LLMSettingsService()
 
-        fixture =
-            JavaTestFixtureFactory
-                .getFixtureFactory()
-                .createCodeInsightFixture(projectBuilder.fixture)
-        fixture.setUp()
+        `when`(project.getService(EvoSuiteSettingsService::class.java)).thenReturn(evoSuiteSettingsService)
+        `when`(project.getService(PluginSettingsService::class.java)).thenReturn(pluginSettingsService)
 
-        settingsConfigurable = PluginSettingsConfigurable(fixture.project)
-
+        settingsConfigurable = PluginSettingsConfigurable(project)
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
 
-        settingsEvoConfigurable = EvoSuiteSettingsConfigurable(fixture.project)
+        settingsEvoConfigurable = EvoSuiteSettingsConfigurable(project)
         settingsEvoConfigurable.createComponent()
         settingsEvoConfigurable.reset()
 
         settingsEvoComponent = settingsEvoConfigurable.settingsComponent!!
 
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = fixture.project.service<PluginSettingsService>().state
+        settingsState = pluginSettingsService.state
 
-        settingsApplicationState = ApplicationManager.getApplication().getService(LLMSettingsService::class.java).state
+        settingsApplicationState = llmSettingsService.state
     }
 
     @AfterEach
     fun tearDown() {
-        fixture.tearDown()
         settingsConfigurable.disposeUIResources()
     }
 

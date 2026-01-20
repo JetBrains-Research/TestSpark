@@ -10,6 +10,7 @@ import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
@@ -17,6 +18,7 @@ import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
+import org.jetbrains.research.testspark.core.generation.llm.runBlockingWithIndicatorLifecycle
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
@@ -126,8 +128,7 @@ class LLMProcessManager(
         val initialPromptMessage =
             promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        // initiate a new RequestManager
-        val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
+        val chatSessionManager = ChatSessionManagerFactory.getChatSessionManager(project)
 
         // adapter for the existing prompt reduction functionality
         val promptSizeReductionStrategy =
@@ -193,53 +194,29 @@ class LLMProcessManager(
                 initialPromptMessage = initialPromptMessage,
                 promptSizeReductionStrategy = promptSizeReductionStrategy,
                 testSuiteFilename = testFileName,
-                packageName = packageName,
                 resultPath = generatedTestsData.resultPath,
                 buildPath = buildPath,
-                requestManager = requestManager,
+                chatSessionManager = chatSessionManager,
                 testsAssembler = testsAssembler,
                 testCompiler = testCompiler,
                 testStorage = testProcessor,
                 testsPresenter = testsPresenter,
-                indicator = indicator,
                 requestsCountThreshold = maxRequests,
-                errorMonitor = errorMonitor,
             )
 
-        val feedbackResponse =
-            llmFeedbackCycle.run { warning ->
-                project.createNotification(warning, NotificationType.WARNING)
-            }
-
-        // Process stopped checking
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
-        log.info("Feedback cycle finished execution with $feedbackResponse")
-
-        when (feedbackResponse) {
-            is Result.Success -> {
-                log.info("Add ${feedbackResponse.data.compilableTestCases.size} compilable test cases into generatedTestsData")
-            }
-
-            is Result.Failure -> {
-                project.createNotification(feedbackResponse.error, NotificationType.ERROR)
-                return null
-            }
-        }
-
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
-
-        // Error during the collecting
-        if (errorMonitor.hasErrorOccurred()) throw ProcessCancelledException(TestSparkModule.Llm())
-
-        log.info("Save generated test suite and test cases into the project workspace")
-
-        val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
-        val generatedTestSuite: TestSuiteGeneratedByLLM? = feedbackResponse.getDataOrNull()?.generatedTestSuite
+        val testSuite = runFeedbackCycle(indicator, llmFeedbackCycle)
         val testSuiteRepresentation =
-            if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
+            testSuite?.let {
+                log.info("Add ${it.testCases} compilable test cases into generatedTestsData")
+                val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
+                testSuitePresenter.toString(testSuite = it)
+            }
+
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 
         ToolUtils.transferToIJTestCases(report)
 
+        log.info("Save generated test suite and test cases into the project workspace")
         ToolUtils.saveData(
             project,
             report,
@@ -251,6 +228,36 @@ class LLMProcessManager(
             language,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager, indicatorController, errorMonitor)
+        return UIContext(projectContext, generatedTestsData, chatSessionManager, indicatorController, errorMonitor)
     }
+
+    private fun runFeedbackCycle(
+        indicator: CustomProgressIndicator,
+        llmFeedbackCycle: LLMWithFeedbackCycle,
+    ): TestSuiteGeneratedByLLM? =
+        runBlockingWithIndicatorLifecycle(indicator) {
+            var feedbackResponse: TestSuiteGeneratedByLLM? = null
+            llmFeedbackCycle.run().collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        feedbackResponse = result.data
+                    }
+
+                    is Result.Failure -> {
+                        when (result.error) {
+                            is LlmError.EmptyLlmResponse,
+                            is LlmError.TestSuiteParsingError,
+                            is LlmError.CompilationError,
+                            -> {
+                                project.createNotification(result.error, NotificationType.WARNING)
+                            }
+
+                            else -> project.createNotification(result.error, NotificationType.ERROR)
+                        }
+                    }
+                }
+            }
+            log.info("Feedback cycle finished execution with result: $feedbackResponse")
+            feedbackResponse
+        }
 }

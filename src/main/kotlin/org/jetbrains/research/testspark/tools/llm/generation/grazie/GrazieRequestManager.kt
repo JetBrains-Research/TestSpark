@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
-import com.intellij.openapi.project.Project
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.data.LlmModuleType
 import org.jetbrains.research.testspark.core.data.TestSparkModule
@@ -9,69 +11,50 @@ import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
-import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
-import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.TestsAssembler
-import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
+import org.jetbrains.research.testspark.core.generation.llm.network.model.LlmParams
 
-class GrazieRequestManager(
-    project: Project,
-) : RequestManager(
-        token = LlmSettingsArguments(project).getToken(),
-        llmModel = LlmSettingsArguments(project).getModel(),
-    ) {
-    override fun send(
-        prompt: String,
-        indicator: CustomProgressIndicator,
-        testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor,
-    ): Result<Unit, TestSparkError> =
-        try {
-            val className = "org.jetbrains.research.grazie.Request"
-            val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
+class GrazieRequestManager : RequestManager {
+    override suspend fun sendRequest(
+        params: LlmParams,
+        chatHistory: List<ChatMessage>,
+    ): Flow<Result<String>> {
+        val className = "org.jetbrains.research.grazie.Request"
+        val request: GrazieRequest =
+            Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
-            val requestError = request.request(token, getMessages(), llmModel, testsAssembler)
-
-            if (requestError.isNotEmpty()) {
-                with(requestError) {
-                    when {
-                        contains("invalid: 401") ->
-                            Result.Failure(
-                                error = HttpError(httpCode = 401),
-                            )
-
-                        contains("invalid: 413 Payload Too Large") ->
-                            Result.Failure(
-                                error = LlmError.PromptTooLong,
-                            )
-                        contains("Provided prompt is too big for this model") && contains("invalid: 412 Precondition Failed") ->
-                            Result.Failure(
-                                error = LlmError.PromptTooLong,
-                            )
-                        else ->
-                            Result.Failure(
-                                error =
-                                    HttpError(
-                                        message = this,
-                                        module = TestSparkModule.Llm(LlmModuleType.Grazie),
-                                    ),
-                            )
+        val messages =
+            chatHistory.map {
+                val role =
+                    when (it.role) {
+                        ChatMessage.ChatRole.User -> "user"
+                        ChatMessage.ChatRole.Assistant -> "assistant"
                     }
-                }
-            } else {
-                Result.Success(data = Unit)
+                (role to it.content)
             }
-        } catch (_: ClassNotFoundException) {
-            Result.Failure(error = LlmError.GrazieNotAvailable)
-        }
 
-    private fun getMessages(): List<Pair<String, String>> =
-        chatHistory.map {
-            val role =
-                when (it.role) {
-                    ChatMessage.ChatRole.User -> "user"
-                    ChatMessage.ChatRole.Assistant -> "assistant"
-                }
-            (role to it.content)
+        return request
+            .request(params.token, messages, params.model)
+            .map { Result.Success(data = it) as Result<String> }
+            .catch { emit(Result.Failure(error = it.toError())) }
+    }
+
+    companion object {
+        private fun Throwable.toError(): TestSparkError {
+            val message = message.toString()
+            val promptTooLong = message.contains("Provided prompt is too big for this model")
+            val preconditionFailed = message.contains("invalid: 412 Precondition Failed")
+            return when {
+                this is ClassNotFoundException -> LlmError.GrazieNotAvailable
+                message.contains("invalid: 401") -> HttpError(httpCode = 401)
+                message.contains("invalid: 413 Payload Too Large") -> LlmError.PromptTooLong
+                promptTooLong && preconditionFailed -> LlmError.PromptTooLong
+
+                else ->
+                    HttpError(
+                        message = message,
+                        module = TestSparkModule.Llm(LlmModuleType.Grazie),
+                    )
+            }
         }
+    }
 }

@@ -14,7 +14,7 @@ class JavaJUnitTestSuiteParser(
     private val junitVersion: JUnitVersion,
     private val testBodyPrinter: TestBodyPrinter,
 ) : JUnitTestSuiteParser {
-    override fun parseTestSuite(rawText: String): TestSuiteGeneratedByLLM? {
+    override fun parseTestSuite(rawText: String): TestSuiteGeneratedByLLM {
         val packageInsideTestText = getPackageFromTestSuiteCode(rawText, SupportedLanguage.Java)
         if (packageInsideTestText.isNotBlank()) {
             packageName = packageInsideTestText

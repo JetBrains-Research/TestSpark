@@ -25,72 +25,74 @@ class JUnitTestSuiteParserStrategy {
             packageName: String,
             testNamePattern: String,
             printTestBodyStrategy: TestBodyPrinter,
-        ): TestSuiteGeneratedByLLM? {
-            if (rawText.isBlank()) {
-                return null
-            }
+        ): TestSuiteGeneratedByLLM {
+            require(rawText.isNotBlank()) { "The raw text is blank" }
 
-            try {
-                val rawCode = if (rawText.contains("```")) rawText.split("```")[1] else rawText
-
-                // save imports
-                val imports =
-                    importPattern
-                        .findAll(rawCode)
-                        .map { it.groupValues[0] }
-                        .toMutableSet()
-
-                // save ExtendWith or RunWith annotation if present
-                val runWithAnnotation: String = JUnitVersion.JUnit4.runWithAnnotationMeta.extract(rawCode) ?: ""
-                val annotation = JUnitVersion.JUnit5.runWithAnnotationMeta.extract(rawCode) ?: runWithAnnotation
-
-                val testSet: MutableList<String> = rawCode.split("@Test").toMutableList()
-
-                // save annotations and pre-set methods
-                val otherInfo: String =
-                    run {
-                        val otherInfoList = testSet.removeAt(0).split("{").toMutableList()
-                        otherInfoList.removeFirst()
-                        val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
-                        otherInfo.ifBlank { "" }
-                    }
-
-                // Save the main test cases
-                val testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf()
-                val testCaseParser = JUnitTestCaseParser()
-
-                testSet.forEach ca@{
-                    val rawTest = "@Test$it"
-
-                    val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
-                    val result: Result<TestCaseGeneratedByLLM, TestSparkError> =
-                        testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
-
-                    if (result.isFailure()) {
-                        return@ca
-                    }
-
-                    val currentTest = (result as Result.Success).data
-
-                    // TODO: make logging work
-                    // log.info("New test case: $currentTest")
-
-                    testCases.add(currentTest)
+            val rawCode =
+                if (rawText.contains("```")) {
+                    rawText
+                        .replace(oldValue = "```", newValue = "")
+                        .trimIndent()
+                        .trim()
+                } else {
+                    rawText
                 }
 
-                val testSuite =
-                    TestSuiteGeneratedByLLM(
-                        imports = imports,
-                        packageName = packageName,
-                        annotation = annotation,
-                        otherInfo = otherInfo,
-                        testCases = testCases,
-                    )
+            // save imports
+            val imports =
+                importPattern
+                    .findAll(rawCode)
+                    .map { it.groupValues[0] }
+                    .toMutableSet()
 
-                return testSuite
-            } catch (e: Exception) {
-                return null
+            // save ExtendWith or RunWith annotation if present
+            val runWithAnnotation: String = JUnitVersion.JUnit4.runWithAnnotationMeta.extract(rawCode) ?: ""
+            val annotation = JUnitVersion.JUnit5.runWithAnnotationMeta.extract(rawCode) ?: runWithAnnotation
+
+            val testSet: MutableList<String> = rawCode.split("@Test").toMutableList()
+
+            // save annotations and pre-set methods
+            val otherInfo: String =
+                run {
+                    val otherInfoList = testSet.removeAt(0).split("{").toMutableList()
+                    otherInfoList.removeFirst()
+                    val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
+                    otherInfo.ifBlank { "" }
+                }
+
+            // Save the main test cases
+            val testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf()
+            val testCaseParser = JUnitTestCaseParser()
+
+            testSet.forEach ca@{
+                val rawTest = "@Test$it"
+
+                val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
+                val result: Result<TestCaseGeneratedByLLM> =
+                    testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
+
+                if (result.isFailure()) {
+                    return@ca
+                }
+
+                val currentTest = (result as Result.Success).data
+
+                // TODO: make logging work
+                // log.info("New test case: $currentTest")
+
+                testCases.add(currentTest)
             }
+
+            val testSuite =
+                TestSuiteGeneratedByLLM(
+                    imports = imports,
+                    packageName = packageName,
+                    annotation = annotation,
+                    otherInfo = otherInfo,
+                    testCases = testCases,
+                )
+
+            return testSuite
         }
     }
 
@@ -100,7 +102,7 @@ class JUnitTestSuiteParserStrategy {
             isLastTestCaseInTestSuite: Boolean,
             testNamePattern: String,
             printTestBodyStrategy: TestBodyPrinter,
-        ): Result<TestCaseGeneratedByLLM, TestSparkError> {
+        ): Result<TestCaseGeneratedByLLM> {
             var expectedException = ""
             var throwsException = ""
             val testLines: MutableList<TestLine> = mutableListOf()

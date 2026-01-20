@@ -5,7 +5,8 @@ package org.jetbrains.research.testspark.core.test
  */
 enum class SupportedLanguage(
     val languageId: String,
+    val extension: String,
 ) {
-    Java("JAVA"),
-    Kotlin("kotlin"),
+    Java(languageId = "JAVA", extension = ".java"),
+    Kotlin(languageId = "kotlin", extension = ".kt"),
 }

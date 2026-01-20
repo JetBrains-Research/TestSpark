@@ -1,12 +1,11 @@
 package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
-import org.jetbrains.research.testspark.core.test.TestsAssembler
+import kotlinx.coroutines.flow.Flow
 
 interface GrazieRequest {
-    fun request(
+    suspend fun request(
         token: String,
         messages: List<Pair<String, String>>,
         profile: String,
-        testsAssembler: TestsAssembler,
-    ): String
+    ): Flow<String>
 }

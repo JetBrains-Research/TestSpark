@@ -98,6 +98,8 @@ if (spaceCredentialsProvided()) {
 
     // add build of new source set as the part of UI testing
     tasks.prepareTestSandbox.configure {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
         dependsOn(hasGrazieAccess.jarTaskName)
         from(
             tasks
@@ -114,6 +116,8 @@ if (spaceCredentialsProvided()) {
     }
     // add build of new source set as the part of pluginBuild process
     tasks.prepareSandbox.configure {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
         dependsOn(hasGrazieAccess.jarTaskName)
         from(
             tasks
@@ -216,12 +220,13 @@ dependencies {
     // https://mvnrepository.com/artifact/net.jqwik/jqwik
     testImplementation("net.jqwik:jqwik:1.6.5")
 
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-test
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+
     // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin

@@ -260,7 +260,33 @@ class KotlinJUnitTestSuiteParserTest {
 
         assertNotNull(testSuite1)
         assertNotNull(testSuite2)
-        assertEquals("org.pkg1", testSuite1!!.packageName)
-        assertEquals("org.pkg2", testSuite2!!.packageName)
+        assertEquals("org.pkg1", testSuite1.packageName)
+        assertEquals("org.pkg2", testSuite2.packageName)
+    }
+
+    @Test
+    fun testParseWithRandomBackticksAtBeginning() {
+        val text =
+            """
+             ```
+            ```kotlin
+            import org.junit.jupiter.api.Test
+            
+            class RandomBackticksTestClass {
+                @Test
+                fun testWithRandomBackticks() {
+                    // Test case implementation
+                }
+            }
+            ```
+            """.trimIndent()
+
+        val testBodyPrinter = KotlinTestBodyPrinter()
+        val parser = KotlinJUnitTestSuiteParser("org.example", JUnitVersion.JUnit5, testBodyPrinter)
+        val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
+
+        assertNotNull(testSuite)
+        assertEquals(1, testSuite!!.testCases.size)
+        assertEquals("testWithRandomBackticks", testSuite.testCases[0].name)
     }
 }

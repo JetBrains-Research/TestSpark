@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.core.test
 
+import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 abstract class TestsAssembler {
@@ -34,5 +35,5 @@ abstract class TestsAssembler {
      *
      * @return A TestSuiteGeneratedByLLM object containing information about the extracted test cases.
      */
-    abstract fun assembleTestSuite(): TestSuiteGeneratedByLLM?
+    abstract fun assembleTestSuite(): Result<TestSuiteGeneratedByLLM>
 }
