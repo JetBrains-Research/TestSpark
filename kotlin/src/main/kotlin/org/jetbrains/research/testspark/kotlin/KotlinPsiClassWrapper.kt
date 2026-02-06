@@ -55,8 +55,8 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
                 // Resolve the superclass type reference to a KtClass
                 val superClassPsiClass = superClassEntry?.typeReference?.let { typeRef ->
                     analyze(typeRef) {
-                        val ktType = typeRef.getKtType()
-                        val superClassSymbol = ktType.expandedClassSymbol
+                        val ktType = typeRef.type
+                        val superClassSymbol = ktType.expandedSymbol
                         superClassSymbol?.psi as? KtClass
                     }
                 }

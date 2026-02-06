@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.template
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
@@ -78,4 +79,12 @@ interface Tool {
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     )
+
+    /**
+     * Checks whether the tool is applicable for the specified programming language.
+     *
+     * @param language The programming language to check, represented by an instance of SupportedLanguage.
+     * @return True if the tool is applicable for the provided language, false otherwise.
+     */
+    fun appliedForLanguage(language: SupportedLanguage): Boolean
 }

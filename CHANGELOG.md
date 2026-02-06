@@ -4,6 +4,19 @@
 
 ## Unreleased
 
+## 0.4.0
+
+### Fixed
+- Resolve compatibility issues with Marketplace verifier
+
+### Changed
+- Improve the collection of sample test code candidates
+
+### Added
+- Support for Google AI as an LLM
+- KEX as a new test generation feature
+- Support IDEA 251.*
+
 ## 0.3.1
 
 ### Fixed

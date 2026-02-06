@@ -7,10 +7,17 @@ assignees: ''
 
 ---
 
-# Description
+### Involved Module
+- [ ] UI
+- [ ] EvoSuite
+- [ ] LLM
+- [ ] Kex
+- [ ] Other (please explain)
+
+### Description
 *Please write the user story or the description depending on the issue.*
 
-# Definition of Done
+### Definition of Done
 * [ ]  *Please write point 1 of the Definition of Done*
 * [ ]  *Please write point 2 of the Definition of Done*
 * [ ]  ...

@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.exception.TestSparkException
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
@@ -181,6 +182,11 @@ class Llm(override val name: String = "LLM") : Tool {
             testsExecutionResultManager,
             codeType,
         )
+    }
+
+    override fun appliedForLanguage(language: SupportedLanguage): Boolean {
+        // LLM test generation applied for all languages
+        return true
     }
 
     /**

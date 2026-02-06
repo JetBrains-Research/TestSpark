@@ -28,21 +28,26 @@ import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
+import org.jetbrains.research.testspark.tools.kex.Kex
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.awt.BorderLayout
 import java.awt.CardLayout
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Toolkit
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import javax.swing.Box
+import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
 import javax.swing.JButton
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
+import javax.swing.SwingConstants
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -110,7 +115,9 @@ class TestSparkAction : AnAction() {
 
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
+        private val kexButton = JRadioButton("<html><b>${Kex().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
+        private val kexForLineCodeTypeErrMsg = JLabel() // The error displayed when if kex and line code type are chosen
 
         private val psiHelper: PsiHelper
             get() {
@@ -201,13 +208,17 @@ class TestSparkAction : AnAction() {
             panelTitle.add(JLabel(TestSparkIcons.pluginIcon))
             panelTitle.add(textTitle)
 
-            testGeneratorButtonGroup.add(llmButton)
-            testGeneratorButtonGroup.add(evoSuiteButton)
+            if (Llm().appliedForLanguage(psiHelper.language)) testGeneratorButtonGroup.add(llmButton)
+            if (EvoSuite().appliedForLanguage(psiHelper.language)) testGeneratorButtonGroup.add(evoSuiteButton)
+            if (Kex().appliedForLanguage(psiHelper.language)) testGeneratorButtonGroup.add(kexButton)
 
             val testGeneratorPanel = JPanel()
             testGeneratorPanel.add(JLabel("Select the test generator:"))
-            testGeneratorPanel.add(llmButton)
-            testGeneratorPanel.add(evoSuiteButton)
+            for (button in testGeneratorButtonGroup.elements) testGeneratorPanel.add(button)
+            if (testGeneratorButtonGroup.elements.toList().size == 1) {
+                // A single button is selected by default
+                testGeneratorButtonGroup.elements.toList()[0].isSelected = true
+            }
 
             for ((codeType, codeTypeName) in codeTypes) {
                 val button = JRadioButton(codeTypeName)
@@ -236,8 +247,15 @@ class TestSparkAction : AnAction() {
                 .panel
 
             val nextButtonPanel = JPanel()
+            nextButtonPanel.layout = BoxLayout(nextButtonPanel, BoxLayout.Y_AXIS)
             nextButton.isEnabled = false
+            nextButton.alignmentX = Component.CENTER_ALIGNMENT
+            kexForLineCodeTypeErrMsg.alignmentX = Component.CENTER_ALIGNMENT
+            kexForLineCodeTypeErrMsg.horizontalAlignment = SwingConstants.CENTER
+            nextButtonPanel.add(kexForLineCodeTypeErrMsg)
+            nextButtonPanel.add(Box.createVerticalStrut(10)) // Add some space between label and button
             nextButtonPanel.add(nextButton)
+            updateNextButton()
 
             val cardPanel = JPanel(BorderLayout())
             cardPanel.add(panelTitle, BorderLayout.NORTH)
@@ -267,6 +285,10 @@ class TestSparkAction : AnAction() {
                 updateNextButton()
             }
 
+            kexButton.addActionListener {
+                updateNextButton()
+            }
+
             for ((_, button) in codeTypeButtons) {
                 button.addActionListener {
                     llmSetupPanelFactory.setPromptEditorType(button.text)
@@ -286,6 +308,8 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     pack()
+                } else if (kexButton.isSelected) {
+                    startKexGeneration()
                 } else if (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) {
                     startEvoSuiteGeneration()
                 } else {
@@ -387,6 +411,7 @@ class TestSparkAction : AnAction() {
             dispose()
         }
 
+        private fun startKexGeneration() = startUnitTestGenerationTool(tool = Kex())
         private fun startEvoSuiteGeneration() = startUnitTestGenerationTool(tool = EvoSuite())
         private fun startLLMGeneration() = startUnitTestGenerationTool(tool = Llm())
 
@@ -398,12 +423,23 @@ class TestSparkAction : AnAction() {
          * This method should be called whenever the mentioned above buttons are clicked.
          */
         private fun updateNextButton() {
-            val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected
+            val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected || kexButton.isSelected
             val isCodeTypeButtonGroupSelected = codeTypeButtons.any { it.second.isSelected }
-            nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
+            val kexForCodeLineType =
+                kexButton.isSelected && codeTypeButtons.any { (codeType, button) -> codeType == CodeType.LINE && button.isSelected }
+            if (kexForCodeLineType) {
+                kexForLineCodeTypeErrMsg.text =
+                    "<html><b><font color='orange'>* Kex cannot generate tests for a single line. Please change your selection</font></b></html>"
+            } else {
+                kexForLineCodeTypeErrMsg.text = ""
+            }
+
+            nextButton.isEnabled =
+                isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected && !kexForCodeLineType
 
             if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||
-                (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected)
+                (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) ||
+                kexButton.isSelected
             ) {
                 nextButton.text = PluginLabelsBundle.get("ok")
             } else {
