@@ -114,21 +114,24 @@ class PromptTemplateFactory(
 
     private fun setSettingsStateParameters() {
         templates.clear()
-        templates = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPrompts)
-            PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPrompts)
-            PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePrompts)
-        }
-        names = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPromptNames)
-            PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPromptNames)
-            PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePromptNames)
-        }
-        currentDefaultIndex = when (promptEditorType) {
-            PromptEditorType.CLASS -> llmSettingsState.classCurrentDefaultPromptIndex
-            PromptEditorType.METHOD -> llmSettingsState.methodCurrentDefaultPromptIndex
-            PromptEditorType.LINE -> llmSettingsState.lineCurrentDefaultPromptIndex
-        }
+        templates =
+            when (promptEditorType) {
+                PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPrompts)
+                PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPrompts)
+                PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePrompts)
+            }
+        names =
+            when (promptEditorType) {
+                PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPromptNames)
+                PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPromptNames)
+                PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePromptNames)
+            }
+        currentDefaultIndex =
+            when (promptEditorType) {
+                PromptEditorType.CLASS -> llmSettingsState.classCurrentDefaultPromptIndex
+                PromptEditorType.METHOD -> llmSettingsState.methodCurrentDefaultPromptIndex
+                PromptEditorType.LINE -> llmSettingsState.lineCurrentDefaultPromptIndex
+            }
         currentTemplateNumber = currentDefaultIndex
     }
 
@@ -139,8 +142,7 @@ class PromptTemplateFactory(
         }
     }
 
-    private fun getDefaultPromptTemplateName(number: Int) =
-        PluginLabelsBundle.get("defaultPromptTemplateName") + number.toString()
+    private fun getDefaultPromptTemplateName(number: Int) = PluginLabelsBundle.get("defaultPromptTemplateName") + number.toString()
 
     private fun addListeners() {
         promptTemplateName.document.addDocumentListener(

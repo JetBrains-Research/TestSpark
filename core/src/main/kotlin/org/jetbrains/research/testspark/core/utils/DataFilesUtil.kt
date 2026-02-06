@@ -43,6 +43,16 @@ class DataFilesUtil {
             folder.delete()
         }
 
+        fun makeTmpFile(
+            prefix: String,
+            content: String,
+        ): String {
+            val tmpFile = File.createTempFile(prefix, ".tmp")
+            tmpFile.writeText(content)
+            tmpFile.deleteOnExit()
+            return tmpFile.absolutePath
+        }
+
         val classpathSeparator: Char
             get() {
                 var sep = ':'

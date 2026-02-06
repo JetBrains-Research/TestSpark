@@ -4,6 +4,18 @@
 
 ## Unreleased
 
+## 0.4.1 - 2025-05-08
+
+### Fixed
+- Changed TestSpark’s vendor to JetBrains
+- Fixed minor bugs
+
+### Changed
+- Improved the error-handling structure
+
+### Added
+- Support IDEA 252.*
+
 ## 0.4.0
 
 ### Fixed

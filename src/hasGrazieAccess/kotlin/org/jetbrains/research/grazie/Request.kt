@@ -7,7 +7,6 @@ import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequest
 
 class Request : GrazieRequest {
-
     override fun request(
         token: String,
         messages: List<Pair<String, String>>,
@@ -17,11 +16,13 @@ class Request : GrazieRequest {
         val generation = TestGeneration(token)
         var errorMessage = ""
         runBlocking {
-            generation.generate(messages, profile).catch {
-                errorMessage = it.message.toString()
-            }.collect {
-                testsAssembler.consume(it)
-            }
+            generation
+                .generate(messages, profile)
+                .catch {
+                    errorMessage = it.message.toString()
+                }.collect {
+                    testsAssembler.consume(it)
+                }
         }
         return errorMessage
     }

@@ -3,7 +3,9 @@ package org.jetbrains.research.testspark.display.custom
 import com.intellij.openapi.progress.ProgressIndicator
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 
-class IJProgressIndicator(private val indicator: ProgressIndicator) : CustomProgressIndicator {
+class IJProgressIndicator(
+    private val indicator: ProgressIndicator,
+) : CustomProgressIndicator {
     override fun setText(text: String) {
         indicator.text = text
     }
@@ -27,14 +29,20 @@ class IJProgressIndicator(private val indicator: ProgressIndicator) : CustomProg
     override fun isRunning(): Boolean = indicator.isRunning
 
     override fun start() {
-        indicator.start()
+        if (!indicator.isRunning) {
+            indicator.start()
+        }
     }
 
     override fun stop() {
-        indicator.stop()
+        if (indicator.isRunning) {
+            indicator.stop()
+        }
     }
 
     override fun cancel() {
-        indicator.cancel()
+        if (!indicator.isCanceled) {
+            indicator.cancel()
+        }
     }
 }

@@ -6,7 +6,9 @@ import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
 import kotlin.time.Duration.Companion.seconds
 
-class KexSettingsConfigurable(private val project: Project) : SettingsConfigurable {
+class KexSettingsConfigurable(
+    private val project: Project,
+) : SettingsConfigurable {
     private val kexSettingsState: KexSettingsState
         get() = project.getService(KexSettingsService::class.java).state
 
@@ -39,14 +41,13 @@ class KexSettingsConfigurable(private val project: Project) : SettingsConfigurab
      *
      * @return whether any setting has been modified
      */
-    override fun isModified(): Boolean {
-        return settingsComponent!!.kexVersion != kexSettingsState.kexVersion ||
+    override fun isModified(): Boolean =
+        settingsComponent!!.kexVersion != kexSettingsState.kexVersion ||
             settingsComponent!!.kexPath != kexSettingsState.kexHome ||
             settingsComponent!!.kexMode != kexSettingsState.kexMode ||
             settingsComponent!!.option != kexSettingsState.otherOptions ||
             settingsComponent!!.maxTests != kexSettingsState.maxTests ||
             settingsComponent!!.timeLimit != kexSettingsState.timeLimit.inWholeSeconds.toInt()
-    }
 
     /**
      * Persists the modified state after a user hit Apply button.
@@ -65,9 +66,7 @@ class KexSettingsConfigurable(private val project: Project) : SettingsConfigurab
      *
      * @return the name displayed in the menu (settings)
      */
-    override fun getDisplayName(): String {
-        return "TestSpark"
-    }
+    override fun getDisplayName(): String = "TestSpark"
 
     /**
      * Disposes the UI resources. It is called when a user closes the Settings dialog.

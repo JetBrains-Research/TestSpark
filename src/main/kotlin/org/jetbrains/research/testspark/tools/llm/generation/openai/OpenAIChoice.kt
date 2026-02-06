@@ -9,4 +9,7 @@ data class OpenAIChoice(
     val finishedReason: String,
 )
 
-data class Delta(val role: String?, val content: String)
+data class Delta(
+    val role: String?,
+    val content: String,
+)

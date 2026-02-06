@@ -6,8 +6,8 @@ import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
-import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -23,7 +23,6 @@ import org.mockito.Mockito.`when`
 
 @EnabledIfEnvironmentVariable(named = "GOOGLE_API_KEY", matches = ".+")
 class GeminiRequestManagerTest {
-
     private lateinit var project: Project
     private lateinit var testsAssembler: TestsAssembler
 
@@ -44,18 +43,20 @@ class GeminiRequestManagerTest {
         `when`(settingsService.state).thenReturn(settingsState)
         `when`(project.getService(LLMSettingsService::class.java)).thenReturn(settingsService)
 
-        testsAssembler = JUnitTestsAssembler(
-            indicator,
-            mock(TestGenerationData::class.java),
-            mock(TestSuiteParser::class.java),
-            JUnitVersion.JUnit5,
-        )
+        testsAssembler =
+            JUnitTestsAssembler(
+                indicator,
+                mock(TestGenerationData::class.java),
+                mock(JUnitTestSuiteParser::class.java),
+                JUnitVersion.JUnit5,
+            )
     }
 
     @Test
     fun `test request manager implementation for Google Gemini`() {
         val manager = GeminiRequestManager(project)
-        val prompt = """
+        val prompt =
+            """
             You are a Java tester.  Provide a test case that covers the following code snippet:
             
             ```java
@@ -68,7 +69,7 @@ class GeminiRequestManagerTest {
               }
             }
             ```
-        """.trimIndent()
+            """.trimIndent()
         manager.request(
             SupportedLanguage.Java,
             prompt,

@@ -10,7 +10,7 @@ package org.jetbrains.research.testspark.core.test.data
 data class TestSuiteGeneratedByLLM(
     var imports: MutableSet<String> = mutableSetOf(),
     var packageName: String = "",
-    var runWith: String = "",
+    var annotation: String = "",
     var otherInfo: String = "",
     var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf(),
 ) {
@@ -22,9 +22,7 @@ data class TestSuiteGeneratedByLLM(
      *
      * @return `true` if the testCases collection is empty, `false` otherwise.
      */
-    fun isEmpty(): Boolean {
-        return testCases.isEmpty()
-    }
+    fun isEmpty(): Boolean = testCases.isEmpty()
 
     /**
      * Sets the test cases for this object.

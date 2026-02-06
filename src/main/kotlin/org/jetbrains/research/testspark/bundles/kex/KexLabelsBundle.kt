@@ -7,11 +7,12 @@ import org.jetbrains.annotations.PropertyKey
 /**
  * Loads the `resources` directory.
  */
-object KexLabelsBundle : DynamicBundle(KexBundlePaths.labels) {
-
+object KexLabelsBundle : DynamicBundle(KexBundlePaths.LABELS) {
     /**
      * Gets the requested default value.
      */
     @Nls
-    fun get(@PropertyKey(resourceBundle = KexBundlePaths.labels) key: String): String = getMessage(key)
+    fun get(
+        @PropertyKey(resourceBundle = KexBundlePaths.LABELS) key: String,
+    ): String = getMessage(key)
 }

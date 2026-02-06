@@ -36,6 +36,13 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.4.1</h4>
+            <ul>
+                <li>Changed TestSpark’s vendor to JetBrains.</li>
+                <li>Support IDEA 252.*</li>
+                <li>Improved the error-handling structure.</li>
+                <li>Fixed minor bugs.</li>
+            </ul>
         <h4>0.4.0</h4>
             <ul>
                 <li>Add support for Google AI as an LLM.</li>
@@ -253,9 +260,9 @@
                            displayType="BALLOON"/>
         <notificationGroup id="Kex Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Generation Error"
+        <notificationGroup id="UserInterface"
                            displayType="BALLOON"/>
-        <notificationGroup id="Test case copied"
+        <notificationGroup id="Compiler Error"
                            displayType="BALLOON"/>
 
     </extensions>

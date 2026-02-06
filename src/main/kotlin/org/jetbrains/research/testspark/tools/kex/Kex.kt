@@ -4,7 +4,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -18,7 +19,9 @@ import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.kex.generation.KexProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
 
-class Kex(override val name: String = "Kex") : Tool {
+class Kex(
+    override val name: String = "Kex",
+) : Tool {
     private val log = Logger.getInstance(this::class.java)
 
     /**
@@ -28,7 +31,12 @@ class Kex(override val name: String = "Kex") : Tool {
      * @return The KexProcessManager instance created for the given project.
      */
     private fun getKexProcessManager(project: Project): KexProcessManager {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
         val settingsProjectState = project.service<PluginSettingsService>().state
         val buildPath = ToolUtils.osJoin(projectClassPath, settingsProjectState.buildPath)
         return KexProcessManager(project, buildPath)
@@ -49,7 +57,8 @@ class Kex(override val name: String = "Kex") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -59,7 +68,8 @@ class Kex(override val name: String = "Kex") : Tool {
             psiHelper,
             caretOffset,
             fileUrl,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
@@ -76,7 +86,8 @@ class Kex(override val name: String = "Kex") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -87,7 +98,8 @@ class Kex(override val name: String = "Kex") : Tool {
             psiHelper,
             caretOffset,
             fileUrl,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
@@ -109,7 +121,8 @@ class Kex(override val name: String = "Kex") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -136,11 +149,17 @@ class Kex(override val name: String = "Kex") : Tool {
         psiHelper: PsiHelper,
         caretOffset: Int,
         fileUrl: String?,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): Pipeline {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
 
         val settingsProjectState = project.service<PluginSettingsService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
@@ -151,7 +170,8 @@ class Kex(override val name: String = "Kex") : Tool {
             caretOffset,
             fileUrl,
             packageName,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             name,
@@ -173,7 +193,9 @@ class Kex(override val name: String = "Kex") : Tool {
                 ++stack
             } else if (c == '>') {
                 --stack
-            } else if (stack == 0) s.append(c)
+            } else if (stack == 0) {
+                s.append(c)
+            }
         }
         return s.toString()
     }

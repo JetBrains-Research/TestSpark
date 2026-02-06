@@ -11,7 +11,6 @@ import kotlinx.serialization.json.Json
  */
 class JsonEncoding {
     companion object {
-
         /**
          * Decode a string into a list of strings
          */
@@ -21,9 +20,10 @@ class JsonEncoding {
         /**
          * Encode a list of strings into a string
          */
-        fun encode(values: MutableList<String>): String = Json.encodeToString(
-            ListSerializer(String.serializer()),
-            values,
-        )
+        fun encode(values: MutableList<String>): String =
+            Json.encodeToString(
+                ListSerializer(String.serializer()),
+                values,
+            )
     }
 }

@@ -41,8 +41,10 @@ class PluginSettingsConfigurableTest {
         val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
             IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
 
-        fixture = JavaTestFixtureFactory.getFixtureFactory()
-            .createCodeInsightFixture(projectBuilder.fixture)
+        fixture =
+            JavaTestFixtureFactory
+                .getFixtureFactory()
+                .createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
         settingsConfigurable = PluginSettingsConfigurable(fixture.project)
@@ -84,7 +86,12 @@ class PluginSettingsConfigurableTest {
     @ParameterizedTest
     @MethodSource("intValueGenerator")
     @Order(3)
-    fun testApplyValues(oldValue: Int, function: () -> Unit, component: () -> Int, state: () -> Int) {
+    fun testApplyValues(
+        oldValue: Int,
+        function: () -> Unit,
+        component: () -> Int,
+        state: () -> Int,
+    ) {
         function()
         settingsConfigurable.apply()
         assertThat(component()).isNotEqualTo(oldValue)
@@ -102,8 +109,8 @@ class PluginSettingsConfigurableTest {
         settingsConfigurable.apply()
     }
 
-    private fun intValueGenerator(): Stream<Arguments> {
-        return Stream.of(
+    private fun intValueGenerator(): Stream<Arguments> =
+        Stream.of(
             Arguments.of(
                 settingsComponent.colorBlue,
                 { settingsComponent.colorBlue += 20 },
@@ -123,5 +130,4 @@ class PluginSettingsConfigurableTest {
                 { settingsState.colorGreen },
             ),
         )
-    }
 }

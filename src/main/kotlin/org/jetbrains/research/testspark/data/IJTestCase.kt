@@ -11,7 +11,6 @@ class IJTestCase(
     testCode: String,
     coveredLines: Set<Int>,
 ) : TestCase(id, testName, testCode, coveredLines) {
-
     var coveredBranches: Set<BranchInfo> = setOf()
     var coveredMutants: Set<MutationInfo> = setOf()
 

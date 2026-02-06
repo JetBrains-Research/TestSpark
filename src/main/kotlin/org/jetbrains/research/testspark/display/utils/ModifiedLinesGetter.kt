@@ -8,7 +8,10 @@ object ModifiedLinesGetter {
      * @param target The target list of strings.
      * @return The indexes of modified lines.
      */
-    fun getLines(source: List<String>, target: List<String>): List<Int> {
+    fun getLines(
+        source: List<String>,
+        target: List<String>,
+    ): List<Int> {
         val dp = Array(source.size + 1) { IntArray(target.size + 1) }
 
         for (i in 1..source.size) {

@@ -25,7 +25,6 @@ class GeneratedTestsProcessor(
     private val kexErrorManager: KexErrorManager,
     private val testsExecutionResultManager: TestsExecutionResultManager,
 ) {
-
     companion object {
         const val EQUALITY_UTILS = "EqualityUtils"
         const val REFLECTION_UTILS = "ReflectionUtils"
@@ -44,9 +43,10 @@ class GeneratedTestsProcessor(
         val imports = mutableSetOf<String>()
         val packageStr = classFQN.substringBeforeLast('.', missingDelimiterValue = DEFAULT_PACKAGE_NAME)
 
-        val generatedTestsDir = File(
-            ToolUtils.osJoin(resultName, "tests", packageStr.replace('.', '/')),
-        )
+        val generatedTestsDir =
+            File(
+                ToolUtils.osJoin(resultName, "tests", packageStr.replace('.', '/')),
+            )
         if (generatedTestsDir.exists() && generatedTestsDir.isDirectory) { // collect all generated tests into a report
             for ((index, file) in generatedTestsDir.listFiles()!!.withIndex()) {
                 val testCode = file.readText()
@@ -97,13 +97,15 @@ class GeneratedTestsProcessor(
     /**
      * Precondition: there is only one class or interface per helper file (ie, EqualityUtils or ReflectionUtils)
      */
-    private fun getHelperClassBody(testCode: String) =
-        testCode.substringAfter('{').substringBeforeLast('}')
+    private fun getHelperClassBody(testCode: String) = testCode.substringAfter('{').substringBeforeLast('}')
 
     /**
      * Merge the fields, @Before, @Test into a single @Test annotated method
      */
-    private fun extractTestMethod(file: File, testCaseName: String): MethodDeclaration? {
+    private fun extractTestMethod(
+        file: File,
+        testCaseName: String,
+    ): MethodDeclaration? {
         val compilationUnit = StaticJavaParser.parse(file)
         val methods = compilationUnit.findAll(MethodDeclaration::class.java)
         val beforeAnnMethod = methods.getMethodWithAnnotation("@Before", file.name) ?: return null
@@ -113,7 +115,8 @@ class GeneratedTestsProcessor(
 
         // convert fields to local variables
         collatedMethodBody.addAll(
-            compilationUnit.findAll(FieldDeclaration::class.java)
+            compilationUnit
+                .findAll(FieldDeclaration::class.java)
                 .filter { it.annotations.isEmpty() } // drops the unwanted timeout field
                 .map { it.setModifiers(NodeList()) } // remove all modifiers (including access specifiers like public and private)
                 .map { it.toString() }
@@ -126,10 +129,12 @@ class GeneratedTestsProcessor(
         return testAnnMethod
     }
 
-    private fun MethodDeclaration.statements(): NodeList<Statement>? =
-        body.map { it.statements }.orElse(NodeList())
+    private fun MethodDeclaration.statements(): NodeList<Statement>? = body.map { it.statements }.orElse(NodeList())
 
-    private fun MutableList<MethodDeclaration>.getMethodWithAnnotation(ann: String, fileName: String): MethodDeclaration? =
+    private fun MutableList<MethodDeclaration>.getMethodWithAnnotation(
+        ann: String,
+        fileName: String,
+    ): MethodDeclaration? =
         firstOrNull { it.annotations.map { it.toString() }.contains(ann) }.apply {
             if (this == null) {
                 kexErrorManager.warningProcess(

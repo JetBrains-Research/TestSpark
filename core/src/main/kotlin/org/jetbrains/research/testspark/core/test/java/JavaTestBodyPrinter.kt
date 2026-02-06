@@ -26,10 +26,11 @@ class JavaTestBodyPrinter : TestBodyPrinter {
 
         // write each line
         lines.forEach { line ->
-            testFullText += when (line.type) {
-                TestLineType.BREAK -> "\t\t\n"
-                else -> "\t\t${line.text}\n"
-            }
+            testFullText +=
+                when (line.type) {
+                    TestLineType.BREAK -> "\t\t\n"
+                    else -> "\t\t${line.text}\n"
+                }
         }
 
         // close test case

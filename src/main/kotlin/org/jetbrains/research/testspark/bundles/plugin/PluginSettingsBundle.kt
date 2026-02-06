@@ -7,11 +7,12 @@ import org.jetbrains.annotations.PropertyKey
 /**
  * Loads the `resources` directory.
  */
-object PluginSettingsBundle : DynamicBundle(PluginBundlePaths.settings) {
-
+object PluginSettingsBundle : DynamicBundle(PluginBundlePaths.SETTINGS) {
     /**
      * Gets the requested default value.
      */
     @Nls
-    fun get(@PropertyKey(resourceBundle = PluginBundlePaths.settings) key: String): String = getMessage(key)
+    fun get(
+        @PropertyKey(resourceBundle = PluginBundlePaths.SETTINGS) key: String,
+    ): String = getMessage(key)
 }

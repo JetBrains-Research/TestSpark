@@ -8,31 +8,36 @@ import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFunction
+import org.jetbrains.kotlin.psi.KtNullableType
 import org.jetbrains.kotlin.psi.KtPrimaryConstructor
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtTypeReference
+import org.jetbrains.kotlin.psi.KtUserType
 import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
-
+class KotlinPsiMethodWrapper(
+    val psiFunction: KtFunction,
+) : PsiMethodWrapper {
     override val name: String get() = psiFunction.name!!
 
     override val text: String? = psiFunction.text
 
-    override val containingClass: PsiClassWrapper? = psiFunction.run {
-        parentOfType<KtClass>()?.let { KotlinPsiClassWrapper(it) }
-    }
+    override val containingClass: PsiClassWrapper? =
+        psiFunction.run {
+            parentOfType<KtClass>()?.let { KotlinPsiClassWrapper(it) }
+        }
 
     override val containingFile: PsiFile = psiFunction.containingFile
 
     override val methodDescriptor: String
-        get() = psiFunction.run {
-            val parameterTypes = valueParameters.joinToString("") { generateFieldType(it.typeReference) }
-            val returnType = generateReturnDescriptor(psiFunction)
-            return "$name($parameterTypes)$returnType"
-        }
+        get() =
+            psiFunction.run {
+                val parameterTypes = valueParameters.joinToString("") { generateFieldType(it.typeReference) }
+                val returnType = generateReturnDescriptor(psiFunction)
+                return "$name($parameterTypes)$returnType"
+            }
 
     override val signature: String
         get() = buildSignature(psiFunction)
@@ -54,14 +59,17 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
 
     val isTopLevelFunction: Boolean = psiFunction.containingClassOrObject == null
 
-    val isDefaultMethod: Boolean = psiFunction.run {
-        val containingClass = PsiTreeUtil.getParentOfType(this, KtClassOrObject::class.java)
-        val containingInterface = containingClass?.isInterfaceClass()
-        // ensure that the function is a non-abstract method defined in an interface
-        name != "<init>" && // function is not a constructor
-            bodyExpression != null && // function has an implementation
-            containingInterface == true // function is defined within an interface
-    }
+    val isDefaultMethod: Boolean =
+        psiFunction.run {
+            val containingClass = PsiTreeUtil.getParentOfType(this, KtClassOrObject::class.java)
+            val containingInterface = containingClass?.isInterfaceClass()
+            // ensure that the function is a non-abstract method defined in an interface
+            name != "<init>" &&
+                // function is not a constructor
+                bodyExpression != null &&
+                // function has an implementation
+                containingInterface == true // function is defined within an interface
+        }
 
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiFunction.containingFile
@@ -74,20 +82,38 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
         return lineNumber in startLine..endLine
     }
 
+    override fun isTestingMethod(): Boolean =
+        psiFunction.annotationEntries.any { annotation ->
+            val text = (annotation.text)
+            text == "@org.junit.Test" ||
+                text == "@org.junit.jupiter.api.Test" ||
+                text == "@org.testng.annotations.Test" ||
+                text == "@Test"
+        }
+
     /**
      * Returns a set of `PsiClassWrapper` instances for non-standard Kotlin classes referenced by the
      * parameters of the current function.
      *
      * @return A mutable set of `PsiClassWrapper` instances representing non-standard Kotlin classes.
      */
-    fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
+    override fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
 
         psiFunction.valueParameters.forEach { parameter ->
-            val typeReference = parameter.typeReference
-            val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-            if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
+            var typeElement = parameter.typeReference?.typeElement
+            if (typeElement is KtNullableType) {
+                typeElement = typeElement.innerType
+            }
+            if (typeElement is KtUserType) {
+                val psiClass =
+                    typeElement.referenceExpression
+                        ?.references
+                        ?.firstOrNull()
+                        ?.resolve()
+                if (psiClass is KtClass && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
+                    interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
+                }
             }
         }
 
@@ -123,8 +149,8 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
      * @param type the type to generate the descriptor for
      * @return the field descriptor
      */
-    private fun generateFieldType(type: String): String {
-        return when (type) {
+    private fun generateFieldType(type: String): String =
+        when (type) {
             "Int" -> "I"
             "Long" -> "J"
             "Float" -> "F"
@@ -136,7 +162,6 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
             "Unit" -> "V"
             else -> "L${type.replace('.', '/')};"
         }
-    }
 
     companion object {
         /**
@@ -145,9 +170,12 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
          * @param function The Kotlin function to build the signature for.
          * @return The signature of the function.
          */
-        fun buildSignature(function: KtFunction) = function.run {
-            val bodyStart = bodyExpression?.startOffsetInParent ?: textLength
-            text.substring(0, bodyStart).replace('\n', ' ').trim()
-        }
+        fun buildSignature(function: KtFunction) =
+            function.run {
+                val bodyStart = bodyExpression?.startOffsetInParent ?: textLength
+                val prefix = if (this is KtPrimaryConstructor || this is KtSecondaryConstructor) name else ""
+                val signatureStart = if (this is KtSecondaryConstructor) "constructor".length else 0
+                prefix + text.substring(signatureStart, bodyStart).replace('\n', ' ').trim()
+            }
     }
 }

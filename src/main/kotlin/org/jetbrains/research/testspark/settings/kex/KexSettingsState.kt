@@ -16,7 +16,6 @@ data class KexSettingsState(
     var timeLimit: Duration = DefaultKexSettingsState.timeLimit,
     var maxTests: Int = DefaultKexSettingsState.maxTests,
 ) {
-
     /**
      * Default values of SettingsKexState.
      */

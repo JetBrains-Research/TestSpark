@@ -42,31 +42,33 @@ class SettingsArgumentsLlmEvoSuiteTest {
 
     @Test
     fun testCommandForClass() {
-        val settings = EvoSuiteSettingsArguments(
-            "project/classpath",
-            "project",
-            "serializepath",
-            "lang.java.Dung",
-            "basedir",
-            settingsState,
-        )
-        val command = mutableListOf(
-            "-generateMOSuite",
-            "-serializeResult",
-            "-serializeResultPath",
-            "serializepath",
-            "-base_dir",
-            """"basedir"""",
-            "-projectCP",
-            "project/classpath",
-            "-Dnew_statistics=false",
-            "-class",
-            "lang.java.Dung",
-            "-Dcatch_undeclared_exceptions=false",
-            "-Dtest_naming_strategy=COVERAGE",
-            "-Dalgorithm=DYNAMOSA",
-            "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH",
-        )
+        val settings =
+            EvoSuiteSettingsArguments(
+                "project/classpath",
+                "project",
+                "serializepath",
+                "lang.java.Dung",
+                "basedir",
+                settingsState,
+            )
+        val command =
+            mutableListOf(
+                "-generateMOSuite",
+                "-serializeResult",
+                "-serializeResultPath",
+                "serializepath",
+                "-base_dir",
+                """"basedir"""",
+                "-projectCP",
+                "project/classpath",
+                "-Dnew_statistics=false",
+                "-class",
+                "lang.java.Dung",
+                "-Dcatch_undeclared_exceptions=false",
+                "-Dtest_naming_strategy=COVERAGE",
+                "-Dalgorithm=DYNAMOSA",
+                "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH",
+            )
 
         val actual = settings.build()
 
@@ -77,32 +79,34 @@ class SettingsArgumentsLlmEvoSuiteTest {
 
     @Test
     fun testCommandForMethod() {
-        val settings = EvoSuiteSettingsArguments(
-            "project/classpath",
-            "project",
-            "serializepath",
-            "lang.java.Dung",
-            "basedir",
-            settingsState,
-        ).forMethod("dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;")
-        val command = mutableListOf(
-            "-generateMOSuite",
-            "-serializeResult",
-            "-serializeResultPath",
-            "serializepath",
-            "-base_dir",
-            "\"basedir\"",
-            "-projectCP",
-            "project/classpath",
-            "-Dnew_statistics=false",
-            "-class",
-            "lang.java.Dung",
-            "-Dcatch_undeclared_exceptions=false",
-            "-Dtest_naming_strategy=COVERAGE",
-            "-Dtarget_method=dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;",
-            "-Dalgorithm=DYNAMOSA",
-            "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH",
-        )
+        val settings =
+            EvoSuiteSettingsArguments(
+                "project/classpath",
+                "project",
+                "serializepath",
+                "lang.java.Dung",
+                "basedir",
+                settingsState,
+            ).forMethod("dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;")
+        val command =
+            mutableListOf(
+                "-generateMOSuite",
+                "-serializeResult",
+                "-serializeResultPath",
+                "serializepath",
+                "-base_dir",
+                "\"basedir\"",
+                "-projectCP",
+                "project/classpath",
+                "-Dnew_statistics=false",
+                "-class",
+                "lang.java.Dung",
+                "-Dcatch_undeclared_exceptions=false",
+                "-Dtest_naming_strategy=COVERAGE",
+                "-Dtarget_method=dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;",
+                "-Dalgorithm=DYNAMOSA",
+                "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH",
+            )
 
         val actual = settings.build()
 
@@ -122,24 +126,25 @@ class SettingsArgumentsLlmEvoSuiteTest {
                 "basedir",
                 settingsState,
             ).forLine(419)
-        val command = mutableListOf(
-            "-generateMOSuite",
-            "-serializeResult",
-            "-serializeResultPath",
-            "serializepath",
-            "-base_dir",
-            """"basedir"""",
-            "-projectCP",
-            "project/classpath",
-            "-Dnew_statistics=false",
-            "-class",
-            "lang.java.Dung",
-            "-Dcatch_undeclared_exceptions=false",
-            "-Dtest_naming_strategy=COVERAGE",
-            "-Dtarget_line=419",
-            "-Dalgorithm=DYNAMOSA",
-            "-Dcriterion=LINE:BRANCH:",
-        )
+        val command =
+            mutableListOf(
+                "-generateMOSuite",
+                "-serializeResult",
+                "-serializeResultPath",
+                "serializepath",
+                "-base_dir",
+                """"basedir"""",
+                "-projectCP",
+                "project/classpath",
+                "-Dnew_statistics=false",
+                "-class",
+                "lang.java.Dung",
+                "-Dcatch_undeclared_exceptions=false",
+                "-Dtest_naming_strategy=COVERAGE",
+                "-Dtarget_line=419",
+                "-Dalgorithm=DYNAMOSA",
+                "-Dcriterion=LINE:BRANCH:",
+            )
 
         val actual = settings.build(true)
 
@@ -159,14 +164,15 @@ class SettingsArgumentsLlmEvoSuiteTest {
         settingsState.criterionMethod = false
         settingsState.criterionOutput = false
 
-        val settings = EvoSuiteSettingsArguments(
-            "project/classpath",
-            "project",
-            "serializepath",
-            "lang.java.Dung",
-            "basedir",
-            settingsState,
-        )
+        val settings =
+            EvoSuiteSettingsArguments(
+                "project/classpath",
+                "project",
+                "serializepath",
+                "lang.java.Dung",
+                "basedir",
+                settingsState,
+            )
 
         val criterion = settings.build().last()
 
@@ -182,14 +188,15 @@ class SettingsArgumentsLlmEvoSuiteTest {
         settingsState.criterionWeakMutation = false
         settingsState.criterionLine = false
 
-        val settings = EvoSuiteSettingsArguments(
-            "project/classpath",
-            "project",
-            "serializepath",
-            "lang.java.Dung",
-            "basedir",
-            settingsState,
-        )
+        val settings =
+            EvoSuiteSettingsArguments(
+                "project/classpath",
+                "project",
+                "serializepath",
+                "lang.java.Dung",
+                "basedir",
+                settingsState,
+            )
 
         val criterion = settings.build().last()
 
@@ -200,14 +207,15 @@ class SettingsArgumentsLlmEvoSuiteTest {
 
     @Test
     fun testCriterionStringAll() {
-        val settings = EvoSuiteSettingsArguments(
-            "project/classpath",
-            "project",
-            "serializepath",
-            "lang.java.Dung",
-            "basedir",
-            settingsState,
-        )
+        val settings =
+            EvoSuiteSettingsArguments(
+                "project/classpath",
+                "project",
+                "serializepath",
+                "lang.java.Dung",
+                "basedir",
+                settingsState,
+            )
 
         val criterion = settings.build().last()
 

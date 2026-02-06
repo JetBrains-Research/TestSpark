@@ -7,7 +7,6 @@ import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testspark.core.data.Report
 
 class IJReport : Report {
-
     var allCoveredBranches: Set<BranchInfo> = setOf()
     var allUncoveredBranches: Set<BranchInfo> = setOf()
     var allCoveredMutation: Set<MutationInfo> = setOf()
@@ -24,7 +23,7 @@ class IJReport : Report {
      * @param compactReport is org.evosuite.utils.CompactReport object
      */
     constructor(compactReport: CompactReport) {
-        UUT = compactReport.UUT
+        uut = compactReport.UUT
         allCoveredLines = compactReport.allCoveredLines
         allUncoveredLines = compactReport.allUncoveredLines
         allCoveredBranches = compactReport.allCoveredBranches

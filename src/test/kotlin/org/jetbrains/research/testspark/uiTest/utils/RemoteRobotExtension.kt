@@ -19,28 +19,37 @@ import javax.imageio.ImageIO
 
 // The code here was copied from JetBrains/intellij-ui-test-robot library to create UI testing for the plugin.
 // Link: https://github.com/JetBrains/intellij-ui-test-robot/blob/master/ui-test-example/src/test/kotlin/org/intellij/examples/simple/plugin/utils/RemoteRobotExtension.kt
-class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
+class RemoteRobotExtension :
+    AfterTestExecutionCallback,
+    ParameterResolver {
     private val url: String = System.getProperty("remote-robot-url") ?: "http://127.0.0.1:8082"
-    private val remoteRobot: RemoteRobot = if (System.getProperty("debug-retrofit")?.equals("enable") == true) {
-        val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
-            this.level = HttpLoggingInterceptor.Level.BODY
+    private val remoteRobot: RemoteRobot =
+        if (System.getProperty("debug-retrofit")?.equals("enable") == true) {
+            val interceptor: HttpLoggingInterceptor =
+                HttpLoggingInterceptor().apply {
+                    this.level = HttpLoggingInterceptor.Level.BODY
+                }
+            val client =
+                OkHttpClient
+                    .Builder()
+                    .apply {
+                        this.addInterceptor(interceptor)
+                    }.build()
+            RemoteRobot(url, client)
+        } else {
+            RemoteRobot(url)
         }
-        val client = OkHttpClient.Builder().apply {
-            this.addInterceptor(interceptor)
-        }.build()
-        RemoteRobot(url, client)
-    } else {
-        RemoteRobot(url)
-    }
     private val client = OkHttpClient()
 
-    override fun supportsParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Boolean {
-        return parameterContext?.parameter?.type?.equals(RemoteRobot::class.java) ?: false
-    }
+    override fun supportsParameter(
+        parameterContext: ParameterContext?,
+        extensionContext: ExtensionContext?,
+    ): Boolean = parameterContext?.parameter?.type?.equals(RemoteRobot::class.java) ?: false
 
-    override fun resolveParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Any {
-        return remoteRobot
-    }
+    override fun resolveParameter(
+        parameterContext: ParameterContext?,
+        extensionContext: ExtensionContext?,
+    ): Any = remoteRobot
 
     override fun afterTestExecution(context: ExtensionContext?) {
         val testMethod: Method = context?.requiredTestMethod ?: throw IllegalStateException("test method is null")
@@ -65,28 +74,36 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
         println("Hierarchy snapshot: ${hierarchySnapshot.absolutePath}")
     }
 
-    private fun saveFile(url: String, folder: String, name: String): File {
+    private fun saveFile(
+        url: String,
+        folder: String,
+        name: String,
+    ): File {
         val response = client.newCall(Request.Builder().url(url).build()).execute()
-        return File(folder).apply {
-            mkdirs()
-        }.resolve(name).apply {
-            writeText(response.body?.string() ?: "")
-        }
+        return File(folder)
+            .apply {
+                mkdirs()
+            }.resolve(name)
+            .apply {
+                writeText(response.body?.string() ?: "")
+            }
     }
 
     private fun BufferedImage.save(name: String) {
-        val bytes = ByteArrayOutputStream().use { b ->
-            ImageIO.write(this, "png", b)
-            b.toByteArray()
-        }
+        val bytes =
+            ByteArrayOutputStream().use { b ->
+                ImageIO.write(this, "png", b)
+                b.toByteArray()
+            }
         File("build/reports").apply { mkdirs() }.resolve("$name.png").writeBytes(bytes)
     }
 
     private fun saveIdeaFrames(testName: String) {
         remoteRobot.findAll<ContainerFixture>(byXpath("//div[@class='IdeFrameImpl']")).forEachIndexed { n, frame ->
-            val pic = try {
-                frame.callJs<ByteArray>(
-                    """
+            val pic =
+                try {
+                    frame.callJs<ByteArray>(
+                        """
                         importPackage(java.io)
                         importPackage(javax.imageio)
                         importPackage(java.awt.image)
@@ -102,21 +119,24 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
                         }
                         pictureBytes;
                     """,
-                    true,
-                )
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                throw e
-            }
-            pic.inputStream().use {
-                ImageIO.read(it)
-            }.save(testName + "_" + n)
+                        true,
+                    )
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                    throw e
+                }
+            pic
+                .inputStream()
+                .use {
+                    ImageIO.read(it)
+                }.save(testName + "_" + n)
         }
     }
 
-    private fun fetchScreenShot(): BufferedImage {
-        return remoteRobot.callJs<ByteArray>(
-            """importPackage(java.io)
+    private fun fetchScreenShot(): BufferedImage =
+        remoteRobot
+            .callJs<ByteArray>(
+                """importPackage(java.io)
             importPackage(javax.imageio)
             const screenShot = new java.awt.Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             let pictureBytes;
@@ -129,8 +149,8 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
             }
             pictureBytes;
             """,
-        ).inputStream().use {
-            ImageIO.read(it)
-        }
-    }
+            ).inputStream()
+            .use {
+                ImageIO.read(it)
+            }
 }

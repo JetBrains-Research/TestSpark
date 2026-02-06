@@ -53,9 +53,7 @@ object PromptParserHelper {
         return textField
     }
 
-    fun getKeywords(): Array<PromptKeyword> {
-        return PromptKeyword.entries.toTypedArray()
-    }
+    fun getKeywords(): Array<PromptKeyword> = PromptKeyword.entries.toTypedArray()
 
     fun isPromptValid(prompt: String): Boolean {
         PromptKeyword.entries.forEach {

@@ -4,7 +4,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -24,7 +25,9 @@ import java.io.File
  *
  * @param name The name of the EvoSuite tool.
  */
-class EvoSuite(override val name: String = "EvoSuite") : Tool {
+class EvoSuite(
+    override val name: String = "EvoSuite",
+) : Tool {
     private val log = Logger.getInstance(this::class.java)
 
     /**
@@ -34,7 +37,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @return The EvoSuiteProcessManager instance created for the given project.
      */
     private fun getEvoSuiteProcessManager(project: Project): EvoSuiteProcessManager {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
         val settingsProjectState = project.service<PluginSettingsService>().state
         val buildPath = "$projectClassPath${File.separatorChar}${settingsProjectState.buildPath}"
         return EvoSuiteProcessManager(project, buildPath)
@@ -55,7 +63,8 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -65,7 +74,8 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             psiHelper,
             caretOffset,
             fileUrl,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
@@ -91,7 +101,8 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -102,7 +113,8 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             psiHelper,
             caretOffset,
             fileUrl,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
@@ -129,7 +141,8 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -140,7 +153,8 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             psiHelper,
             caretOffset,
             fileUrl,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
@@ -172,11 +186,17 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         psiHelper: PsiHelper,
         caretOffset: Int,
         fileUrl: String?,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): Pipeline {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
 
         val settingsProjectState = project.service<PluginSettingsService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
@@ -187,7 +207,8 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             caretOffset,
             fileUrl,
             packageName,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             name,

@@ -20,9 +20,7 @@ abstract class TestsAssembler {
      *
      * @return The content of the LLM response.
      */
-    fun getContent(): String {
-        return rawText
-    }
+    fun getContent(): String = rawText
 
     /**
      * Clears the raw text content stored in the TestsAssembler object.

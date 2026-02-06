@@ -17,7 +17,9 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class EvoSuitePanelBuilder(private val project: Project) : PanelBuilder {
+class EvoSuitePanelBuilder(
+    private val project: Project,
+) : PanelBuilder {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 
@@ -44,21 +46,20 @@ class EvoSuitePanelBuilder(private val project: Project) : PanelBuilder {
         algorithmSelector.setMinimumAndPreferredWidth(300)
         algorithmSelector.selectedItem = evoSuiteSettingsState.algorithm
 
-        return FormBuilder.createFormBuilder()
+        return FormBuilder
+            .createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
                 JBLabel(EvoSuiteLabelsBundle.get("javaPath")),
                 javaPathTextField,
                 10,
                 false,
-            )
-            .addLabeledComponent(
+            ).addLabeledComponent(
                 JBLabel(EvoSuiteLabelsBundle.get("defaultSearch")),
                 algorithmSelector,
                 10,
                 false,
-            )
-            .panel
+            ).panel
     }
 
     override fun getBottomPanel(): JPanel {

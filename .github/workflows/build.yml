@@ -24,9 +24,9 @@ jobs:
   ktlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: |
-          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.5.0/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
       - name: run ktlint
         run: |
           ktlint 
@@ -46,7 +46,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v4
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
@@ -93,7 +93,7 @@ jobs:
 
       # Cache Plugin Verifier IDEs
       - name: Setup Plugin Verifier IDEs Cache
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v4
         with:
           path: ${{ steps.properties.outputs.pluginVerifierHomeDir }}/ides
           key: plugin-verifier-${{ hashFiles('build/listProductsReleases.txt') }}
@@ -123,7 +123,7 @@ jobs:
           FILENAME=`ls *.zip`
           unzip "$FILENAME" -d content
 
-          echo "::set-output name=filename::${FILENAME:0:-4}"
+          echo "filename=${FILENAME:0:-4}" >> $GITHUB_OUTPUT
 
       # Store already-built plugin as an artifact for downloading
       - name: Upload artifact
@@ -143,7 +143,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v4
 
       # Remove old release drafts by using the curl request for the available releases with draft flag
       - name: Remove Old Release Drafts

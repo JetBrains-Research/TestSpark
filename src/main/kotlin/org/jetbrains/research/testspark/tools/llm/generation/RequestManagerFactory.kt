@@ -14,17 +14,18 @@ interface RequestManagerFactory {
     fun getRequestManager(project: Project): RequestManager
 }
 
-class StandardRequestManagerFactory(private val project: Project) : RequestManagerFactory {
+class StandardRequestManagerFactory(
+    private val project: Project,
+) : RequestManagerFactory {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
-    override fun getRequestManager(project: Project): RequestManager {
-        return when (val platform = LlmSettingsArguments(project).currentLLMPlatformName()) {
+    override fun getRequestManager(project: Project): RequestManager =
+        when (val platform = LlmSettingsArguments(project).currentLLMPlatformName()) {
             llmSettingsState.openAIName -> OpenAIRequestManager(project)
             llmSettingsState.grazieName -> GrazieRequestManager(project)
             llmSettingsState.huggingFaceName -> HuggingFaceRequestManager(project)
             llmSettingsState.geminiName -> GeminiRequestManager(project)
             else -> throw IllegalStateException("Unknown selected platform: $platform")
         }
-    }
 }

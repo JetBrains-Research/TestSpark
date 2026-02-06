@@ -6,7 +6,6 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
-import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
 import com.intellij.remoterobot.utils.keyboard
@@ -22,9 +21,10 @@ import java.time.Duration
  */
 @FixtureName("Idea Frame")
 @DefaultXpath("type", "//div[@class='IdeFrameImpl']")
-class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
-    CommonContainerFixture(remoteRobot, remoteComponent) {
-
+class IdeaFrame(
+    remoteRobot: RemoteRobot,
+    remoteComponent: RemoteComponent,
+) : CommonContainerFixture(remoteRobot, remoteComponent) {
     // Action to open file menu
     private val openFileMenu
         get() = actionLink(byXpath("File", "//div[@class='ActionMenu' and @text='File']"))
@@ -96,7 +96,10 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      * @param fileName name of file to open
      * @param projectName name of project
      */
-    fun openProjectFile(fileName: String, projectName: String) {
+    fun openProjectFile(
+        fileName: String,
+        projectName: String,
+    ) {
         // Wait for file name to be found
         try {
             projectViewTree.findText(projectName).rightClick()
@@ -115,18 +118,6 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      */
     fun closeProjectFile() {
         actionLink(byXpath("//div[@class='SingleHeightLabel']//div[@class='InplaceButton']")).click()
-    }
-
-    /**
-     * Change the quick access params to have max search time to 2 seconds.
-     */
-    fun changeQuickAccess() {
-        find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(60)).apply {
-            searchBudgetTypeComboBox.selectItem("Max time")
-            searchBudgetValueSpinnerTextField.text = "2"
-            saveButton.click()
-        }
-        find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
     }
 
     /**
@@ -163,7 +154,10 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      * @param testFileName - the name of the file that you want to delete.
      * @param projectName - the name of the project in which the file is contained.
      */
-    fun deleteProject(testFileName: String, projectName: String) {
+    fun deleteProject(
+        testFileName: String,
+        projectName: String,
+    ) {
         // Open the correct file
         openProjectFile(testFileName, projectName)
         // Function to trigger safe delete option
@@ -233,7 +227,10 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      *
      * @param pathToMainFile an array of file tabs that the robot has to (double) click on to open the main file
      */
-    fun openMainFileFromProjectTree(pathToMainFile: List<String>, mainClass: String) {
+    fun openMainFileFromProjectTree(
+        pathToMainFile: List<String>,
+        mainClass: String,
+    ) {
         projectTab.click()
         pathToMainFile.forEach {
             if (!projectViewTree.hasText(mainClass) || mainClass.startsWith(it)) {

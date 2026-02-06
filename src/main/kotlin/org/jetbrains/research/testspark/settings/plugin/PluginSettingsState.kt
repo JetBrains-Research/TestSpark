@@ -13,7 +13,6 @@ data class PluginSettingsState(
     var buildPath: String = DefaultPluginSettingsState.buildPath,
     var buildCommand: String = DefaultPluginSettingsState.buildCommand,
 ) {
-
     /**
      * Default values of SettingsProjectState.
      */

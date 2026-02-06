@@ -7,11 +7,12 @@ import org.jetbrains.annotations.PropertyKey
 /**
  * Loads the `recourses` directory.
  */
-object LLMLabelsBundle : DynamicBundle(LLMBundlePaths.labels) {
-
+object LLMLabelsBundle : DynamicBundle(LLMBundlePaths.LABELS) {
     /**
      * Gets the requested default value.
      */
     @Nls
-    fun get(@PropertyKey(resourceBundle = LLMBundlePaths.labels) key: String): String = getMessage(key)
+    fun get(
+        @PropertyKey(resourceBundle = LLMBundlePaths.LABELS) key: String,
+    ): String = getMessage(key)
 }

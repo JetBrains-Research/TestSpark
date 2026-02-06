@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ErrorMessageManagerTest {
-
     /**
      * Test with a string length less than BLOCK_SIZE and no separators.
      */
@@ -34,9 +33,10 @@ class ErrorMessageManagerTest {
     @Test
     fun testNormalizeWithMultipleBlocksNoSeparator() {
         val input = "a".repeat(ErrorMessageManager.BLOCK_SIZE * 2 + 50)
-        val expected = "a".repeat(ErrorMessageManager.BLOCK_SIZE) + ErrorMessageManager.SEPARATOR +
+        val expected =
             "a".repeat(ErrorMessageManager.BLOCK_SIZE) + ErrorMessageManager.SEPARATOR +
-            "a".repeat(50) + ErrorMessageManager.SEPARATOR
+                "a".repeat(ErrorMessageManager.BLOCK_SIZE) + ErrorMessageManager.SEPARATOR +
+                "a".repeat(50) + ErrorMessageManager.SEPARATOR
         val result = ErrorMessageManager.normalize(input)
         assertEquals(expected, result)
     }
@@ -57,12 +57,14 @@ class ErrorMessageManagerTest {
      */
     @Test
     fun testNormalizeWithMultipleSeparators() {
-        val input = "a".repeat(40) + ErrorMessageManager.SEPARATOR +
-            "b".repeat(40) + ErrorMessageManager.SEPARATOR +
-            "c".repeat(20)
-        val expected = "a".repeat(40) + ErrorMessageManager.SEPARATOR +
-            "b".repeat(40) + ErrorMessageManager.SEPARATOR +
-            "c".repeat(20) + ErrorMessageManager.SEPARATOR
+        val input =
+            "a".repeat(40) + ErrorMessageManager.SEPARATOR +
+                "b".repeat(40) + ErrorMessageManager.SEPARATOR +
+                "c".repeat(20)
+        val expected =
+            "a".repeat(40) + ErrorMessageManager.SEPARATOR +
+                "b".repeat(40) + ErrorMessageManager.SEPARATOR +
+                "c".repeat(20) + ErrorMessageManager.SEPARATOR
         val result = ErrorMessageManager.normalize(input)
         assertEquals(expected, result)
     }

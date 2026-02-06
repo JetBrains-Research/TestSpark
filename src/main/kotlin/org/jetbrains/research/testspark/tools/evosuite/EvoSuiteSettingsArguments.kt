@@ -22,17 +22,22 @@ class EvoSuiteSettingsArguments(
     baseDir: String,
     private val evoSuiteSettingsState: EvoSuiteSettingsState,
 ) {
-    private var command: MutableList<String> = mutableListOf(
-        algorithmsToGenerateMap[evoSuiteSettingsState.algorithm]!!,
-        "-serializeResult",
-        "-serializeResultPath", serializeResultPath,
-        "-base_dir", """"$baseDir"""",
-        "-projectCP", projectClassPath, // will be updated after building
-        "-Dnew_statistics=false",
-        "-class", classFQN,
-        "-Dcatch_undeclared_exceptions=false",
-        "-Dtest_naming_strategy=COVERAGE",
-    )
+    private var command: MutableList<String> =
+        mutableListOf(
+            algorithmsToGenerateMap[evoSuiteSettingsState.algorithm]!!,
+            "-serializeResult",
+            "-serializeResultPath",
+            serializeResultPath,
+            "-base_dir",
+            """"$baseDir"""",
+            "-projectCP",
+            projectClassPath, // will be updated after building
+            "-Dnew_statistics=false",
+            "-class",
+            classFQN,
+            "-Dcatch_undeclared_exceptions=false",
+            "-Dtest_naming_strategy=COVERAGE",
+        )
 
     /**
      * Appends a method parameter to the command.
@@ -98,35 +103,36 @@ class EvoSuiteSettingsArguments(
     }
 
     companion object {
-        private const val generateSuite = "-generateSuite"
-        private const val generateMOSuite = "-generateMOSuite"
-        private const val generateTests = "-generateTests"
-        private const val generateRandom = "-generateRandom"
+        private const val GENERATE_SUITE = "-generateSuite"
+        private const val GENERATE_MO_SUITE = "-generateMOSuite"
+        private const val GENERATE_TESTS = "-generateTests"
+        private const val GENERATE_RANDOM = "-generateRandom"
 
         /**
          * HashMap that maps algorithms to their corresponding generation strings.
          */
-        private val algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> = hashMapOf(
-            ContentDigestAlgorithm.DYNAMOSA to generateMOSuite,
-            ContentDigestAlgorithm.MOSA to generateMOSuite,
-            ContentDigestAlgorithm.LIPS to generateRandom,
-            ContentDigestAlgorithm.MIO to generateMOSuite,
-            ContentDigestAlgorithm.RANDOM_SEARCH to generateTests,
-            ContentDigestAlgorithm.MONOTONIC_GA to generateSuite,
-            ContentDigestAlgorithm.STANDARD_GA to generateSuite,
-            ContentDigestAlgorithm.BREEDER_GA to generateSuite,
-            ContentDigestAlgorithm.STANDARD_GA to generateSuite,
-            ContentDigestAlgorithm.STEADY_STATE_GA to generateSuite,
-            ContentDigestAlgorithm.CELLULAR_GA to generateSuite,
-            ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to generateSuite,
-            ContentDigestAlgorithm.MAP_ELITES to generateRandom,
-            ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to generateSuite,
-            ContentDigestAlgorithm.ONE_PLUS_ONE_EA to generateSuite,
-            ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to generateSuite,
-            ContentDigestAlgorithm.MU_LAMBDA_EA to generateSuite,
-            ContentDigestAlgorithm.NSGAII to generateSuite,
-            ContentDigestAlgorithm.SPEA2 to generateSuite,
-        )
+        private val algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> =
+            hashMapOf(
+                ContentDigestAlgorithm.DYNAMOSA to GENERATE_MO_SUITE,
+                ContentDigestAlgorithm.MOSA to GENERATE_MO_SUITE,
+                ContentDigestAlgorithm.LIPS to GENERATE_RANDOM,
+                ContentDigestAlgorithm.MIO to GENERATE_MO_SUITE,
+                ContentDigestAlgorithm.RANDOM_SEARCH to GENERATE_TESTS,
+                ContentDigestAlgorithm.MONOTONIC_GA to GENERATE_SUITE,
+                ContentDigestAlgorithm.STANDARD_GA to GENERATE_SUITE,
+                ContentDigestAlgorithm.BREEDER_GA to GENERATE_SUITE,
+                ContentDigestAlgorithm.STANDARD_GA to GENERATE_SUITE,
+                ContentDigestAlgorithm.STEADY_STATE_GA to GENERATE_SUITE,
+                ContentDigestAlgorithm.CELLULAR_GA to GENERATE_SUITE,
+                ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to GENERATE_SUITE,
+                ContentDigestAlgorithm.MAP_ELITES to GENERATE_RANDOM,
+                ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to GENERATE_SUITE,
+                ContentDigestAlgorithm.ONE_PLUS_ONE_EA to GENERATE_SUITE,
+                ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to GENERATE_SUITE,
+                ContentDigestAlgorithm.MU_LAMBDA_EA to GENERATE_SUITE,
+                ContentDigestAlgorithm.NSGAII to GENERATE_SUITE,
+                ContentDigestAlgorithm.SPEA2 to GENERATE_SUITE,
+            )
 
         /**
          * Creates a string for the criterion parameter in the format required by EvoSuite.
@@ -134,7 +140,10 @@ class EvoSuiteSettingsArguments(
          * @param state the (settings) state that contains all the criteria
          * @return the generated criteria string, in the required format
          */
-        private fun createCriterionString(evoSuiteSettingsState: EvoSuiteSettingsState, isLineCoverage: Boolean): String {
+        private fun createCriterionString(
+            evoSuiteSettingsState: EvoSuiteSettingsState,
+            isLineCoverage: Boolean,
+        ): String {
             val sb = StringBuilder("-Dcriterion=") // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
 
             if (isLineCoverage) {

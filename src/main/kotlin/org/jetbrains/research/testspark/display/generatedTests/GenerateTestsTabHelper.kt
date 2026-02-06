@@ -4,25 +4,55 @@ object GenerateTestsTabHelper {
     /**
      * A helper method to remove a test case from the cache and from the UI.
      *
-     * @param testCaseName the name of the test
+     * @param testCaseId the id of the test
      */
-    fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+    fun removeTestCase(
+        testCaseId: Int,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
         // Update the number of selected test cases if necessary
-        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
+        val testCaseIsSelected = generatedTestsTabData.testCaseIdToSelectedCheckbox[testCaseId]!!.isSelected
+        val testCaseIsNotHidden = !generatedTestsTabData.hiddenTestCases.contains(testCaseId)
+        generatedTestsTabData.hiddenTestCases.remove(testCaseId)
+        if (testCaseIsSelected && testCaseIsNotHidden) {
             generatedTestsTabData.testsSelected--
         }
 
         // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseIdToPanel[testCaseId])
 
         // Remove the test panel
-        generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
+        generatedTestsTabData.testCaseIdToPanel.remove(testCaseId)
 
         // Remove the selected checkbox
-        generatedTestsTabData.testCaseNameToSelectedCheckbox.remove(testCaseName)
+        generatedTestsTabData.testCaseIdToSelectedCheckbox.remove(testCaseId)
 
         // Remove the editorTextField
-        generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+        generatedTestsTabData.testCaseIdToEditorTextField.remove(testCaseId)
+    }
+
+    fun showTestCase(
+        testCaseId: Int,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
+        generatedTestsTabData.hiddenTestCases.remove(testCaseId)
+        if (generatedTestsTabData.testCaseIdToSelectedCheckbox[testCaseId]!!.isSelected) {
+            generatedTestsTabData.testsSelected++
+        }
+
+        update(generatedTestsTabData)
+    }
+
+    fun hideTestCase(
+        testCaseId: Int,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
+        generatedTestsTabData.hiddenTestCases.add(testCaseId)
+        if (generatedTestsTabData.testCaseIdToSelectedCheckbox[testCaseId]!!.isSelected) {
+            generatedTestsTabData.testsSelected--
+        }
+
+        update(generatedTestsTabData)
     }
 
     /**

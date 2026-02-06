@@ -1,18 +1,26 @@
 package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.test.TestBodyPrinter
-import org.jetbrains.research.testspark.core.test.TestCaseParseResult
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 class JUnitTestSuiteParserStrategy {
+    private class ParserError(
+        cause: Throwable? = null,
+    ) : TestSparkError(
+            module = TestSparkModule.Common,
+            cause = cause,
+        )
+
     companion object {
         fun parseJUnitTestSuite(
             rawText: String,
-            junitVersion: JUnitVersion,
             importPattern: Regex,
             packageName: String,
             testNamePattern: String,
@@ -26,22 +34,26 @@ class JUnitTestSuiteParserStrategy {
                 val rawCode = if (rawText.contains("```")) rawText.split("```")[1] else rawText
 
                 // save imports
-                val imports = importPattern.findAll(rawCode)
-                    .map { it.groupValues[0] }
-                    .toMutableSet()
+                val imports =
+                    importPattern
+                        .findAll(rawCode)
+                        .map { it.groupValues[0] }
+                        .toMutableSet()
 
-                // save RunWith
-                val runWith: String = junitVersion.runWithAnnotationMeta.extract(rawCode) ?: ""
+                // save ExtendWith or RunWith annotation if present
+                val runWithAnnotation: String = JUnitVersion.JUnit4.runWithAnnotationMeta.extract(rawCode) ?: ""
+                val annotation = JUnitVersion.JUnit5.runWithAnnotationMeta.extract(rawCode) ?: runWithAnnotation
 
                 val testSet: MutableList<String> = rawCode.split("@Test").toMutableList()
 
                 // save annotations and pre-set methods
-                val otherInfo: String = run {
-                    val otherInfoList = testSet.removeAt(0).split("{").toMutableList()
-                    otherInfoList.removeFirst()
-                    val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
-                    otherInfo.ifBlank { "" }
-                }
+                val otherInfo: String =
+                    run {
+                        val otherInfoList = testSet.removeAt(0).split("{").toMutableList()
+                        otherInfoList.removeFirst()
+                        val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
+                        otherInfo.ifBlank { "" }
+                    }
 
                 // Save the main test cases
                 val testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf()
@@ -51,15 +63,14 @@ class JUnitTestSuiteParserStrategy {
                     val rawTest = "@Test$it"
 
                     val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
-                    val result: TestCaseParseResult =
+                    val result: Result<TestCaseGeneratedByLLM, TestSparkError> =
                         testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
 
-                    if (result.errorOccurred) {
-                        println("WARNING: ${result.errorMessage}")
+                    if (result.isFailure()) {
                         return@ca
                     }
 
-                    val currentTest = result.testCase!!
+                    val currentTest = (result as Result.Success).data
 
                     // TODO: make logging work
                     // log.info("New test case: $currentTest")
@@ -67,13 +78,14 @@ class JUnitTestSuiteParserStrategy {
                     testCases.add(currentTest)
                 }
 
-                val testSuite = TestSuiteGeneratedByLLM(
-                    imports = imports,
-                    packageName = packageName,
-                    runWith = runWith,
-                    otherInfo = otherInfo,
-                    testCases = testCases,
-                )
+                val testSuite =
+                    TestSuiteGeneratedByLLM(
+                        imports = imports,
+                        packageName = packageName,
+                        annotation = annotation,
+                        otherInfo = otherInfo,
+                        testCases = testCases,
+                    )
 
                 return testSuite
             } catch (e: Exception) {
@@ -88,7 +100,7 @@ class JUnitTestSuiteParserStrategy {
             isLastTestCaseInTestSuite: Boolean,
             testNamePattern: String,
             printTestBodyStrategy: TestBodyPrinter,
-        ): TestCaseParseResult {
+        ): Result<TestCaseGeneratedByLLM, TestSparkError> {
             var expectedException = ""
             var throwsException = ""
             val testLines: MutableList<TestLine> = mutableListOf()
@@ -99,15 +111,12 @@ class JUnitTestSuiteParserStrategy {
             }
 
             // Get unexpected exceptions
+
             /* Each test case should follow fun <testcase name> {...}
-                Tests do not return anything so it is safe to consider that void always appears before test case name
+               Tests do not return anything so it is safe to consider that void always appears before test case name
              */
             if (!rawTest.contains(testNamePattern)) {
-                return TestCaseParseResult(
-                    testCase = null,
-                    errorMessage = "The raw Test does not contain $testNamePattern:\n $rawTest",
-                    errorOccurred = true,
-                )
+                return Result.Failure(ParserError(RuntimeException("The raw Test does not contain $testNamePattern:\n $rawTest")))
             }
 
             /**
@@ -126,23 +135,30 @@ class JUnitTestSuiteParserStrategy {
             /**
              * Optional [throws <exception>] part is extracted from the test definition epilogue.
              */
-            val interestingPartOfSignature = testCaseEpilogue
-                .split("{")[0]
-                .split("()")[1]
-                .trim()
+            val interestingPartOfSignature =
+                testCaseEpilogue
+                    .split("{")[0]
+                    .split("()")[1]
+                    .trim()
 
             if (interestingPartOfSignature.contains("throws")) {
                 throwsException = interestingPartOfSignature.split("throws")[1].trim()
             }
 
             // Get test name
-            val testName: String = testCaseEpilogue
-                .split("()")[0]
-                .trim()
+            val testName: String =
+                testCaseEpilogue
+                    .split("()")[0]
+                    .trim()
 
             // Get test body and remove opening bracket
-            var testBody = rawTest.split("{").toMutableList().apply { removeFirst() }
-                .joinToString("{").trim()
+            var testBody =
+                rawTest
+                    .split("{")
+                    .toMutableList()
+                    .apply { removeFirst() }
+                    .joinToString("{")
+                    .trim()
 
             // remove closing bracket
             val tempList = testBody.split("}").toMutableList()
@@ -152,8 +168,6 @@ class JUnitTestSuiteParserStrategy {
                 // it is the last test, thus we should remove another closing bracket
                 if (tempList.isNotEmpty()) {
                     tempList.removeLast()
-                } else {
-                    println("WARNING: the final test does not have the enclosing bracket:\n $testBody")
                 }
             }
 
@@ -164,29 +178,27 @@ class JUnitTestSuiteParserStrategy {
             rawLines.forEach { rawLine ->
                 val line = rawLine.trim()
 
-                val type: TestLineType = when {
-                    line.startsWith("//") -> TestLineType.COMMENT
-                    line.isBlank() -> TestLineType.BREAK
-                    line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
-                    else -> TestLineType.CODE
-                }
+                val type: TestLineType =
+                    when {
+                        line.startsWith("//") -> TestLineType.COMMENT
+                        line.isBlank() -> TestLineType.BREAK
+                        line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
+                        else -> TestLineType.CODE
+                    }
 
                 testLines.add(TestLine(type, line))
             }
 
-            val currentTest = TestCaseGeneratedByLLM(
-                name = testName,
-                expectedException = expectedException,
-                throwsException = throwsException,
-                lines = testLines,
-                printTestBodyStrategy = printTestBodyStrategy,
-            )
+            val currentTest =
+                TestCaseGeneratedByLLM(
+                    name = testName,
+                    expectedException = expectedException,
+                    throwsException = throwsException,
+                    lines = testLines,
+                    printTestBodyStrategy = printTestBodyStrategy,
+                )
 
-            return TestCaseParseResult(
-                testCase = currentTest,
-                errorMessage = "",
-                errorOccurred = false,
-            )
+            return Result.Success(currentTest)
         }
     }
 }

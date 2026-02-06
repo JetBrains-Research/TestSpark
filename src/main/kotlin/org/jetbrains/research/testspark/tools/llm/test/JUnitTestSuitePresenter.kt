@@ -5,7 +5,7 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.testmanager.TestGeneratorFactory
+import org.jetbrains.research.testspark.testmanager.template.TestGenerator
 
 class JUnitTestSuitePresenter(
     private val project: Project,
@@ -36,13 +36,13 @@ class JUnitTestSuitePresenter(
             // Add each test
             testCases.forEach { testCase -> testBody += "$testCase\n" }
 
-            TestGeneratorFactory.create(language).generateCode(
+            TestGenerator.create(language).generateCode(
                 project,
                 testFileName,
                 testBody,
                 imports,
                 packageName,
-                runWith,
+                annotation,
                 otherInfo,
                 generatedTestsData,
             )
@@ -59,13 +59,13 @@ class JUnitTestSuitePresenter(
         testCaseIndex: Int,
     ): String =
         testSuite.run {
-            TestGeneratorFactory.create(language).generateCode(
+            TestGenerator.create(language).generateCode(
                 project,
                 getClassWithTestCaseName(testCases[testCaseIndex].name),
                 testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
                 imports,
                 packageName,
-                runWith,
+                annotation,
                 otherInfo,
                 generatedTestsData,
             )
@@ -83,13 +83,13 @@ class JUnitTestSuitePresenter(
             // Add each test (exclude expected exception)
             testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
 
-            TestGeneratorFactory.create(language).generateCode(
+            TestGenerator.create(language).generateCode(
                 project,
                 testFileName,
                 testBody,
                 imports,
                 packageName,
-                runWith,
+                annotation,
                 otherInfo,
                 generatedTestsData,
             )
@@ -104,12 +104,11 @@ class JUnitTestSuitePresenter(
      *
      * @return The printable package string.
      */
-    fun getPrintablePackageString(testSuite: TestSuiteGeneratedByLLM): String {
-        return testSuite.run {
+    fun getPrintablePackageString(testSuite: TestSuiteGeneratedByLLM): String =
+        testSuite.run {
             when {
                 packageName.isEmpty() || packageName.isBlank() -> ""
                 else -> packageName
             }
         }
-    }
 }

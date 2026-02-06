@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.bundles.llm
 
 object LLMBundlePaths {
-    const val defaults: String = "properties.llm.LLMDefaults"
-    const val messages: String = "properties.llm.LLMMessages"
-    const val labels: String = "properties.llm.LLMLabels"
-    const val settings: String = "properties.llm.LLMSettings"
+    const val DEFAULTS: String = "properties.llm.LLMDefaults"
+    const val MESSAGES: String = "properties.llm.LLMMessages"
+    const val LABELS: String = "properties.llm.LLMLabels"
+    const val SETTINGS: String = "properties.llm.LLMSettings"
 }

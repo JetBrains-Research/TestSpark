@@ -33,8 +33,10 @@ class EvoSuiteSettingsConfigurableTest {
         val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
             IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
 
-        fixture = JavaTestFixtureFactory.getFixtureFactory()
-            .createCodeInsightFixture(projectBuilder.fixture)
+        fixture =
+            JavaTestFixtureFactory
+                .getFixtureFactory()
+                .createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
         settingsConfigurable = EvoSuiteSettingsConfigurable(fixture.project)
@@ -103,7 +105,12 @@ class EvoSuiteSettingsConfigurableTest {
 
     @ParameterizedTest
     @MethodSource("checkBoxValueGenerator")
-    fun testResetCheckBoxes(oldValue: Boolean, function: () -> Unit, component: () -> Boolean, state: () -> Boolean) {
+    fun testResetCheckBoxes(
+        oldValue: Boolean,
+        function: () -> Unit,
+        component: () -> Boolean,
+        state: () -> Boolean,
+    ) {
         function()
         settingsConfigurable.reset()
         assertThat(component()).isEqualTo(oldValue)
@@ -112,7 +119,12 @@ class EvoSuiteSettingsConfigurableTest {
 
     @ParameterizedTest
     @MethodSource("checkBoxValueGenerator")
-    fun testApplyCheckBoxes(oldValue: Boolean, function: () -> Unit, component: () -> Boolean, state: () -> Boolean) {
+    fun testApplyCheckBoxes(
+        oldValue: Boolean,
+        function: () -> Unit,
+        component: () -> Boolean,
+        state: () -> Boolean,
+    ) {
         function()
         settingsConfigurable.apply()
         assertThat(component()).isNotEqualTo(oldValue)
@@ -138,8 +150,8 @@ class EvoSuiteSettingsConfigurableTest {
      *
      * @return stream of functions
      */
-    private fun checkBoxValueGenerator(): Stream<Arguments> {
-        return Stream.of(
+    private fun checkBoxValueGenerator(): Stream<Arguments> =
+        Stream.of(
             Arguments.of(
                 settingsComponent.junitCheck,
                 { settingsComponent.junitCheck = !settingsComponent.junitCheck },
@@ -219,5 +231,4 @@ class EvoSuiteSettingsConfigurableTest {
                 { settingsState.sandbox },
             ),
         )
-    }
 }

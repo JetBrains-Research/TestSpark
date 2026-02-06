@@ -6,12 +6,15 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
 import com.intellij.psi.PsiType
+import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import java.util.stream.Collectors
 
-class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper {
+class JavaPsiMethodWrapper(
+    private val psiMethod: PsiMethod,
+) : PsiMethodWrapper {
     override val name: String get() = psiMethod.name
 
     override val text: String? = psiMethod.text
@@ -23,7 +26,8 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
     override val methodDescriptor: String
         get() {
             val parameterTypes =
-                psiMethod.getSignature(PsiSubstitutor.EMPTY)
+                psiMethod
+                    .getSignature(PsiSubstitutor.EMPTY)
                     .parameterTypes
                     .stream()
                     .map { i -> generateFieldType(i) }
@@ -65,6 +69,32 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
         val startLine = document.getLineNumber(textRange.startOffset) + 1
         val endLine = document.getLineNumber(textRange.endOffset) + 1
         return lineNumber in startLine..endLine
+    }
+
+    override fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
+        val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
+
+        parameterList.parameters.forEach { paramIt ->
+            PsiTypesUtil.getPsiClass(paramIt.type)?.let { typeIt ->
+                JavaPsiClassWrapper(typeIt).let {
+                    if (!it.qualifiedName.startsWith("java.")) {
+                        interestingPsiClasses.add(it)
+                    }
+                }
+            }
+        }
+
+        return interestingPsiClasses
+    }
+
+    override fun isTestingMethod(): Boolean {
+        // Check if the method is not annotated with @Test
+        return psiMethod.annotations.any { annotation ->
+            val qualifiedName = annotation.qualifiedName
+            qualifiedName == "org.junit.Test" ||
+                qualifiedName == "org.junit.jupiter.api.Test" ||
+                qualifiedName == "org.testng.annotations.Test"
+        }
     }
 
     /**
@@ -133,7 +163,10 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
          */
         fun buildSignature(method: PsiMethod): String {
             val bodyStart = method.body?.startOffsetInParent ?: method.textLength
-            return method.text.substring(0, bodyStart).replace("\\n", "").trim()
+            return method.text
+                .substring(0, bodyStart)
+                .replace("\\n", "")
+                .trim()
         }
     }
 }

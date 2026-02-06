@@ -24,6 +24,7 @@ import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.kotlin.KotlinPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestGenerator
 import java.io.File
@@ -31,32 +32,42 @@ import java.util.Locale
 import javax.swing.JOptionPane
 
 class KotlinDisplayUtils : DisplayUtils {
-    override fun applyTests(project: Project, uiContext: UIContext?, testCaseComponents: List<String>): Boolean {
+    override fun applyTests(
+        project: Project,
+        uiContext: UIContext?,
+        testCaseComponents: List<String>,
+    ): Boolean {
         val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
 
         // Apply filter with folders and java files with main class
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
-                file.isDirectory || (
-                    file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
-                        PsiManager.getInstance(project).findFile(file!!) as KtFile
-                        ).classes.stream().map { it.name }
-                        .toArray()
-                        .contains(
+                file.isDirectory ||
+                    (
+                        file.extension?.lowercase(Locale.getDefault()) == "kotlin" &&
                             (
-                                PsiManager.getInstance(project)
-                                    .findFile(file) as PsiJavaFile
-                                ).name.removeSuffix(".kt"),
-                        )
+                                PsiManager.getInstance(project).findFile(file!!) as KtFile
+                            ).classes
+                                .stream()
+                                .map { it.name }
+                                .toArray()
+                                .contains(
+                                    (
+                                        PsiManager
+                                            .getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                    ).name.removeSuffix(".kt"),
+                                )
                     )
             }
         }
 
-        val fileChooser = FileChooser.chooseFiles(
-            descriptor,
-            project,
-            LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
-        )
+        val fileChooser =
+            FileChooser.chooseFiles(
+                descriptor,
+                project,
+                LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
+            )
 
         /**
          * Cancel button pressed
@@ -134,9 +145,12 @@ class KotlinDisplayUtils : DisplayUtils {
                 val ktPsiFactory = KtPsiFactory(project)
                 ktClass = ktPsiFactory.createClass("class ${className.split(".")[0]} {}")
 
-                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
+                if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
+                    val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
                     val annotationEntry =
-                        ktPsiFactory.createAnnotationEntry("@RunWith(${uiContext.testGenerationOutput.runWith})")
+                        ktPsiFactory.createAnnotationEntry(
+                            "@${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})",
+                        )
                     ktClass!!.addBefore(annotationEntry, ktClass!!.body)
                 }
 
@@ -185,14 +199,16 @@ class KotlinDisplayUtils : DisplayUtils {
         // insert tests to a code
         testCaseComponents.reversed().forEach {
             val testMethodCode =
-                KotlinTestAnalyzer.extractFirstTestMethodCode(
-                    KotlinTestGenerator.formatCode(
-                        project,
-                        it.replace("\r\n", "\n")
-                            .replace("verifyException(", "// verifyException("),
-                        uiContext!!.testGenerationOutput,
-                    ),
-                )
+                KotlinTestAnalyzer
+                    .extractFirstTestMethodCode(
+                        KotlinTestGenerator.formatCode(
+                            project,
+                            it
+                                .replace("\r\n", "\n")
+                                .replace("verifyException(", "// verifyException("),
+                            uiContext!!.testGenerationOutput,
+                        ),
+                    )
                     // Fix Windows line separators
                     .replace("\r\n", "\n")
 
@@ -212,9 +228,10 @@ class KotlinDisplayUtils : DisplayUtils {
         val importsString = uiContext.testGenerationOutput.importsCode.joinToString("\n") + "\n\n"
 
         // Find the insertion offset
-        val insertionOffset = outputFile.importList?.startOffsetInParent
-            ?: outputFile.packageDirective?.pureEndOffset
-            ?: 0
+        val insertionOffset =
+            outputFile.importList?.startOffsetInParent
+                ?: outputFile.packageDirective?.pureEndOffset
+                ?: 0
 
         // Insert the imports into the document
         PsiDocumentManager.getInstance(project).getDocument(outputFile)?.let { document ->

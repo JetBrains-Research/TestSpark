@@ -13,7 +13,9 @@ import javax.swing.JComponent
  * It interacts with the SettingsEvoSuiteComponent, TestSparkSettingsService and TestSparkSettingsState.
  * It provides controller functionality for the TestSparkSettingsState.
  */
-class EvoSuiteSettingsConfigurable(private val project: Project) : SettingsConfigurable {
+class EvoSuiteSettingsConfigurable(
+    private val project: Project,
+) : SettingsConfigurable {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 
@@ -130,9 +132,7 @@ class EvoSuiteSettingsConfigurable(private val project: Project) : SettingsConfi
      *
      * @return the name displayed in the menu (settings)
      */
-    override fun getDisplayName(): String {
-        return "TestSpark"
-    }
+    override fun getDisplayName(): String = "TestSpark"
 
     /**
      * Disposes the UI resources. It is called when a user closes the Settings dialog.

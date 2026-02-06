@@ -3,7 +3,9 @@ package org.jetbrains.research.testspark.tools
 /**
  * Enum class representing strategy for test generation
  */
-enum class GenerationTool(val toolId: String) {
+enum class GenerationTool(
+    val toolId: String,
+) {
     EvoSuite("EvoSuite"),
     LLM("LLM"),
     Kex("Kex"),

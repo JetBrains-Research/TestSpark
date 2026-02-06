@@ -39,7 +39,7 @@ class GeneratedTestsTabBuilder(
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
 ) {
-    private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
+    private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData(uiContext.indicatorController)
 
     private var mainPanel: JPanel = JPanel()
 
@@ -55,11 +55,14 @@ class GeneratedTestsTabBuilder(
      * Displays the generated tests tab in the tool window.
      * This method initializes necessary components based on the selected language and shows the tab.
      */
-    fun show(contentManager: ContentManager, language: SupportedLanguage) {
+    fun show(
+        contentManager: ContentManager,
+        language: SupportedLanguage,
+    ) {
         generatedTestsTabData.allTestCasePanel.removeAll()
         generatedTestsTabData.allTestCasePanel.layout =
             BoxLayout(generatedTestsTabData.allTestCasePanel, BoxLayout.Y_AXIS)
-        generatedTestsTabData.testCaseNameToPanel.clear()
+        generatedTestsTabData.testCaseIdToPanel.clear()
 
         generatedTestsTabData.contentManager = contentManager
 
@@ -80,15 +83,16 @@ class GeneratedTestsTabBuilder(
      * @param language The programming language.
      */
     private fun setDisplayUtils(language: SupportedLanguage) {
-        displayUtils = when (language) {
-            SupportedLanguage.Java -> {
-                JavaDisplayUtils()
-            }
+        displayUtils =
+            when (language) {
+                SupportedLanguage.Java -> {
+                    JavaDisplayUtils()
+                }
 
-            SupportedLanguage.Kotlin -> {
-                KotlinDisplayUtils()
+                SupportedLanguage.Kotlin -> {
+                    KotlinDisplayUtils()
+                }
             }
-        }
     }
 
     /**
@@ -172,16 +176,16 @@ class GeneratedTestsTabBuilder(
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
-            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), testCasePanel.preferredSize.height)
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 
-            generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
-            generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
-            generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] =
+            generatedTestsTabData.testCaseIdToPanel[testCase.id] = testCasePanel
+            generatedTestsTabData.testCaseIdToSelectedCheckbox[testCase.id] = checkbox
+            generatedTestsTabData.testCaseIdToEditorTextField[testCase.id] =
                 testCasePanelBuilder.getEditorTextField()
         }
-        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
+        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseIdToPanel.size
         generatedTestsTabData.testCasePanelFactories.addAll(testCasePanelFactories)
         generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
@@ -201,13 +205,17 @@ class GeneratedTestsTabBuilder(
     fun applyTests(): Boolean {
         // Filter the selected test cases
         val selectedTestCasePanels =
-            generatedTestsTabData.testCaseNameToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+            generatedTestsTabData.testCaseIdToPanel.filter {
+                val testIsNotHidden = !generatedTestsTabData.hiddenTestCases.contains(it.key)
+                (it.value.getComponent(0) as JCheckBox).isSelected && testIsNotHidden
+            }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)
-        val testCaseComponents = selectedTestCases
-            .map { generatedTestsTabData.testCaseNameToEditorTextField[it]!! }
-            .map { it.document.text }
+        val testCaseComponents =
+            selectedTestCases
+                .map { generatedTestsTabData.testCaseIdToEditorTextField[it]!! }
+                .map { it.document.text }
 
         val applyingResult = displayUtils!!.applyTests(project, uiContext, testCaseComponents)
 
@@ -230,11 +238,12 @@ class GeneratedTestsTabBuilder(
 
         // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
-        generatedTestsTabData.content = contentFactory.createContent(
-            mainPanel,
-            PluginLabelsBundle.get("generatedTests"),
-            true,
-        )
+        generatedTestsTabData.content =
+            contentFactory.createContent(
+                mainPanel,
+                PluginLabelsBundle.get("generatedTests"),
+                true,
+            )
         generatedTestsTabData.contentManager!!.addContent(generatedTestsTabData.content!!)
         generatedTestsTabData.contentManager!!.setSelectedContent(generatedTestsTabData.content!!)
 
@@ -257,7 +266,8 @@ class GeneratedTestsTabBuilder(
      * Clears all the generated test cases from the UI and the internal cache.
      */
     fun clear() {
-        generatedTestsTabData.testCaseNameToPanel.toMap()
+        generatedTestsTabData.testCaseIdToPanel
+            .toMap()
             .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()
         generatedTestsTabData.topButtonsPanelBuilder.clear(generatedTestsTabData)

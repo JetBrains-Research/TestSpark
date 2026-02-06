@@ -22,6 +22,7 @@ import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.java.JavaPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
 import org.jetbrains.research.testspark.testmanager.java.JavaTestGenerator
 import java.io.File
@@ -29,33 +30,43 @@ import java.util.Locale
 import javax.swing.JOptionPane
 
 class JavaDisplayUtils : DisplayUtils {
-    override fun applyTests(project: Project, uiContext: UIContext?, testCaseComponents: List<String>): Boolean {
+    override fun applyTests(
+        project: Project,
+        uiContext: UIContext?,
+        testCaseComponents: List<String>,
+    ): Boolean {
         // Descriptor for choosing folders and java files
         val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
 
         // Apply filter with folders and java files with main class
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
-                file.isDirectory || (
-                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                        PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                        ).classes.stream().map { it.name }
-                        .toArray()
-                        .contains(
+                file.isDirectory ||
+                    (
+                        file.extension?.lowercase(Locale.getDefault()) == "java" &&
                             (
-                                PsiManager.getInstance(project)
-                                    .findFile(file) as PsiJavaFile
-                                ).name.removeSuffix(".java"),
-                        )
+                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                            ).classes
+                                .stream()
+                                .map { it.name }
+                                .toArray()
+                                .contains(
+                                    (
+                                        PsiManager
+                                            .getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                    ).name.removeSuffix(".java"),
+                                )
                     )
             }
         }
 
-        val fileChooser = FileChooser.chooseFiles(
-            descriptor,
-            project,
-            LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
-        )
+        val fileChooser =
+            FileChooser.chooseFiles(
+                descriptor,
+                project,
+                LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
+            )
 
         /**
          * Cancel button pressed
@@ -131,8 +142,11 @@ class JavaDisplayUtils : DisplayUtils {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext.testGenerationOutput.runWith})")
+                if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
+                    val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+                    psiClass!!.modifierList!!.addAnnotation(
+                        "${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})",
+                    )
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -141,10 +155,15 @@ class JavaDisplayUtils : DisplayUtils {
             // Set services of the chosen file
             virtualFile = chosenFile
             psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
-            psiClass = psiJavaFile!!.classes[
-                psiJavaFile!!.classes.stream().map { it.name }.toArray()
-                    .indexOf(psiJavaFile!!.name.removeSuffix(".java")),
-            ]
+            psiClass =
+                psiJavaFile!!.classes[
+                    psiJavaFile!!
+                        .classes
+                        .stream()
+                        .map { it.name }
+                        .toArray()
+                        .indexOf(psiJavaFile!!.name.removeSuffix(".java")),
+                ]
         }
 
         // Add tests to the file
@@ -176,14 +195,16 @@ class JavaDisplayUtils : DisplayUtils {
         // insert tests to a code
         testCaseComponents.reversed().forEach {
             val testMethodCode =
-                JavaTestAnalyzer.extractFirstTestMethodCode(
-                    JavaTestGenerator.formatCode(
-                        project,
-                        it.replace("\r\n", "\n")
-                            .replace("verifyException(", "// verifyException("),
-                        uiContext!!.testGenerationOutput,
-                    ),
-                )
+                JavaTestAnalyzer
+                    .extractFirstTestMethodCode(
+                        JavaTestGenerator.formatCode(
+                            project,
+                            it
+                                .replace("\r\n", "\n")
+                                .replace("verifyException(", "// verifyException("),
+                            uiContext!!.testGenerationOutput,
+                        ),
+                    )
                     // Fix Windows line separators
                     .replace("\r\n", "\n")
 
@@ -206,7 +227,9 @@ class JavaDisplayUtils : DisplayUtils {
         )
 
         // insert package to a code
-        outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
+        outputFile.packageStatement ?: PsiDocumentManager
+            .getInstance(project)
+            .getDocument(outputFile)!!
             .insertString(
                 0,
                 if (uiContext.testGenerationOutput.packageName.isEmpty()) {

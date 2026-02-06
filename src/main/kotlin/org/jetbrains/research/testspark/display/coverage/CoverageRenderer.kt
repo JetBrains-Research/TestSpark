@@ -8,6 +8,9 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.LineMarkerRendererEx
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorTextField
@@ -18,7 +21,11 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -44,14 +51,14 @@ import javax.swing.JPanel
 class CoverageRenderer(
     private val color: Color,
     private val lineNumber: Int,
-    private val tests: List<String>,
+    private val tests: List<TestCase>,
     private val coveredMutation: List<String>,
     private val notCoveredMutation: List<String>,
-    private val mapMutantsToTests: HashMap<String, MutableList<String>>,
+    private val mapMutantsToTests: HashMap<String, MutableList<Int>>,
     private val project: Project,
     private val generatedTestsTabData: GeneratedTestsTabData,
-) :
-    ActiveGutterRenderer, LineMarkerRendererEx {
+) : ActiveGutterRenderer,
+    LineMarkerRendererEx {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 
@@ -63,16 +70,20 @@ class CoverageRenderer(
      * @param editor the editor
      * @param e mouse event
      */
-    override fun doAction(editor: Editor, e: MouseEvent) {
+    override fun doAction(
+        editor: Editor,
+        e: MouseEvent,
+    ) {
         e.consume()
-        val prePanel = FormBuilder
-            .createFormBuilder()
-            .addComponent(JBLabel(" Covered by tests:"), 10)
+        val prePanel =
+            FormBuilder
+                .createFormBuilder()
+                .addComponent(JBLabel(" Covered by tests:"), 10)
 
-        for (testName in tests) {
+        for (testCase in tests) {
             prePanel.addComponent(
-                ActionLink(testName) {
-                    highlightTestCase(testName)
+                ActionLink(testCase.testName) {
+                    highlightTestCase(testCase.id)
                 },
             )
         }
@@ -97,11 +108,12 @@ class CoverageRenderer(
             }
         }
 
-        val panel = JBScrollPane(
-            prePanel.addVerticalGap(10).panel,
-            JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
-        )
+        val panel =
+            JBScrollPane(
+                prePanel.addVerticalGap(10).panel,
+                JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+            )
 
         panel.preferredSize = Dimension(panel.preferredSize.width, 400.coerceAtMost(panel.preferredSize.height))
 
@@ -111,7 +123,8 @@ class CoverageRenderer(
             hint,
             editor,
             point,
-            HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_OTHER_HINT or HintManager.HIDE_BY_SCROLLING,
+            HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_OTHER_HINT or
+                HintManager.HIDE_BY_SCROLLING,
             -1,
             false,
             HintHint(editor, point),
@@ -125,7 +138,10 @@ class CoverageRenderer(
      * @param e mouse event
      * @return true iff mouse has interacted with gutter
      */
-    override fun canDoAction(editor: Editor, e: MouseEvent): Boolean {
+    override fun canDoAction(
+        editor: Editor,
+        e: MouseEvent,
+    ): Boolean {
         val component = e.component
         if (component is EditorGutterComponentEx) {
             return e.x > component.lineMarkerAreaOffset && e.x < component.iconAreaOffset
@@ -138,21 +154,24 @@ class CoverageRenderer(
      * @param mutantName name of the mutant whose coverage to visualise
      * @param map map of mutant operations -> List of names of tests which cover the mutants
      */
-    private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
+    private fun highlightMutantsInToolwindow(
+        mutantName: String,
+        map: HashMap<String, MutableList<Int>>,
+    ) {
         highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
     }
 
     /**
      * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
      *
-     * @param name name of the test whose editor should be highlighted
+     * @param id id of the test whose editor should be highlighted
      */
-    private fun highlightTestCase(name: String) {
-        val myPanel = generatedTestsTabData.testCaseNameToPanel[name] ?: return
+    private fun highlightTestCase(id: Int) {
+        val myPanel = generatedTestsTabData.testCaseIdToPanel[id] ?: return
         openToolWindowTab()
         scrollToPanel(myPanel)
 
-        val editorTextField = generatedTestsTabData.testCaseNameToEditorTextField[name] ?: return
+        val editorTextField = generatedTestsTabData.testCaseIdToEditorTextField[id] ?: return
         val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
@@ -167,7 +186,7 @@ class CoverageRenderer(
         if (editorTextField.background.equals(highlightColor)) return
         defaultEditorColor = editorTextField.background
         editorTextField.background = highlightColor
-        returnOriginalEditorBackground(editorTextField)
+        returnOriginalEditorBackground(editorTextField, id)
     }
 
     /**
@@ -207,20 +226,39 @@ class CoverageRenderer(
      * Reset the provided editors color to the default (initial) one after 10 seconds
      * @param editor the editor whose color to change
      */
-    private fun returnOriginalEditorBackground(editor: EditorTextField) {
-        Thread {
-            val timeWithHighlightedBackground: Long = 10000
-            Thread.sleep(timeWithHighlightedBackground)
-            editor.background = defaultEditorColor
-        }.start()
+    private fun returnOriginalEditorBackground(
+        editor: EditorTextField,
+        id: Int,
+    ) {
+        ProgressManager.getInstance().run(
+            object : Task.Backgroundable(project, "${PluginMessagesBundle.get("coverageMessage")} $id") {
+                override fun run(indicator: ProgressIndicator) {
+                    generatedTestsTabData.indicatorController.activeIndicators.add(IJProgressIndicator(indicator))
+                    val timeWithHighlightedBackground: Long =
+                        PluginDefaultsBundle.get("testCaseHighlightingDurationMs").toLong()
+                    val numberOfIterations = 100
+                    repeat(numberOfIterations) {
+                        if (indicator.isCanceled) return
+                        Thread.sleep(timeWithHighlightedBackground / numberOfIterations)
+                    }
+                }
+
+                override fun onFinished() {
+                    super.onFinished()
+                    synchronized(this) {
+                        editor.background = defaultEditorColor
+                    }
+                }
+            },
+        )
     }
 
     /**
      * Highlight a range of editors
-     * @param names list of test names to pass to highlight function
+     * @param ids list of test ids to pass to highlight function
      */
-    private fun highlightCoveredMutants(names: List<String>) {
-        names.forEach {
+    private fun highlightCoveredMutants(ids: List<Int>) {
+        ids.forEach {
             highlightTestCase(it)
         }
     }
@@ -232,7 +270,11 @@ class CoverageRenderer(
      * @param g graphics used to draw
      * @param r rectangle object
      */
-    override fun paint(editor: Editor, g: Graphics, r: Rectangle) {
+    override fun paint(
+        editor: Editor,
+        g: Graphics,
+        r: Rectangle,
+    ) {
         g.fillRect(r.x, r.y, r.width * 3 / 2, r.height * 5 / 6)
         g.color = color
     }
@@ -242,7 +284,5 @@ class CoverageRenderer(
      *
      * @return position
      */
-    override fun getPosition(): LineMarkerRendererEx.Position {
-        return LineMarkerRendererEx.Position.LEFT
-    }
+    override fun getPosition(): LineMarkerRendererEx.Position = LineMarkerRendererEx.Position.LEFT
 }

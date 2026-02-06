@@ -13,7 +13,11 @@ interface ErrorManager {
      * @param message the error message to be processed
      * @param project the project for which the error occurred
      */
-    fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor)
+    fun errorProcess(
+        message: String,
+        project: Project,
+        errorMonitor: ErrorMonitor,
+    )
 
     /**
      * Processes a warning message for a specific project.
@@ -21,5 +25,8 @@ interface ErrorManager {
      * @param message the warning message to be processed
      * @param project the project for which the warning is being processed
      */
-    fun warningProcess(message: String, project: Project)
+    fun warningProcess(
+        message: String,
+        project: Project,
+    )
 }

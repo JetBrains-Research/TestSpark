@@ -37,17 +37,21 @@ class LLMErrorManager : ErrorManager {
      * @param message The error message to be displayed in the notification.
      * @param project The project in which the error occurred.
      */
-    override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
+    override fun errorProcess(
+        message: String,
+        project: Project,
+        errorMonitor: ErrorMonitor,
+    ) {
         if (errorMonitor.notifyErrorOccurrence()) {
             log.warn("Error in Test Generation: $message")
-            NotificationGroupManager.getInstance()
+            NotificationGroupManager
+                .getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(
                     PluginMessagesBundle.get("llmErrorTitle"),
                     message,
                     NotificationType.ERROR,
-                )
-                .notify(project)
+                ).notify(project)
         }
     }
 
@@ -57,15 +61,18 @@ class LLMErrorManager : ErrorManager {
      * @param message The content of the warning notification.
      * @param project The project in which to display the notification.
      */
-    override fun warningProcess(message: String, project: Project) {
+    override fun warningProcess(
+        message: String,
+        project: Project,
+    ) {
         log.warn("Error in Test Generation: $message")
-        NotificationGroupManager.getInstance()
+        NotificationGroupManager
+            .getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(
                 PluginMessagesBundle.get("llmWarningTitle"),
                 message,
                 NotificationType.WARNING,
-            )
-            .notify(project)
+            ).notify(project)
     }
 }

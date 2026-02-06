@@ -11,19 +11,16 @@ data class TestGenerationData(
     var testResultName: String = "",
     // The base directory of the project.
     var baseDir: String? = null,
-
     // Code required of imports and package for generated tests
     var importsCode: MutableSet<String> = mutableSetOf(),
     var packageName: String = "",
-    var runWith: String = "",
+    var annotation: String = "",
     // Modifications to this code in the tool-window editor are forgotten when apply to test suite
     var otherInfo: String = "",
-
     // changing parameters with a large prompt
     var polyDepthReducing: Int = 0,
     var inputParamsDepthReducing: Int = 0,
 ) {
-
     /**
      * Cleaning all old data before a new test generation.
      */
@@ -33,7 +30,7 @@ data class TestGenerationData(
         fileUrl = ""
         importsCode = mutableSetOf()
         packageName = ""
-        runWith = ""
+        annotation = ""
         otherInfo = ""
         polyDepthReducing = 0
         inputParamsDepthReducing = 0

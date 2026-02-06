@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
+import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -19,11 +21,26 @@ import java.util.Locale
  * @param testSuiteCode The generated code of the test suite.
  * @return The package name extracted from the test suite code, or an empty string if no package declaration was found.
  */
-fun getPackageFromTestSuiteCode(testSuiteCode: String?, language: SupportedLanguage): String {
+fun getPackageFromTestSuiteCode(
+    testSuiteCode: String?,
+    language: SupportedLanguage,
+): String {
     testSuiteCode ?: return ""
     return when (language) {
-        SupportedLanguage.Kotlin -> kotlinPackagePattern.find(testSuiteCode)?.groups?.get(1)?.value.orEmpty()
-        SupportedLanguage.Java -> javaPackagePattern.find(testSuiteCode)?.groups?.get(1)?.value.orEmpty()
+        SupportedLanguage.Kotlin ->
+            kotlinPackagePattern
+                .find(testSuiteCode)
+                ?.groups
+                ?.get(1)
+                ?.value
+                .orEmpty()
+        SupportedLanguage.Java ->
+            javaPackagePattern
+                .find(testSuiteCode)
+                ?.groups
+                ?.get(1)
+                ?.value
+                .orEmpty()
     }
 }
 
@@ -34,9 +51,15 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?, language: SupportedLangu
  * @param classFQN The fully qualified name of the class to be excluded from the imports code. It will not be included in the result.
  * @return The imports code extracted from the test suite code. If no imports are found or the result is empty after filtering, an empty string is returned.
  */
-fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String?): MutableSet<String> {
+fun getImportsCodeFromTestSuiteCode(
+    testSuiteCode: String?,
+    classFQN: String?,
+): MutableSet<String> {
     testSuiteCode ?: return mutableSetOf()
-    return testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
+    return testSuiteCode
+        .replace("\r\n", "\n")
+        .split("\n")
+        .asSequence()
         .filter { it.contains("^import".toRegex()) }
         .filterNot { it.contains("evosuite".toRegex()) }
         .filterNot { it.contains("RunWith".toRegex()) }
@@ -52,13 +75,14 @@ fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String?): 
  * @return The generated class name as a string.
  */
 fun getClassWithTestCaseName(testCaseName: String): String {
-    val className = testCaseName.replaceFirstChar {
-        if (it.isLowerCase()) {
-            it.titlecase(Locale.getDefault())
-        } else {
-            it.toString()
+    val className =
+        testCaseName.replaceFirstChar {
+            if (it.isLowerCase()) {
+                it.titlecase(Locale.getDefault())
+            } else {
+                it.toString()
+            }
         }
-    }
     return "Generated$className"
 }
 
@@ -80,27 +104,29 @@ fun executeTestCaseModificationRequest(
     requestManager: RequestManager,
     testsAssembler: TestsAssembler,
     errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
-): TestSuiteGeneratedByLLM? {
+): Result<TestSuiteGeneratedByLLM, TestSparkError> {
     // Update Token information
-    val prompt = buildString {
-        append("For this test:\n ```\n ")
-        append(testCase)
-        append("\n```\nGenerate a SINGLE test method. Do not change class and method names.")
-        append("\nPerform the following task:\n")
-        append(task)
-    }
+    val prompt =
+        buildString {
+            append("For this test:\n ```\n ")
+            append(testCase)
+            append("\n```\nGenerate a SINGLE test method. Do not change class and method names.")
+            append("\nPerform the following task:\n")
+            append(task)
+        }
 
     val packageName = getPackageFromTestSuiteCode(testCase, language)
 
-    val response = requestManager.request(
-        language,
-        prompt,
-        indicator,
-        packageName,
-        testsAssembler,
-        isUserFeedback = true,
-        errorMonitor,
-    )
+    val response =
+        requestManager.request(
+            language,
+            prompt,
+            indicator,
+            packageName,
+            testsAssembler,
+            isUserFeedback = true,
+            errorMonitor,
+        )
 
-    return response.testSuite
+    return response
 }

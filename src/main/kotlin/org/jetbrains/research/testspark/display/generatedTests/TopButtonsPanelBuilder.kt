@@ -40,9 +40,10 @@ class TopButtonsPanelBuilder {
      * Updates the labels.
      */
     fun update(generatedTestsTabData: GeneratedTestsTabData) {
-        val passedTestsCount = generatedTestsTabData.testCasePanelFactories
-            .filter { !it.isRemoved() }
-            .count { it.getError()?.isEmpty() == true }
+        val passedTestsCount =
+            generatedTestsTabData.testCasePanelFactories
+                .filter { it.isRemoved().not() && it.isShown() }
+                .count { it.getError()?.isEmpty() == true }
 
         val removedTestsCount = generatedTestsTabData.testCasePanelFactories.count { it.isRemoved() }
 
@@ -50,16 +51,20 @@ class TopButtonsPanelBuilder {
             removeAllButton.doClick()
             return
         }
-        testsSelectedLabel.text = String.format(
-            testsSelectedText,
-            generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCaseNameToPanel.size,
-        )
+
+        val numOfShownTests =
+            generatedTestsTabData.testCaseIdToPanel.size - generatedTestsTabData.hiddenTestCases.size
+        testsSelectedLabel.text =
+            String.format(
+                testsSelectedText,
+                generatedTestsTabData.testsSelected,
+                numOfShownTests,
+            )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 passedTestsCount,
-                generatedTestsTabData.testCaseNameToPanel.size,
+                numOfShownTests,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
@@ -75,12 +80,22 @@ class TopButtonsPanelBuilder {
      *
      *  @param selected whether the checkboxes have to be selected or not
      */
-    private fun toggleAllCheckboxes(selected: Boolean, generatedTestsTabData: GeneratedTestsTabData) {
-        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
-            val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
-        }
-        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
+    private fun toggleAllCheckboxes(
+        selected: Boolean,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
+        generatedTestsTabData.testCaseIdToPanel
+            .filter { it.key !in generatedTestsTabData.hiddenTestCases }
+            .forEach { (_, jPanel) ->
+                val checkBox = jPanel.getComponent(0) as JCheckBox
+                checkBox.isSelected = selected
+            }
+        generatedTestsTabData.testsSelected =
+            if (selected) {
+                generatedTestsTabData.testCaseIdToPanel.size - generatedTestsTabData.hiddenTestCases.size
+            } else {
+                0
+            }
     }
 
     /**
@@ -89,14 +104,18 @@ class TopButtonsPanelBuilder {
      * This method presents a caution message to the user and asks for confirmation before executing the test cases.
      * If the user confirms, it iterates through each test case panel factory and runs the corresponding test.
      */
-    private fun runAllTestCases(project: Project, generatedTestsTabData: GeneratedTestsTabData) {
-        val choice = JOptionPane.showConfirmDialog(
-            null,
-            PluginMessagesBundle.get("runCautionMessage"),
-            PluginMessagesBundle.get("confirmationTitle"),
-            JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.WARNING_MESSAGE,
-        )
+    private fun runAllTestCases(
+        project: Project,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
+        val choice =
+            JOptionPane.showConfirmDialog(
+                null,
+                PluginMessagesBundle.get("runCautionMessage"),
+                PluginMessagesBundle.get("confirmationTitle"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+            )
 
         if (choice == JOptionPane.CANCEL_OPTION) return
 
@@ -106,7 +125,7 @@ class TopButtonsPanelBuilder {
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            testCasePanelFactory.addTask(tasks)
+            if (testCasePanelFactory.isShown()) testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
         executeTasks(project, tasks, generatedTestsTabData)
@@ -120,30 +139,37 @@ class TopButtonsPanelBuilder {
         val nextTask = tasks.poll()
 
         nextTask?.let { task ->
-            ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Test execution") {
-                var globalIndicator: ProgressIndicator? = null
+            ProgressManager.getInstance().run(
+                object : Task.Backgroundable(project, "Test execution") {
+                    var globalIndicator: ProgressIndicator? = null
 
-                override fun run(indicator: ProgressIndicator) {
-                    globalIndicator = indicator
-                    task(IJProgressIndicator(indicator))
-                }
+                    override fun run(indicator: ProgressIndicator) {
+                        globalIndicator = indicator
 
-                override fun onFinished() {
-                    super.onFinished()
-                    if (globalIndicator != null && !globalIndicator!!.isCanceled) {
-                        executeTasks(project, tasks, generatedTestsTabData)
-                    } else {
-                        if (tasks.isNotEmpty()) {
-                            runAllButton.isEnabled = true
-                            val firstTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size - tasks.size - 1
-                            val lastTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size
-                            for (index in firstTestPanelFactoryIndex until lastTestPanelFactoryIndex) {
-                                generatedTestsTabData.testCasePanelFactories[index].removeTask()
+                        val ijIndicator = IJProgressIndicator(indicator)
+
+                        generatedTestsTabData.indicatorController.activeIndicators.add(ijIndicator)
+
+                        task(ijIndicator)
+                    }
+
+                    override fun onFinished() {
+                        super.onFinished()
+                        if (globalIndicator != null && !globalIndicator!!.isCanceled) {
+                            executeTasks(project, tasks, generatedTestsTabData)
+                        } else {
+                            if (tasks.isNotEmpty()) {
+                                runAllButton.isEnabled = true
+                                val firstTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size - tasks.size - 1
+                                val lastTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size
+                                for (index in firstTestPanelFactoryIndex until lastTestPanelFactoryIndex) {
+                                    generatedTestsTabData.testCasePanelFactories[index].removeTask()
+                                }
                             }
                         }
                     }
-                }
-            })
+                },
+            )
         }
         if (nextTask == null) {
             generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton().isEnabled = true
@@ -151,7 +177,10 @@ class TopButtonsPanelBuilder {
         }
     }
 
-    fun getPanel(project: Project, generatedTestsTabData: GeneratedTestsTabData): JPanel {
+    fun getPanel(
+        project: Project,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ): JPanel {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.preferredSize = Dimension(0, 30)

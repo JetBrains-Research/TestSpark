@@ -27,7 +27,6 @@ data class EvoSuiteSettingsState(
     var evosuiteSetupCheckBoxSelected: Boolean = DefaultEvoSuiteSettingsState.evosuiteSetupCheckBoxSelected,
     var evosuitePort: String = DefaultEvoSuiteSettingsState.evosuitePort,
 ) {
-
     /**
      * Default values of SettingsEvoSuiteState.
      */

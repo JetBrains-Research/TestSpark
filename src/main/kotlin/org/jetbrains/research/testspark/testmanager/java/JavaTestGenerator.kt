@@ -9,11 +9,11 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.testmanager.template.TestGenerator
 import java.io.File
 
 object JavaTestGenerator : TestGenerator {
-
     private val log = Logger.getInstance(this::class.java)
 
     override fun generateCode(
@@ -22,11 +22,11 @@ object JavaTestGenerator : TestGenerator {
         body: String,
         imports: Set<String>,
         packageString: String,
-        runWith: String,
+        annotation: String,
         otherInfo: String,
         testGenerationData: TestGenerationData,
     ): String {
-        var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
+        var testFullText = printUpperPart(className, imports, packageString, annotation, otherInfo, project)
 
         // Add each test (exclude expected exception)
         testFullText += body
@@ -43,17 +43,23 @@ object JavaTestGenerator : TestGenerator {
         return formatCode(project, Regex("\n\n\n(?:\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
-    override fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
+    override fun formatCode(
+        project: Project,
+        code: String,
+        generatedTestData: TestGenerationData,
+    ): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
             val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.java"
             // create a temporary PsiFile
-            val psiFile: PsiFile = PsiFileFactory.getInstance(project)
-                .createFileFromText(
-                    fileName,
-                    JavaLanguage.INSTANCE,
-                    code,
-                )
+            val psiFile: PsiFile =
+                PsiFileFactory
+                    .getInstance(project)
+                    .createFileFromText(
+                        fileName,
+                        JavaLanguage.INSTANCE,
+                        code,
+                    )
 
             CodeStyleManager.getInstance(project).reformat(psiFile)
 
@@ -70,8 +76,9 @@ object JavaTestGenerator : TestGenerator {
         className: String,
         imports: Set<String>,
         packageString: String,
-        runWith: String,
+        annotation: String,
         otherInfo: String,
+        project: Project,
     ): String {
         var testText = ""
 
@@ -87,9 +94,10 @@ object JavaTestGenerator : TestGenerator {
 
         testText += "\n"
 
-        // add runWith if exists
-        if (runWith.isNotBlank()) {
-            testText += "@RunWith($runWith)\n"
+        // add RunWith or ExtendWith annotation if exists
+        if (annotation.isNotBlank()) {
+            val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+            testText += "@${junitVersion.runWithAnnotationMeta.annotationName}($annotation)\n"
         }
         // open the test class
         testText += "public class $className {\n\n"

@@ -181,35 +181,37 @@ class EvoSuiteSettingsComponent : SettingsComponent {
     }
 
     override fun createSettingsPanel() {
-        panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(EvoSuiteLabelsBundle.get("javaSettings")))
-            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("javaPath")), javaPathTextField, 10, false)
-            .addComponent(JXTitledSeparator(EvoSuiteLabelsBundle.get("generalSettings")))
-            // EvoSuite "input" options (e.g. text, number)
-            // Important settings like algorithm selection, seed selection
-            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("defaultSearch")), algorithmSelector, 10, false)
-            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("seed")), seedTextField, 10, false)
-            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("port")), evosuitePortField, 10, false)
-            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("configId")), configurationIdTextField, 5, false)
-            .addComponent(evosuiteSetupCheckBox, 10)
-            // Checkboxes settings
-            .addComponent(sandboxCheckBox, 10)
-            .addComponent(assertionsCheckBox, 10)
-            .addComponent(clientOnThreadCheckBox, 10)
-            .addComponent(minimizeCheckBox, 10)
-            .addComponent(junitCheckCheckBox, 10)
-            // Criterion selection checkboxes
-            .addComponent(criterionSeparator, 15)
-            .addComponent(criterionLineCheckBox, 5)
-            .addComponent(criterionBranchCheckBox, 5)
-            .addComponent(criterionExceptionCheckBox, 5)
-            .addComponent(criterionWeakMutationCheckBox, 5)
-            .addComponent(criterionOutputCheckBox, 5)
-            .addComponent(criterionMethodCheckBox, 5)
-            .addComponent(criterionMethodNoExceptionCheckBox, 5)
-            .addComponent(criterionCBranchCheckBox, 5)
-            .addComponentFillVertically(JPanel(), 0)
-            .panel
+        panel =
+            FormBuilder
+                .createFormBuilder()
+                .addComponent(JXTitledSeparator(EvoSuiteLabelsBundle.get("javaSettings")))
+                .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("javaPath")), javaPathTextField, 10, false)
+                .addComponent(JXTitledSeparator(EvoSuiteLabelsBundle.get("generalSettings")))
+                // EvoSuite "input" options (e.g. text, number)
+                // Important settings like algorithm selection, seed selection
+                .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("defaultSearch")), algorithmSelector, 10, false)
+                .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("seed")), seedTextField, 10, false)
+                .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("port")), evosuitePortField, 10, false)
+                .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("configId")), configurationIdTextField, 5, false)
+                .addComponent(evosuiteSetupCheckBox, 10)
+                // Checkboxes settings
+                .addComponent(sandboxCheckBox, 10)
+                .addComponent(assertionsCheckBox, 10)
+                .addComponent(clientOnThreadCheckBox, 10)
+                .addComponent(minimizeCheckBox, 10)
+                .addComponent(junitCheckCheckBox, 10)
+                // Criterion selection checkboxes
+                .addComponent(criterionSeparator, 15)
+                .addComponent(criterionLineCheckBox, 5)
+                .addComponent(criterionBranchCheckBox, 5)
+                .addComponent(criterionExceptionCheckBox, 5)
+                .addComponent(criterionWeakMutationCheckBox, 5)
+                .addComponent(criterionOutputCheckBox, 5)
+                .addComponent(criterionMethodCheckBox, 5)
+                .addComponent(criterionMethodNoExceptionCheckBox, 5)
+                .addComponent(criterionCBranchCheckBox, 5)
+                .addComponentFillVertically(JPanel(), 0)
+                .panel
     }
 
     override fun addListeners() {}

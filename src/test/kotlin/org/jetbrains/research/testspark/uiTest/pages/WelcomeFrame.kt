@@ -16,16 +16,18 @@ import com.intellij.remoterobot.utils.waitFor
  */
 @FixtureName("Welcome Frame")
 @DefaultXpath("type", "//div[@class='FlatWelcomeFrame']")
-class WelcomeFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
-    CommonContainerFixture(remoteRobot, remoteComponent) {
-
+class WelcomeFrame(
+    remoteRobot: RemoteRobot,
+    remoteComponent: RemoteComponent,
+) : CommonContainerFixture(remoteRobot, remoteComponent) {
     // Action to press "Open project" button
     private val openProject
-        get() = actionLink(
-            byXpath(
-                "//div[(@accessiblename='Open or Import' and @class='JButton') or (@class='MainButton' and @text='Open') or (@class='JButton' and @defaultIcon='open.svg')]",
-            ),
-        )
+        get() =
+            actionLink(
+                byXpath(
+                    "//div[(@accessiblename='Open or Import' and @class='JButton') or (@class='MainButton' and @text='Open') or (@class='JButton' and @defaultIcon='open.svg')]",
+                ),
+            )
 
     // Press ok button to open file
     private val ok
@@ -53,13 +55,15 @@ class WelcomeFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     fun open(projectName: String) {
         openProject.click()
 
-        val path = System.getProperty("user.dir") + if (remoteRobot.isWin()) {
-            "\\src\\test\\resources\\project\\$projectName"
-        } else if (remoteRobot.isLinux() || remoteRobot.isMac()) {
-            "/src/test/resources/project/$projectName"
-        } else {
-            assert(false) { "Bad test OS: " + remoteRobot.os }
-        }
+        val path =
+            System.getProperty("user.dir") +
+                if (remoteRobot.isWin()) {
+                    "\\src\\test\\resources\\project\\$projectName"
+                } else if (remoteRobot.isLinux() || remoteRobot.isMac()) {
+                    "/src/test/resources/project/$projectName"
+                } else {
+                    assert(false) { "Bad test OS: " + remoteRobot.os }
+                }
 
         textField(byXpath("//div[@class='BorderlessTextField']")).text = path
 

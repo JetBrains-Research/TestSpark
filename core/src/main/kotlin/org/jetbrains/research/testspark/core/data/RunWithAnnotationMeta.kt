@@ -1,7 +1,9 @@
 package org.jetbrains.research.testspark.core.data
 
-data class RunWithAnnotationMeta(val annotationName: String, val import: String) {
-
+data class RunWithAnnotationMeta(
+    val annotationName: String,
+    val import: String,
+) {
     val regex = annotationRegex(annotationName)
 
     fun extract(line: String): String? {
@@ -12,9 +14,10 @@ data class RunWithAnnotationMeta(val annotationName: String, val import: String)
     }
 
     companion object {
-        private fun annotationRegex(annotationName: String) = Regex(
-            pattern = "@$annotationName\\([^)]*\\)",
-            options = setOf(RegexOption.MULTILINE),
-        )
+        private fun annotationRegex(annotationName: String) =
+            Regex(
+                pattern = "@$annotationName\\([^)]*\\)",
+                options = setOf(RegexOption.MULTILINE),
+            )
     }
 }

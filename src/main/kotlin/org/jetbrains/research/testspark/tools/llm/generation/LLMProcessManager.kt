@@ -1,21 +1,27 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
-import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
+import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -28,8 +34,8 @@ import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
-import org.jetbrains.research.testspark.tools.factories.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -53,18 +59,24 @@ class LLMProcessManager(
     private val testSamplesCode: String,
     projectSDKPath: Path? = null,
 ) : ProcessManager {
+    private val homeDirectory =
+        projectSDKPath?.toString() ?: run {
+            val sdk =
+                ProjectRootManager
+                    .getInstance(project)
+                    .projectSdk
+                    ?.homeDirectory
+                    ?.path
+                    ?: throw JavaSDKMissingException()
 
-    private val homeDirectory = projectSDKPath?.toString() ?: run {
-        val sdk = ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
-            ?: throw JavaSDKMissingException(LLMMessagesBundle.get("javaSdkNotConfigured"))
+            return@run sdk
+        }
 
-        return@run sdk
-    }
-
-    private val testFileName: String = when (language) {
-        SupportedLanguage.Java -> "GeneratedTest.java"
-        SupportedLanguage.Kotlin -> "GeneratedTest.kt"
-    }
+    private val testFileName: String =
+        when (language) {
+            SupportedLanguage.Java -> "GeneratedTest.java"
+            SupportedLanguage.Kotlin -> "GeneratedTest.kt"
+        }
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = LlmSettingsArguments(project).maxLLMRequest()
@@ -83,16 +95,21 @@ class LLMProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
+        indicatorController: IndicatorController,
         errorMonitor: ErrorMonitor,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
-        if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
+        if (project
+                .service<PluginSettingsService>()
+                .state.buildPath
+                .isEmpty()
+        ) {
             // User did not set own path
             buildPath = ToolUtils.getBuildPath(project)
         }
@@ -113,131 +130,111 @@ class LLMProcessManager(
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
 
         // adapter for the existing prompt reduction functionality
-        val promptSizeReductionStrategy = object : PromptSizeReductionStrategy {
-            override fun isReductionPossible(): Boolean =
-                promptManager.isPromptSizeReductionPossible(generatedTestsData)
+        val promptSizeReductionStrategy =
+            object : PromptSizeReductionStrategy {
+                override fun isReductionPossible(): Boolean = promptManager.isPromptSizeReductionPossible(generatedTestsData)
 
-            override fun reduceSizeAndGeneratePrompt(): String {
-                if (!isReductionPossible()) {
-                    throw IllegalStateException("Prompt size reduction is not possible yet requested")
+                override fun reduceSizeAndGeneratePrompt(): String {
+                    if (!isReductionPossible()) {
+                        throw IllegalStateException("Prompt size reduction is not possible yet requested")
+                    }
+                    val reductionSuccess = promptManager.reducePromptSize(generatedTestsData)
+                    assert(reductionSuccess)
+
+                    return promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
                 }
-                val reductionSuccess = promptManager.reducePromptSize(generatedTestsData)
-                assert(reductionSuccess)
-
-                return promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
             }
-        }
 
         // adapter for the existing test case/test suite string representing functionality
-        val testsPresenter = object : TestsPresenter {
-            private val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
+        val testsPresenter =
+            object : TestsPresenter {
+                private val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
 
-            override fun representTestSuite(testSuite: TestSuiteGeneratedByLLM): String {
-                return testSuitePresenter.toStringWithoutExpectedException(testSuite)
-            }
+                override fun representTestSuite(testSuite: TestSuiteGeneratedByLLM): String =
+                    testSuitePresenter.toStringWithoutExpectedException(testSuite)
 
-            override fun representTestCase(testSuite: TestSuiteGeneratedByLLM, testCaseIndex: Int): String {
-                return testSuitePresenter.toStringSingleTestCaseWithoutExpectedException(testSuite, testCaseIndex)
+                override fun representTestCase(
+                    testSuite: TestSuiteGeneratedByLLM,
+                    testCaseIndex: Int,
+                ): String = testSuitePresenter.toStringSingleTestCaseWithoutExpectedException(testSuite, testCaseIndex)
             }
-        }
 
         // Creation of JUnit specific parser, printer and assembler
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.create(language)
-        val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
-            jUnitVersion,
-            language,
-            testBodyPrinter,
-            packageName,
-        )
-        val testsAssembler = TestsAssemblerFactory.create(
-            indicator,
-            generatedTestsData,
-            testSuiteParser,
-            jUnitVersion,
-        )
+        val testBodyPrinter = TestBodyPrinter.create(language)
+        val testSuiteParser =
+            JUnitTestSuiteParser.create(
+                jUnitVersion,
+                language,
+                testBodyPrinter,
+                packageName,
+            )
+        val testsAssembler =
+            JUnitTestsAssembler(
+                indicator,
+                generatedTestsData,
+                testSuiteParser,
+                jUnitVersion,
+            )
 
-        val testCompiler = TestCompilerFactory.create(
-            project,
-            jUnitVersion,
-            language,
-            homeDirectory,
-        )
+        val testCompiler =
+            TestCompilerFactory.create(
+                project,
+                jUnitVersion,
+                language,
+                homeDirectory,
+            )
 
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
-        val llmFeedbackCycle = LLMWithFeedbackCycle(
-            language = language,
-            report = report,
-            initialPromptMessage = initialPromptMessage,
-            promptSizeReductionStrategy = promptSizeReductionStrategy,
-            testSuiteFilename = testFileName,
-            packageName = packageName,
-            resultPath = generatedTestsData.resultPath,
-            buildPath = buildPath,
-            requestManager = requestManager,
-            testsAssembler = testsAssembler,
-            testCompiler = testCompiler,
-            testStorage = testProcessor,
-            testsPresenter = testsPresenter,
-            indicator = indicator,
-            requestsCountThreshold = maxRequests,
-            errorMonitor = errorMonitor,
-        )
+        val llmFeedbackCycle =
+            LLMWithFeedbackCycle(
+                language = language,
+                report = report,
+                initialPromptMessage = initialPromptMessage,
+                promptSizeReductionStrategy = promptSizeReductionStrategy,
+                testSuiteFilename = testFileName,
+                packageName = packageName,
+                resultPath = generatedTestsData.resultPath,
+                buildPath = buildPath,
+                requestManager = requestManager,
+                testsAssembler = testsAssembler,
+                testCompiler = testCompiler,
+                testStorage = testProcessor,
+                testsPresenter = testsPresenter,
+                indicator = indicator,
+                requestsCountThreshold = maxRequests,
+                errorMonitor = errorMonitor,
+            )
 
-        val feedbackResponse = llmFeedbackCycle.run { warning ->
-            when (warning) {
-                LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
-
-                LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
-
-                LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.get("compilationError"), project)
+        val feedbackResponse =
+            llmFeedbackCycle.run { warning ->
+                project.createNotification(warning, NotificationType.WARNING)
             }
-        }
 
         // Process stopped checking
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
-        log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
+        log.info("Feedback cycle finished execution with $feedbackResponse")
 
-        when (feedbackResponse.executionResult) {
-            FeedbackCycleExecutionResult.OK -> {
-                log.info("Add ${feedbackResponse.compilableTestCases.size} compilable test cases into generatedTestsData")
+        when (feedbackResponse) {
+            is Result.Success -> {
+                log.info("Add ${feedbackResponse.data.compilableTestCases.size} compilable test cases into generatedTestsData")
             }
 
-            FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
-                if (feedbackResponse.generatedTestSuite != null) {
-                    llmErrorManager.warningProcess(LLMMessagesBundle.get("noCompilableTestCases"), project)
-                } else {
-                    llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
-                }
-            }
-
-            FeedbackCycleExecutionResult.CANCELED -> {
-                log.info("Process stopped")
+            is Result.Failure -> {
+                project.createNotification(feedbackResponse.error, NotificationType.ERROR)
                 return null
-            }
-
-            FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.get("tooLongPromptRequest"), project, errorMonitor)
-                return null
-            }
-
-            FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.get("savingTestFileIssue"), project, errorMonitor)
             }
         }
 
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 
         // Error during the collecting
-        if (errorMonitor.hasErrorOccurred()) return null
+        if (errorMonitor.hasErrorOccurred()) throw ProcessCancelledException(TestSparkModule.Llm())
 
         log.info("Save generated test suite and test cases into the project workspace")
 
         val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
-        val generatedTestSuite: TestSuiteGeneratedByLLM? = feedbackResponse.generatedTestSuite
+        val generatedTestSuite: TestSuiteGeneratedByLLM? = feedbackResponse.getDataOrNull()?.generatedTestSuite
         val testSuiteRepresentation =
             if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
 
@@ -254,6 +251,6 @@ class LLMProcessManager(
             language,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager, errorMonitor)
+        return UIContext(projectContext, generatedTestsData, requestManager, indicatorController, errorMonitor)
     }
 }

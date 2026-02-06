@@ -18,7 +18,9 @@ import javax.swing.JTextField
 /**
  * This class displays and captures changes to the values of the Settings entries.
  */
-class KexSettingsComponent(private val project: Project) : SettingsComponent {
+class KexSettingsComponent(
+    private val project: Project,
+) : SettingsComponent {
     var panel: JPanel? = null
     private val kexSettingsState: KexSettingsState
         get() = project.getService(KexSettingsService::class.java).state
@@ -75,16 +77,19 @@ class KexSettingsComponent(private val project: Project) : SettingsComponent {
     override fun stylizePanel() {
         kexPathTextField.toolTipText = KexSettingsBundle.get("kexHome")
     }
+
     override fun createSettingsPanel() {
-        panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(KexLabelsBundle.get("kexSettings")))
-            .addLabeledComponent(JBLabel(KexLabelsBundle.get("kexMode")), kexModeSelector, 10, false)
-            .addLabeledComponent(JBLabel(KexLabelsBundle.get("maxTests")), maxTestsField, 10, false)
-            .addLabeledComponent(JBLabel(KexLabelsBundle.get("timeLimit")), timeLimitField, 10, false)
-            .addLabeledComponent(JBLabel(KexLabelsBundle.get("option")), optionTextField, 10, false)
-            .addLabeledComponent(JBLabel(KexLabelsBundle.get("kexHome")), kexPathTextField, 10, false)
-            .addLabeledComponent(JBLabel(KexLabelsBundle.get("kexVersion")), kexVersionTextField, 10, false)
-            .panel
+        panel =
+            FormBuilder
+                .createFormBuilder()
+                .addComponent(JXTitledSeparator(KexLabelsBundle.get("kexSettings")))
+                .addLabeledComponent(JBLabel(KexLabelsBundle.get("kexMode")), kexModeSelector, 10, false)
+                .addLabeledComponent(JBLabel(KexLabelsBundle.get("maxTests")), maxTestsField, 10, false)
+                .addLabeledComponent(JBLabel(KexLabelsBundle.get("timeLimit")), timeLimitField, 10, false)
+                .addLabeledComponent(JBLabel(KexLabelsBundle.get("option")), optionTextField, 10, false)
+                .addLabeledComponent(JBLabel(KexLabelsBundle.get("kexHome")), kexPathTextField, 10, false)
+                .addLabeledComponent(JBLabel(KexLabelsBundle.get("kexVersion")), kexVersionTextField, 10, false)
+                .panel
     }
 
     override fun addListeners() {}

@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiModifier
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
@@ -16,7 +17,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
 
-class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
+class JavaPsiClassWrapper(
+    private val psiClass: PsiClass,
+) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
 
     override val qualifiedName: String get() = psiClass.qualifiedName ?: ""
@@ -27,7 +30,13 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
 
     override val allMethods: List<PsiMethodWrapper> get() = psiClass.allMethods.map { JavaPsiMethodWrapper(it) }
 
-    override val constructorSignatures: List<String> get() = psiClass.constructors.map { JavaPsiMethodWrapper.buildSignature(it) }
+    override val constructorSignatures: List<String>
+        get() =
+            psiClass.constructors.map {
+                JavaPsiMethodWrapper.buildSignature(
+                    it,
+                )
+            }
 
     override val superClass: PsiClassWrapper? get() = psiClass.superClass?.let { JavaPsiClassWrapper(it) }
 
@@ -36,12 +45,13 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val containingFile: PsiFile get() = psiClass.containingFile
 
     override val fullText: String
-        get() = JavaKotlinClassTextExtractor().extract(
-            psiClass.containingFile,
-            psiClass.text,
-            javaPackagePattern,
-            javaImportPattern,
-        )
+        get() =
+            JavaKotlinClassTextExtractor().extract(
+                psiClass.containingFile,
+                psiClass.text,
+                javaPackagePattern,
+                javaImportPattern,
+            )
 
     override val classType: ClassType
         get() {
@@ -59,12 +69,10 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)
         val query = ClassInheritorsSearch.search(psiClass, scope, false)
-        return query.findAll().map { JavaPsiClassWrapper(it) }
+        return query.findAll().filter { it !is PsiAnonymousClass }.map { JavaPsiClassWrapper(it) }
     }
 
-    override fun getInterestingPsiClassesWithQualifiedNames(
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper> {
+    override fun getInterestingPsiClassesWithQualifiedNames(psiMethod: PsiMethodWrapper): MutableSet<PsiClassWrapper> {
         val interestingMethods = mutableSetOf(psiMethod as JavaPsiMethodWrapper)
         for (currentPsiMethod in allMethods) {
             if ((currentPsiMethod as JavaPsiMethodWrapper).isConstructor) interestingMethods.add(currentPsiMethod)
@@ -85,13 +93,28 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
         return interestingPsiClasses.toMutableSet()
     }
 
-    /**
-     * Checks if the constraints on the selected class are satisfied, so that EvoSuite can generate tests for it.
-     * Namely, it is not an enum and not an anonymous inner class.
-     *
-     * @return true if the constraints are satisfied, false otherwise
-     */
-    fun isTestableClass(): Boolean {
-        return !psiClass.isEnum && psiClass !is PsiAnonymousClass
+    override fun isValidSubjectUnderTest(): Boolean {
+        if (psiClass.isInterface ||
+            psiClass.isEnum ||
+            psiClass.hasModifierProperty(PsiModifier.ABSTRACT) ||
+            psiClass.isAnnotationType ||
+            psiClass is PsiAnonymousClass
+        ) {
+            return false
+        }
+
+        val importsSet =
+            (containingFile as PsiJavaFile)
+                .importList
+                ?.allImportStatements
+                ?.mapNotNull { it.text }
+                ?.toSet() ?: emptySet()
+
+        val containsImport =
+            importsSet.any { import ->
+                getListOfTestingImports().any { it in import }
+            }
+
+        return !containsImport
     }
 }

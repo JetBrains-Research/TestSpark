@@ -1,9 +1,24 @@
 package org.jetbrains.research.testspark.testmanager.template
 
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.data.TestSample
+import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
+import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
+
 /**
  * Interface for retrieving information from test class code.
  */
 interface TestAnalyzer {
+    companion object {
+        fun create(language: SupportedLanguage): TestAnalyzer =
+            when (language) {
+                SupportedLanguage.Kotlin -> KotlinTestAnalyzer
+                SupportedLanguage.Java -> JavaTestAnalyzer
+            }
+    }
+
     /**
      * Extracts the code of the first test method found in the given class code.
      *
@@ -19,7 +34,10 @@ interface TestAnalyzer {
      * @param classCode The source code of the class containing test methods.
      * @return The name of the first test method. If no test method is found, an empty string is returned.
      */
-    fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String
+    fun extractFirstTestMethodName(
+        oldTestCaseName: String,
+        classCode: String,
+    ): String
 
     /**
      * Retrieves the class name from the given test case code.
@@ -36,4 +54,42 @@ interface TestAnalyzer {
      * @return the class name extracted from the test case code
      */
     fun getFileNameFromTestCaseCode(code: String): String
+
+    /**
+     * Extracts a list of test samples from the given project and file.
+     * This method analyzes the provided file in the context of the project to identify relevant test samples.
+     *
+     * @param project The current project where the file is located.
+     * @param file The virtual file to be analyzed for extracting test samples.
+     */
+    fun getTestSamplesList(
+        project: Project,
+        file: VirtualFile,
+    ): List<TestSample>
+
+    /**
+     * Creates a visual representation of a method reference in the format "ClassName#MethodName".
+     *
+     * @param className The name of the class containing the method.
+     * @param methodName The name of the method.
+     * @return A string representation of the method reference enclosed in HTML tags.
+     */
+    fun createHtmlMethodName(
+        className: String?,
+        methodName: String?,
+    ): String {
+        var htmlMethodName = "<html>"
+        htmlMethodName += className ?: "unnamed"
+        htmlMethodName += "#"
+        htmlMethodName += methodName ?: "unnamed"
+        htmlMethodName += "</html>"
+        return htmlMethodName
+    }
+
+    /**
+     * Checks if the given file is of a supported type.
+     *
+     * @param file The virtual file to be checked.
+     */
+    fun isSupportedFileType(file: VirtualFile): Boolean
 }

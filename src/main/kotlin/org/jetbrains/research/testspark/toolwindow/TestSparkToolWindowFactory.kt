@@ -14,7 +14,10 @@ class TestSparkToolWindowFactory : ToolWindowFactory {
     /**
      * Initialises the UI of the tool window.
      */
-    override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+    override fun createToolWindowContent(
+        project: Project,
+        toolWindow: ToolWindow,
+    ) {
         val descriptionTab = DescriptionTab(project)
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         val content: Content = contentFactory.createContent(descriptionTab.getContent(), PluginLabelsBundle.get("descriptionWindow"), false)

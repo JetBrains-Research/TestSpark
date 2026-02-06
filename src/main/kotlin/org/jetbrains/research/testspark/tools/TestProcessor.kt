@@ -25,7 +25,11 @@ class TestProcessor(
     givenProjectSDKPath: Path? = null,
 ) : TestsPersistentStorage {
     private val homeDirectory =
-        givenProjectSDKPath?.toString() ?: ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
+        givenProjectSDKPath?.toString() ?: ProjectRootManager
+            .getInstance(project)
+            .projectSdk!!
+            .homeDirectory!!
+            .path
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -42,13 +46,14 @@ class TestProcessor(
         }
         Path(generatedTestPath).createDirectories()
 
+        val testFilePath = "$generatedTestPath${sanitizeFileName(testFileName)}"
         // Save the generated test suite to the file
-        val testFile = File("$generatedTestPath$testFileName")
+        val testFile = File(testFilePath)
         testFile.createNewFile()
         log.info("Save test in file " + testFile.absolutePath)
         testFile.writeText(code)
 
-        return "$generatedTestPath$testFileName"
+        return testFilePath
     }
 
     /**
@@ -74,7 +79,9 @@ class TestProcessor(
         junitVersion: JUnitVersion,
     ): String {
         // find the proper javac
-        val javaRunner = findJavaCompilerInDirectory(homeDirectory)
+        val javaRunnerFile = findJavaCompilerInDirectory(homeDirectory)
+        val javaRunnerAbsolutePath = javaRunnerFile.absolutePath
+        val javaRunner = if (DataFilesUtil.isWindows()) "\"$javaRunnerAbsolutePath\"" else "'$javaRunnerAbsolutePath'"
         // JaCoCo libs
         val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
         val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
@@ -95,28 +102,43 @@ class TestProcessor(
             } else {
                 "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false"
             }
-        val testExecutionResult = CommandLineRunner.run(
-            arrayListOf(
-                javaRunner.absolutePath,
-                javaAgentFlag,
-                "-cp",
-                "\"${testCompiler.getClassPaths(projectBuildPath)}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
-                "org.jetbrains.research.SingleJUnitTestRunner${junitVersion.version}",
-                name,
-            ),
-        )
+
+        // save classpaths to a temp file
+        val classPathsList =
+            "\"" +
+                testCompiler
+                    .getClassPaths(
+                        projectBuildPath,
+                    ).replace("\\", "/") +
+                "${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath" +
+                "\""
+        val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
+        val classPaths = "\"@$fileName\""
+
+        val testExecutionResult =
+            CommandLineRunner.run(
+                arrayListOf(
+                    javaRunner,
+                    javaAgentFlag,
+                    "-cp",
+                    classPaths,
+                    "org.jetbrains.research.SingleJUnitTestRunner${junitVersion.version}",
+                    name,
+                ),
+            )
 
         log.info("Exit code: '${testExecutionResult.exitCode}'; Execution message: '${testExecutionResult.executionMessage}'")
 
         // Prepare the command for generating the Jacoco report
-        val command = mutableListOf(
-            javaRunner.absolutePath,
-            "-jar",
-            // jacocoCLIDir,
-            jacocoCLILibraryPath,
-            "report",
-            "$dataFileName.exec",
-        )
+        val command =
+            mutableListOf(
+                javaRunner,
+                "-jar",
+                // jacocoCLIDir,
+                jacocoCLILibraryPath,
+                "report",
+                "$dataFileName.exec",
+            )
 
         // for classpath containing cut
         command.add("--classfiles")
@@ -160,19 +182,29 @@ class TestProcessor(
         junitVersion: JUnitVersion,
     ): TestCase {
         // get buildPath
-        var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
+        var buildPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
+        if (project
+                .service<PluginSettingsService>()
+                .state.buildPath
+                .isEmpty()
+        ) {
             // User did not set own path
             buildPath = ToolUtils.getBuildPath(project)
         }
 
         // save new test to file
-        val generatedTestPath: String = saveGeneratedTest(
-            packageName,
-            testCode,
-            resultPath,
-            fileName,
-        )
+        val generatedTestPath: String =
+            saveGeneratedTest(
+                packageName,
+                testCode,
+                resultPath,
+                fileName,
+            )
 
         // compilation checking
         val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath, resultPath)
@@ -181,29 +213,31 @@ class TestProcessor(
         } else {
             val dataFileName = "$resultPath/jacoco-${fileName.split(".")[0]}"
 
-            val testExecutionError = createXmlFromJacoco(
-                fileName.split(".")[0],
-                dataFileName,
-                testName,
-                buildPath,
-                packageName,
-                resultPath,
-                projectContext,
-                testCompiler,
-                junitVersion,
-            )
+            val testExecutionError =
+                createXmlFromJacoco(
+                    fileName.split(".")[0],
+                    dataFileName,
+                    testName,
+                    buildPath,
+                    packageName,
+                    resultPath,
+                    projectContext,
+                    testCompiler,
+                    junitVersion,
+                )
 
             if (!File("$dataFileName.xml").exists()) {
                 testsExecutionResultManager.addFailedTest(testId, testCode, testExecutionError)
             } else {
-                val testCase = getTestCaseFromXml(
-                    testId,
-                    testName,
-                    testCode,
-                    getExceptionData(testExecutionError, projectContext).second,
-                    "$dataFileName.xml",
-                    projectContext,
-                )
+                val testCase =
+                    getTestCaseFromXml(
+                        testId,
+                        testName,
+                        testCode,
+                        getExceptionData(testExecutionError, projectContext).second,
+                        "$dataFileName.xml",
+                        projectContext,
+                    )
 
                 if (getExceptionData(testExecutionError, projectContext).first) {
                     testsExecutionResultManager.addFailedTest(testId, testCode, testExecutionError)
@@ -227,7 +261,10 @@ class TestProcessor(
      * @param testExecutionError error output (including the thrown stack trace) during the test execution.
      * @return a set of lines that are covered in CUT during the exception happening.
      */
-    private fun getExceptionData(testExecutionError: String, projectContext: ProjectContext): Pair<Boolean, Set<Int>> {
+    private fun getExceptionData(
+        testExecutionError: String,
+        projectContext: ProjectContext,
+    ): Pair<Boolean, Set<Int>> {
         if (testExecutionError.isBlank()) {
             return Pair(false, emptySet())
         }
@@ -285,7 +322,10 @@ class TestProcessor(
                     }
                     children("sourcefile") {
                         isCorrectSourceFile =
-                            this.attributes.getValue("name") == projectContext.fileUrlAsString!!.split(File.separatorChar).last()
+                            this.attributes.getValue("name") ==
+                            projectContext.fileUrlAsString!!
+                                .split(File.separatorChar)
+                                .last()
                         children("line") {
                             if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
@@ -311,13 +351,23 @@ class TestProcessor(
      * Finds 'javac' compiler (both on Unix & Windows)
      * starting from the provided directory.
      */
-    private fun findJavaCompilerInDirectory(homeDirectory: String): File {
-        return File(homeDirectory).walk()
+    private fun findJavaCompilerInDirectory(homeDirectory: String): File =
+        File(homeDirectory)
+            .walk()
             .filter {
                 val isJavaName =
                     if (DataFilesUtil.isWindows()) it.name.equals("java.exe") else it.name.equals("java")
                 isJavaName && it.isFile
-            }
-            .first()
+            }.first()
+
+    /**
+     * Remove all forbidden characters depending on platform.
+     */
+    private fun sanitizeFileName(name: String): String {
+        if (DataFilesUtil.isWindows()) {
+            val forbiddenChars = arrayOf("<", ">", ":", "\"", "/", "\\", "|", "?", "*")
+            return forbiddenChars.fold(name) { acc, c -> acc.replace(c, "_") }
+        }
+        return name
     }
 }

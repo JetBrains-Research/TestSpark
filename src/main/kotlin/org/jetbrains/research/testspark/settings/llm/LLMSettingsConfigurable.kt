@@ -13,7 +13,9 @@ import javax.swing.JComponent
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
  *   observes the changes and manages the UI and state.
  */
-class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurable {
+class LLMSettingsConfigurable(
+    private val project: Project,
+) : SettingsConfigurable {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
@@ -120,7 +122,8 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
 
         // junit version
         modified = modified or (settingsComponent!!.junitVersion != llmSettingsState.junitVersion)
-        modified = modified or (settingsComponent!!.junitVersionPriorityCheckBoxSelected != llmSettingsState.junitVersionPriorityCheckBoxSelected)
+        modified =
+            modified or (settingsComponent!!.junitVersionPriorityCheckBoxSelected != llmSettingsState.junitVersionPriorityCheckBoxSelected)
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != llmSettingsState.llmSetupCheckBoxSelected)
         modified =
@@ -135,9 +138,15 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        if (!PromptParserHelper.isPromptValid(JsonEncoding.decode(settingsComponent!!.classPrompts)[settingsComponent!!.classCurrentDefaultPromptIndex]) ||
-            !PromptParserHelper.isPromptValid(JsonEncoding.decode(settingsComponent!!.methodPrompts)[settingsComponent!!.methodCurrentDefaultPromptIndex]) ||
-            !PromptParserHelper.isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex])
+        if (!PromptParserHelper.isPromptValid(
+                JsonEncoding.decode(settingsComponent!!.classPrompts)[settingsComponent!!.classCurrentDefaultPromptIndex],
+            ) ||
+            !PromptParserHelper.isPromptValid(
+                JsonEncoding.decode(settingsComponent!!.methodPrompts)[settingsComponent!!.methodCurrentDefaultPromptIndex],
+            ) ||
+            !PromptParserHelper.isPromptValid(
+                JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex],
+            )
         ) {
             Messages.showErrorDialog(
                 LLMMessagesBundle.get("defaultPromptIsNotValidMessage"),
@@ -189,9 +198,7 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
      *
      * @return the name displayed in the menu (settings)
      */
-    override fun getDisplayName(): String {
-        return "TestSpark"
-    }
+    override fun getDisplayName(): String = "TestSpark"
 
     /**
      * Disposes the UI resources. It is called when a user closes the Settings dialog.

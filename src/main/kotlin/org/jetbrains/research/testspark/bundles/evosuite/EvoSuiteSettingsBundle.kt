@@ -7,11 +7,12 @@ import org.jetbrains.annotations.PropertyKey
 /**
  * Loads the `resources` directory.
  */
-object EvoSuiteSettingsBundle : DynamicBundle(EvoSuiteBundlePaths.settings) {
-
+object EvoSuiteSettingsBundle : DynamicBundle(EvoSuiteBundlePaths.SETTINGS) {
     /**
      * Gets the requested default value.
      */
     @Nls
-    fun get(@PropertyKey(resourceBundle = EvoSuiteBundlePaths.settings) key: String): String = getMessage(key)
+    fun get(
+        @PropertyKey(resourceBundle = EvoSuiteBundlePaths.SETTINGS) key: String,
+    ): String = getMessage(key)
 }

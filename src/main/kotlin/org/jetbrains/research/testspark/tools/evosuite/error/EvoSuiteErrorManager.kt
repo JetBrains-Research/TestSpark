@@ -34,8 +34,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @param message The additional message to include in the error message.
      * @return The common error message with the provided message.
      */
-    private fun getCommonErrorMessage(message: String) =
-        EvoSuiteMessagesBundle.get("evosuiteErrorCommon") + " " + message
+    private fun getCommonErrorMessage(message: String) = EvoSuiteMessagesBundle.get("evosuiteErrorCommon") + " " + message
 
     /**
      * Returns the exceeded timeout message with the specified EvoSuite process timeout.
@@ -116,16 +115,20 @@ class EvoSuiteErrorManager : ErrorManager {
      *
      * @param message the balloon content to display
      */
-    override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
+    override fun errorProcess(
+        message: String,
+        project: Project,
+        errorMonitor: ErrorMonitor,
+    ) {
         if (errorMonitor.notifyErrorOccurrence()) {
-            NotificationGroupManager.getInstance()
+            NotificationGroupManager
+                .getInstance()
                 .getNotificationGroup("EvoSuite Execution Error")
                 .createNotification(
                     PluginMessagesBundle.get("evosuiteErrorTitle"),
                     getCommonErrorMessage(message),
                     NotificationType.ERROR,
-                )
-                .notify(project)
+                ).notify(project)
         }
     }
 
@@ -134,14 +137,17 @@ class EvoSuiteErrorManager : ErrorManager {
      *
      * @param message the balloon content to display
      */
-    override fun warningProcess(message: String, project: Project) {
-        NotificationGroupManager.getInstance()
+    override fun warningProcess(
+        message: String,
+        project: Project,
+    ) {
+        NotificationGroupManager
+            .getInstance()
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(
                 PluginMessagesBundle.get("evosuiteErrorTitle"),
                 getCommonErrorMessage(message),
                 NotificationType.WARNING,
-            )
-            .notify(project)
+            ).notify(project)
     }
 }

@@ -1,69 +1,33 @@
 package org.jetbrains.research.testspark.tools.llm
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
-import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.core.exception.TestSparkException
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
-import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
-import java.nio.file.Path
 
 /**
  * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
  *
  * @param name The name of the tool. Default value is "Llm".
  */
-class Llm(override val name: String = "LLM") : Tool {
-
+class Llm(
+    override val name: String = "LLM",
+) : Tool {
     private val log = Logger.getInstance(this::class.java)
-
-    /**
-     * Returns an instance of the LLMProcessManager.
-     *
-     * @param project The current project.
-     * @param psiFile The PSI file.
-     * @param caretOffset The caret offset in the file.
-     * @param testSamplesCode The test samples code.
-     * @return An instance of LLMProcessManager.
-     */
-    fun getLLMProcessManager(
-        project: Project,
-        psiHelper: PsiHelper,
-        caretOffset: Int,
-        testSamplesCode: String,
-        projectSDKPath: Path? = null,
-    ): LLMProcessManager {
-        val classesToTest = mutableListOf<PsiClassWrapper>()
-        val maxPolymorphismDepth = LlmSettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
-
-        ProgressManager.getInstance().runProcessWithProgressSynchronously({
-            ApplicationManager.getApplication().runReadAction {
-                psiHelper.collectClassesToTest(project, classesToTest, caretOffset, maxPolymorphismDepth)
-            }
-        }, PluginMessagesBundle.get("collectingClassesToTest"), false, project)
-
-        return LLMProcessManager(
-            project,
-            psiHelper.language,
-            PromptManager(project, psiHelper, caretOffset),
-            testSamplesCode,
-            projectSDKPath,
-        )
-    }
 
     /**
      * Generates test cases for a class in the specified project.
@@ -80,13 +44,14 @@ class Llm(override val name: String = "LLM") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for CLASS was selected")
-        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
-            testGenerationController.finished()
+        if (!LLMHelper.isCorrectToken(project, errorMonitor)) {
+            indicatorController.finished()
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
@@ -97,7 +62,8 @@ class Llm(override val name: String = "LLM") : Tool {
             caretOffset,
             fileUrl,
             testSamplesCode,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             codeType,
@@ -119,13 +85,14 @@ class Llm(override val name: String = "LLM") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for METHOD was selected")
-        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
-            testGenerationController.finished()
+        if (!LLMHelper.isCorrectToken(project, errorMonitor)) {
+            indicatorController.finished()
             return
         }
         val psiMethod = psiHelper.getSurroundingMethod(caretOffset)!!
@@ -137,7 +104,8 @@ class Llm(override val name: String = "LLM") : Tool {
             caretOffset,
             fileUrl,
             testSamplesCode,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             codeType,
@@ -159,13 +127,14 @@ class Llm(override val name: String = "LLM") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for LINE was selected")
-        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
-            testGenerationController.finished()
+        if (!LLMHelper.isCorrectToken(project, errorMonitor)) {
+            indicatorController.finished()
             return
         }
         val selectedLine: Int = psiHelper.getSurroundingLineNumber(caretOffset)!!
@@ -177,7 +146,8 @@ class Llm(override val name: String = "LLM") : Tool {
             caretOffset,
             fileUrl,
             testSamplesCode,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             codeType,
@@ -197,7 +167,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param caretOffset The offset of the caret position in the PSI file.
      * @param fileUrl The URL of the file to generate tests for (optional).
      * @param testSamplesCode The code of the test samples to use for test generation.
-     * @param testGenerationController The controller for test generation operations.
+     * @param indicatorController The controller for test generation operations.
      * @param testSparkDisplayManager The manager for displaying test-related information.
      * @param testsExecutionResultManager The manager for handling test execution results.
      * @param codeType The type of data fragment to generate tests for.
@@ -208,36 +178,40 @@ class Llm(override val name: String = "LLM") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
         codeType: FragmentToTestData,
     ) {
         try {
             val packageName = psiHelper.getPackageName()
-            val pipeline = Pipeline(
-                project,
-                psiHelper,
-                caretOffset,
-                fileUrl,
-                packageName,
-                testGenerationController,
-                testSparkDisplayManager,
-                testsExecutionResultManager,
-                name,
-            )
+            val pipeline =
+                Pipeline(
+                    project,
+                    psiHelper,
+                    caretOffset,
+                    fileUrl,
+                    packageName,
+                    indicatorController,
+                    errorMonitor,
+                    testSparkDisplayManager,
+                    testsExecutionResultManager,
+                    name,
+                )
 
-            val manager = LLMProcessManager(
-                project,
-                psiHelper.language,
-                PromptManager(project, psiHelper, caretOffset),
-                testSamplesCode,
-            )
+            val manager =
+                LLMProcessManager(
+                    project,
+                    psiHelper.language,
+                    PromptManager(project, psiHelper, caretOffset),
+                    testSamplesCode,
+                )
 
             pipeline.runTestGeneration(manager, codeType)
         } catch (err: TestSparkException) {
-            testGenerationController.finished()
-            LLMErrorManager().errorProcess(err.message!!, project, testGenerationController.errorMonitor)
+            indicatorController.finished()
+            project.createNotification(err, NotificationType.ERROR)
         }
     }
 }
