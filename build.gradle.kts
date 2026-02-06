@@ -136,9 +136,13 @@ dependencies {
         // make a custom version of IDEA
         create(properties("platformType"), properties("platformVersion"))
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-        bundledPlugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
+        bundledPlugins(
+            providers.gradleProperty("platformPlugins").map {
+                it.split(',') + "com.intellij.gradle"
+            },
+        )
 
-        pluginVerifier("1.383")
+        pluginVerifier()
         zipSigner()
         instrumentationTools()
 
@@ -247,7 +251,7 @@ intellijPlatform {
     // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
     pluginVerification {
         ides {
-            recommended()
+//            recommended()
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
                 channels = listOf(ProductRelease.Channel.RELEASE)

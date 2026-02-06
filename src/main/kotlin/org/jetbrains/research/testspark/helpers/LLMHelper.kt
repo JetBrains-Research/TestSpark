@@ -424,48 +424,6 @@ object LLMHelper {
     }
 
     /**
-     * Retrieves a list of available models from the Google AI API.
-     *
-     * Note that this will only return models that support content generation because we need this for the
-     * test-generation queries.
-     *
-     * @param providedToken The authentication token provided by Google AI.
-     * @return An array of model IDs. If an error occurs during the request, an array with an empty string is returned.
-     */
-    fun getGeminiModels(providedToken: String): Array<String> {
-        val url = "https://generativelanguage.googleapis.com/v1beta/models?key=$providedToken"
-
-        val httpRequest = HttpRequests.request(url)
-        val models = mutableListOf<String>()
-
-        try {
-            httpRequest.connect { request ->
-                if ((request.connection as HttpURLConnection).responseCode == HttpURLConnection.HTTP_OK) {
-                    val jsonObject = JsonParser.parseString(request.readString()).asJsonObject
-                    val dataArray = jsonObject.getAsJsonArray("models")
-                    for (dataObject in dataArray) {
-                        val id = dataObject.asJsonObject.getAsJsonPrimitive("name").asString
-                        val methods = dataObject.asJsonObject
-                            .getAsJsonArray("supportedGenerationMethods")
-                            .map { method -> method.asString }
-                        if (methods.contains("generateContent")) {
-                            models.add(id.removePrefix("models/"))
-                        }
-                    }
-                }
-            }
-        } catch (e: HttpRequests.HttpStatusException) {
-            return arrayOf("")
-        }
-
-        if (models.isNotEmpty()) {
-            return models.toTypedArray()
-        }
-
-        return arrayOf("")
-    }
-
-    /**
      * Retrieves the available Grazie models.
      *
      * @return an array of string representing the available Grazie models

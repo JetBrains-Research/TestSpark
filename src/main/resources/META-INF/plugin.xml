@@ -36,6 +36,10 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.4.2</h>
+            <ul>
+                <li>Support IDE 253.*</li>
+            </ul>
         <h4>0.4.1</h4>
             <ul>
                 <li>Changed TestSpark’s vendor to JetBrains.</li>

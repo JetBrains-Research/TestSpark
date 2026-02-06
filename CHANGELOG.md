@@ -4,17 +4,22 @@
 
 ## Unreleased
 
-## 0.4.1 - 2025-05-08
+## 0.4.2
+
+### Added
+- Support IDEA `253.*`.
+
+## 0.4.1
 
 ### Fixed
-- Changed TestSpark’s vendor to JetBrains
+- Changed TestSpark's vendor to JetBrains
 - Fixed minor bugs
 
 ### Changed
 - Improved the error-handling structure
 
 ### Added
-- Support IDEA 252.*
+- Support IDEA `252.*`.
 
 ## 0.4.0
 
@@ -27,7 +32,7 @@
 ### Added
 - Support for Google AI as an LLM
 - KEX as a new test generation feature
-- Support IDEA 251.*
+- Support IDEA `251.*`.
 
 ## 0.3.1
 
