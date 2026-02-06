@@ -42,12 +42,15 @@ class JavaTestCompiler(
     override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
+        // See: https://github.com/JetBrains-Research/TestSpark/issues/402
+        val javac = if (DataFilesUtil.isWindows()) "\"$javac\"" else "'$javac'"
+
         val executionResult = CommandLineRunner.run(
             arrayListOf(
                 /**
                  * Filepath may contain spaces, so we need to wrap it in quotes.
                  */
-                "'$javac'",
+                javac,
                 "-cp",
                 classPaths,
                 path,
@@ -59,7 +62,7 @@ class JavaTestCompiler(
         logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
         val classFilePath = path.replace(".java", ".class")
-        if (!File(classFilePath).exists()) {
+        if (executionResult.exitCode == 0 && !File(classFilePath).exists()) {
             throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
         }
         return executionResult

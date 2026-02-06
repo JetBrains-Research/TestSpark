@@ -24,33 +24,43 @@ object TestCompilerFactory {
 
         // TODO add the warning window that for Java we always need the javaHomeDirectoryPath
         return when (language) {
-            SupportedLanguage.Java -> createJavaCompiler(project, libraryPaths, junitLibraryPaths, javaHomeDirectory)
-            SupportedLanguage.Kotlin -> createKotlinCompiler(libraryPaths, junitLibraryPaths)
+            SupportedLanguage.Java -> {
+                val javaSDKHomePath = findJavaSDKHomePath(javaHomeDirectory, project)
+                JavaTestCompiler(libraryPaths, junitLibraryPaths, javaSDKHomePath)
+            }
+            SupportedLanguage.Kotlin -> {
+                // Kotlinc relies on java to compile kotlin files.
+                val javaSDKHomePath = findJavaSDKHomePath(javaHomeDirectory, project)
+                // kotlinc should be under `[kotlinSDKHomeDirectory]/bin/kotlinc`
+                val kotlinSDKHomeDirectory = KotlinPluginLayout.kotlinc.absolutePath
+                KotlinTestCompiler(libraryPaths, junitLibraryPaths, kotlinSDKHomeDirectory, javaSDKHomePath)
+            }
         }
     }
 
-    private fun createJavaCompiler(
+    /**
+     * Finds the home path of the Java SDK.
+     *
+     * @param javaHomeDirectory The directory where Java SDK is installed. If null, the project's configured SDK path is used.
+     * @param project The project for which the Java SDK home path is being determined.
+     * @return The home path of the Java SDK.
+     * @throws JavaSDKMissingException If no Java SDK is configured for the project.
+     */
+    private fun findJavaSDKHomePath(
+        javaHomeDirectory: String?,
         project: Project,
-        libraryPaths: List<String>,
-        junitLibraryPaths: List<String>,
-        javaHomeDirectory: String? = null,
-    ): JavaTestCompiler {
-        val javaSDKHomePath = javaHomeDirectory
-            ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
+    ): String {
+        val javaSDKHomePath =
+            javaHomeDirectory
+                ?: ProjectRootManager
+                    .getInstance(project)
+                    .projectSdk
+                    ?.homeDirectory
+                    ?.path
 
         if (javaSDKHomePath == null) {
             throw JavaSDKMissingException(LLMMessagesBundle.get("javaSdkNotConfigured"))
         }
-
-        return JavaTestCompiler(libraryPaths, junitLibraryPaths, javaSDKHomePath)
-    }
-
-    private fun createKotlinCompiler(
-        libraryPaths: List<String>,
-        junitLibraryPaths: List<String>,
-    ): KotlinTestCompiler {
-        // kotlinc should be under `[kotlinSDKHomeDirectory]/bin/kotlinc`
-        val kotlinSDKHomeDirectory = KotlinPluginLayout.kotlinc.absolutePath
-        return KotlinTestCompiler(libraryPaths, junitLibraryPaths, kotlinSDKHomeDirectory)
+        return javaSDKHomePath
     }
 }

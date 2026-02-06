@@ -84,7 +84,24 @@ class EvoSuiteProcessManager(
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
+
+            // Resolving relative java path, if it's possible
+            if (evoSuiteSettingsState.javaPath.startsWith("~/")) {
+                val pathEvalCommandResult =
+                    CommandLineRunner.run(arrayListOf("eval", "ls", evoSuiteSettingsState.javaPath))
+                if (!pathEvalCommandResult.isSuccessful()) {
+                    evoSuiteErrorManager.errorProcess(
+                        EvoSuiteMessagesBundle.get("incorrectJavaVersion"),
+                        project,
+                        errorMonitor
+                    )
+                    return null
+                }
+                evoSuiteSettingsState.javaPath = pathEvalCommandResult.executionMessage.trim('\n')
+            }
+
             val versionCommandResult = CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version"))
+
             log.info("Version command result: exit code '${versionCommandResult.exitCode}', message '${versionCommandResult.executionMessage}'")
             val version = regex.find(versionCommandResult.executionMessage)
                 ?.groupValues
