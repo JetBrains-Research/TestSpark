@@ -8,6 +8,9 @@
 ### Added
 - Support IDEA `261.*` (IntelliJ 2026.1).
 
+### Breaking
+- Drop support for IDEA `251.*` (IntelliJ 2025.1) and earlier.  The minimal required IntelliJ version is now 2025.2!
+
 ### Changed
 - Migrate the plugin build toolchain to Java 21 (required by the 2025.1+ platform).
 - Bump IntelliJ Platform Gradle Plugin to 2.6.0 and Kotlin JVM plugin to 2.3.0.
