@@ -13,7 +13,6 @@ import org.jetbrains.kotlin.asJava.classes.KtLightClass
 import org.jetbrains.kotlin.asJava.classes.KtUltraLightClass
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
-import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
 import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFramework.Companion.asKtClassOrObject
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
@@ -102,7 +101,7 @@ class KotlinPsiClassWrapper(
         get() {
             return when {
                 psiClass is KtObjectDeclaration -> ClassType.OBJECT
-                psiClass.isInterfaceClass() -> ClassType.INTERFACE
+                (psiClass as? KtClass)?.isInterface() == true -> ClassType.INTERFACE
                 psiClass.hasModifier(KtTokens.ABSTRACT_KEYWORD) -> ClassType.ABSTRACT_CLASS
                 psiClass.isData() -> ClassType.DATA_CLASS
                 psiClass.annotationEntries.any { it.text == "@JvmInline" } -> ClassType.INLINE_VALUE_CLASS
@@ -145,7 +144,7 @@ class KotlinPsiClassWrapper(
 
     override fun isValidSubjectUnderTest(): Boolean {
         // Check if the class type is not suitable for testing:
-        if (psiClass.isInterfaceClass() ||
+        if ((psiClass as? KtClass)?.isInterface() == true ||
             psiClass is KtObjectDeclaration ||
             psiClass.hasModifier(KtTokens.ABSTRACT_KEYWORD) ||
             psiClass.isData() ||

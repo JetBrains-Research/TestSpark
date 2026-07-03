@@ -2,9 +2,10 @@ import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
-import java.net.URL
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -14,9 +15,9 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 // Space credentials
 val spaceUsername =
-    System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
+    System.getProperty("space.username") ?: (project.findProperty("spaceUsername") as? String) ?: ""
 val spacePassword =
-    System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
+    System.getProperty("space.pass") ?: (project.findProperty("spacePassword") as? String) ?: ""
 
 // the test generation module for interacting with Grazie (used when the space credentials are provided)
 val grazieTestGenerationVersion = "1.0.9"
@@ -25,9 +26,9 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "2.1.0"
+    id("org.jetbrains.kotlin.jvm") version "2.3.0"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij.platform") version "2.1.0"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
     // Gradle IntelliJ Plugin Migration Help (uncomment it for migration tips)
 //    id("org.jetbrains.intellij.platform.migration") version "2.1.0"
     // Gradle Changelog Plugin
@@ -64,6 +65,7 @@ repositories {
     }
 }
 
+
 if (spaceCredentialsProvided()) {
     // Add the new source set
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
@@ -85,7 +87,7 @@ if (spaceCredentialsProvided()) {
         configurations
             .detachedConfiguration(
                 dependencies.create("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion"),
-            ).files()
+            ).resolve()
     }
 
     tasks.named(hasGrazieAccess.jarTaskName).configure {
@@ -134,7 +136,7 @@ dependencies {
     // Check platform V2 documentation for more details: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
         // make a custom version of IDEA
-        create(properties("platformType"), properties("platformVersion"))
+        intellijIdeaCommunity(properties("platformVersion"), useInstaller = false)
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
         bundledPlugins(
             providers.gradleProperty("platformPlugins").map {
@@ -144,9 +146,10 @@ dependencies {
 
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
 
         testFramework(TestFrameworkType.Bundled)
+        testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Plugin.Java)
     }
 
     implementation(files("lib/evosuite-${properties("evosuiteVersion")}.jar"))
@@ -303,7 +306,7 @@ tasks {
             targetCompatibility = it
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = it
+            compilerOptions.jvmTarget.set(JvmTarget.fromTarget(it))
         }
     }
 
@@ -402,7 +405,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
             "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$evoSuiteVersion/release.zip"
         val stream =
             try {
-                URL(downloadUrl).openStream()
+                URI(downloadUrl).toURL().openStream()
             } catch (e: Exception) {
                 logger.error("Error fetching latest evosuite custom release - $e")
                 return

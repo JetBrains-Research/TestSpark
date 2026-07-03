@@ -36,6 +36,13 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.5.0</h4>
+            <ul>
+                <li>Support IDE 261.* (IntelliJ 2026.1).</li>
+                <li>Migrate the plugin build to Java 21 (required by the 2025.1+ platform).</li>
+                <li>Update the IntelliJ Platform Gradle Plugin to 2.6.0 and Kotlin JVM plugin to 2.3.0.</li>
+                <li>Known limitation: root `:test` unit-test execution is currently deferred due to a JUnit Platform classpath conflict between Gradle 8/9 and the IntelliJ 2026.1 test runner; use `verifyPlugin` for validation until resolved upstream.</li>
+            </ul>
         <h4>0.4.2</h>
             <ul>
                 <li>Support IDE 253.*</li>

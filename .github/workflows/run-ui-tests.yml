@@ -10,7 +10,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: zulu
-          java-version: 17
+          java-version: 21
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v1
         with:
@@ -48,7 +48,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: zulu
-          java-version: 11
+          java-version: 21
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v1
         with:
@@ -92,7 +92,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: zulu
-          java-version: 11
+          java-version: 21
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v1
         with:
