@@ -3,6 +3,24 @@
 # TestSpark Changelog
 ## Unreleased
 
+## 0.5.0
+
+### Added
+- Support IDEA `261.*` (IntelliJ 2026.1).
+
+### Breaking
+- Drop support for IDEA `251.*` (IntelliJ 2025.1) and earlier.  The minimal required IntelliJ version is now 2025.2!
+
+### Changed
+- Migrate the plugin build toolchain to Java 21 (required by the 2025.1+ platform).
+- Bump IntelliJ Platform Gradle Plugin to 2.6.0 and Kotlin JVM plugin to 2.3.0.
+- Bump `foojay-resolver-convention` to 1.0.0 for reliable JBR-21 toolchain resolution.
+- Remove the deprecated `instrumentationTools()` helper.
+- Rework `KotlinPsiClassWrapper`/`KotlinPsiMethodWrapper` to drop the K1 `isInterfaceClass()` API and rely on `KtClass.isInterface()` directly.
+
+### Known limitations
+- Root `:test` unit-test execution is currently deferred because of a JUnit Platform classpath conflict between Gradle 8/9 and the IntelliJ 2026.1 test runner (`java.system.class.loader=com.intellij.util.lang.PathClassLoader`); use `verifyPlugin` for validation until this is resolved upstream.
+
 ## 0.4.2
 ### Added
 - Support IDEA `253.*`.

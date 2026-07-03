@@ -4,7 +4,6 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
-import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFunction
@@ -62,7 +61,7 @@ class KotlinPsiMethodWrapper(
     val isDefaultMethod: Boolean =
         psiFunction.run {
             val containingClass = PsiTreeUtil.getParentOfType(this, KtClassOrObject::class.java)
-            val containingInterface = containingClass?.isInterfaceClass()
+            val containingInterface = (containingClass as? KtClass)?.isInterface()
             // ensure that the function is a non-abstract method defined in an interface
             name != "<init>" &&
                 // function is not a constructor

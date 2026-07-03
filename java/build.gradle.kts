@@ -12,11 +12,9 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        create(rootProject.properties["platformType"].toString(), rootProject.properties["platformVersion"].toString())
+        intellijIdeaCommunity(rootProject.properties["platformVersion"].toString(), useInstaller = false)
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
         bundledPlugins(listOf("com.intellij.java"))
-
-        instrumentationTools()
     }
     implementation(kotlin("stdlib"))
 
