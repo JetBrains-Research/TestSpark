@@ -65,7 +65,6 @@ repositories {
     }
 }
 
-
 if (spaceCredentialsProvided()) {
     // Add the new source set
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")

@@ -16,7 +16,6 @@ dependencies {
         intellijIdeaCommunity(rootProject.properties["platformVersion"].toString(), useInstaller = false)
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
         bundledPlugins(listOf("com.intellij.java", "org.jetbrains.kotlin"))
-
     }
     implementation(kotlin("stdlib"))
 
