@@ -1,0 +1,21 @@
+settings.gradle.kts
+  s_455016042bc3c8::t_652ffe2d708b03 2
+gradle/wrapper/gradle-wrapper.properties
+  s_455016042bc3c8::t_e85b5800878712 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "06a4346211dfc7b0dc8e4ceda38649e4fdff1f71",
+  "prompts": {},
+  "sessions": {
+    "s_455016042bc3c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "da62d306-b7ac-43c1-aaa0-a9bd57ea623e",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Stephan Lukasczyk <stephan.lukasczyk@jetbrains.com>"
+    }
+  }
+}
