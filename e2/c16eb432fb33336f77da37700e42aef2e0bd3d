@@ -1,0 +1,18 @@
+gradle.properties
+  h_114ca5d818e7b1 14
+build.gradle.kts
+  h_114ca5d818e7b1 260
+CHANGELOG.md
+  h_114ca5d818e7b1 11-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e2c16eb432fb33336f77da37700e42aef2e0bd3d",
+  "prompts": {},
+  "humans": {
+    "h_114ca5d818e7b1": {
+      "author": "Stephan Lukasczyk <stephan.lukasczyk@jetbrains.com>"
+    }
+  }
+}
