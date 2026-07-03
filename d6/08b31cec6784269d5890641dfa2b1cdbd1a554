@@ -1,0 +1,68 @@
+upgrade-plan/06-fix-api-breakages.md
+  s_949e4fe243302a::t_04b5829b564dfa 1-77
+kotlin/src/main/kotlin/org/jetbrains/research/testspark/kotlin/KotlinPsiMethodWrapper.kt
+  s_455016042bc3c8::t_b453d3017eb189 64
+upgrade-plan/02-java-21-toolchain.md
+  s_949e4fe243302a::t_aa41a61764e94a 1-58
+gradle.properties
+  s_455016042bc3c8::t_659ff9d779a5a1 15
+  s_455016042bc3c8::t_77f9ec57219d98 19
+upgrade-plan/07-metadata-changelog.md
+  s_949e4fe243302a::t_d4a1f6c6bae75b 1-57
+kotlin/src/main/kotlin/org/jetbrains/research/testspark/kotlin/KotlinPsiClassWrapper.kt
+  s_455016042bc3c8::t_0a1ab8d36bfa28 104,147
+langwrappers/build.gradle.kts
+  s_455016042bc3c8::t_1039c0761ece8e 16
+  s_455016042bc3c8::t_53664e4bf06ae0 17-18
+upgrade-plan.md
+  s_949e4fe243302a::t_3f93d5e5f87c8b 1-103
+upgrade-plan/05-platform-2026.1.md
+  s_949e4fe243302a::t_41363baba53096 1-63
+upgrade-plan/01-baseline.md
+  s_949e4fe243302a::t_f2ba102646497f 1-61
+upgrade-plan/08-ci-workflows.md
+  s_949e4fe243302a::t_dab3c97195e06c 1-50
+kotlin/build.gradle.kts
+  s_455016042bc3c8::t_bd1e5803dc5138 16
+  s_455016042bc3c8::t_a4a6df2ea58924 17-18
+java/build.gradle.kts
+  s_455016042bc3c8::t_8e7318912496f0 15
+  s_455016042bc3c8::t_17af89b8d80bb2 16-17
+upgrade-plan/03-remove-instrumentationtools.md
+  s_949e4fe243302a::t_6671b893d7990e 1-48
+build.gradle.kts
+  s_455016042bc3c8::t_28f09cce25416c 8
+  s_455016042bc3c8::t_44462dffa5638a 5
+  s_455016042bc3c8::t_932bd5f08d42b0 18,20
+  s_455016042bc3c8::t_0196b727deba6d 29
+upgrade-plan/04-bump-gradle-plugin.md
+  s_949e4fe243302a::t_3acca4561a5938 1-77
+upgrade-plan/09-final-validation.md
+  s_949e4fe243302a::t_9ab88ad5e31b70 1-55
+upgrade-plan/00-README.md
+  s_949e4fe243302a::t_556953f7bfcc0c 1-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d608b31cec6784269d5890641dfa2b1cdbd1a554",
+  "prompts": {},
+  "sessions": {
+    "s_455016042bc3c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "da62d306-b7ac-43c1-aaa0-a9bd57ea623e",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Stephan Lukasczyk <stephan.lukasczyk@jetbrains.com>"
+    },
+    "s_949e4fe243302a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c9bd2d2-d646-41a4-9c62-eb0cb8c62fb7",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Stephan Lukasczyk <stephan.lukasczyk@jetbrains.com>"
+    }
+  }
+}
