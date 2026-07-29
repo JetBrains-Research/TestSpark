@@ -117,4 +117,12 @@ class JavaPsiClassWrapper(
 
         return !containsImport
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is JavaPsiClassWrapper) return false
+        return qualifiedName == other.qualifiedName && qualifiedName.isNotEmpty()
+    }
+
+    override fun hashCode(): Int = if (qualifiedName.isNotEmpty()) qualifiedName.hashCode() else System.identityHashCode(this)
 }
